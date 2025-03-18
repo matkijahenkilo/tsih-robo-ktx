@@ -1,12 +1,20 @@
 package org.matkija.bot
 
+import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager
+import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers
 import dev.minn.jda.ktx.events.listener
+import dev.minn.jda.ktx.events.onButton
+import dev.minn.jda.ktx.events.onCommand
 import dev.minn.jda.ktx.jdabuilder.default
 import dev.minn.jda.ktx.jdabuilder.intents
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import net.dv8tion.jda.api.entities.Guild
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import net.dv8tion.jda.api.requests.GatewayIntent
+import org.matkija.bot.discordBot.commands.music.*
+import org.matkija.bot.discordBot.commands.music.audio.GuildMusicManager
 import org.matkija.bot.discordBot.sauceSender.SauceSender
 import org.matkija.bot.discordBot.sauceSender.canIFixIt
 import java.io.File
@@ -41,11 +49,8 @@ fun main() {
         )
     }
     jda.awaitReady()
-    println("ready")
     val ownerId = jda.retrieveApplicationInfo().complete().owner.id
 //    val dataBaseHandler = DatabaseHandler(bot.name)
-//    SlashCommands.updateCommands(jda)
-
 
     /*
     fix links
@@ -75,4 +80,16 @@ fun main() {
         if (Math.random() <= 0.02 || c.contains("tsih") || c.contains("nora"))
             event.message.addReaction(event.guild.emojis.random()).queue()
     }
+
+    /*
+    load command listeners and return their slash commands
+     */
+    val commandList = listOf(
+        musicInit(jda)
+    )
+    val updateCommands = jda.updateCommands()
+    commandList.forEach {
+        updateCommands.addCommands(it)
+    }
+    updateCommands.queue()
 }

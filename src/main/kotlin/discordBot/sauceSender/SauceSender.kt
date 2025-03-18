@@ -103,6 +103,7 @@ class SauceSender(
                 }
 
                 // send it, embed or not
+                // TODO: refer the previous message
                 if (payload.files!!.size > 10) {
                     sendFilesInParts(payload)
                 } else {
