@@ -4,9 +4,6 @@ import dev.minn.jda.ktx.messages.EmbedBuilder
 import dev.minn.jda.ktx.messages.InlineEmbed
 import net.dv8tion.jda.api.entities.MessageEmbed
 import java.io.File
-import java.text.SimpleDateFormat
-import java.time.Instant
-import java.time.temporal.TemporalAccessor
 
 //TODO: embed is not as wide as Discordia's, while being wider than it should be for Misskey links lol
 fun buildEmbed(
@@ -72,7 +69,8 @@ private fun addAdditionalAttachments(embeds: MutableList<InlineEmbed>, files: Li
         embeds.add(EmbedBuilder {
             url = embeds[0].url
             title = embeds[0].title
-            image = "attachment://${file}" //if this doesn't work, be sure file doesn't have any schizo character that discord hates
+            image =
+                "attachment://${file}" //if this doesn't work, be sure file doesn't have any schizo character that discord hates
         })
     }
     return embeds
@@ -81,7 +79,14 @@ private fun addAdditionalAttachments(embeds: MutableList<InlineEmbed>, files: Li
 private fun buildEmbeds(embeds: List<InlineEmbed>): List<MessageEmbed> = embeds.map { it.build() }
 
 private fun hasVideos(files: List<String>): Boolean =
-    files.any { path -> setOf(".mp4", ".webm", ".mov").any { extension -> path.endsWith(extension, ignoreCase = true) } }
+    files.any { path ->
+        setOf(".mp4", ".webm", ".mov").any { extension ->
+            path.endsWith(
+                extension,
+                ignoreCase = true
+            )
+        }
+    }
 
 private data class EmbedInfo(
     val nick: String,

@@ -12,6 +12,7 @@ object MusicCommands {
 
     const val MUSIC = "music"
     const val MUSIC_PLAY = "play"
+
     //TODO: make a playnext command to be placed in first position of the list, regardless of shuffle
     const val MUSIC_OPTION_LINK = "link_ou_pesquisa"
     const val MUSIC_OPTION_SEARCH = "sites_de_pesquisa"

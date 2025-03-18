@@ -10,7 +10,6 @@ import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData
-import net.dv8tion.jda.api.requests.restaction.CommandListUpdateAction
 import org.matkija.bot.discordBot.commands.music.audio.GuildMusicManager
 
 
@@ -43,6 +42,7 @@ fun musicInit(jda: JDA): SlashCommandData {
     // registering it into playerManager
     playerManager.registerSourceManager(ytSourceManager)
     // excluding deprecated audioSourceManager
+    @Suppress("DEPRECATION") // watch yo tone, Machine
     AudioSourceManagers.registerRemoteSources(
         playerManager,
         com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeAudioSourceManager::class.java
