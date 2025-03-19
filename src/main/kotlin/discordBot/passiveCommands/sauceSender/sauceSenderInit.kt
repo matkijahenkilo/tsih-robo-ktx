@@ -3,6 +3,7 @@ package org.matkija.bot.discordBot.passiveCommands.sauceSender
 import dev.minn.jda.ktx.events.listener
 import net.dv8tion.jda.api.JDA
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
+import org.matkija.bot.utils.TsihPoggers
 
 fun sauceSenderInit(jda: JDA) {
     jda.listener<MessageReceivedEvent> { event ->
@@ -15,7 +16,7 @@ fun sauceSenderInit(jda: JDA) {
                 try {
                     SauceSender(event, c).sendSauce()
                 } catch (e: Exception) {
-                    println(e)
+                    TsihPoggers.POG.error(e.toString())
                 }
             }
         }

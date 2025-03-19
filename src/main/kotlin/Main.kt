@@ -10,6 +10,7 @@ import org.matkija.bot.discordBot.commands.music.musicInit
 import org.matkija.bot.discordBot.commands.question.questionInit
 import org.matkija.bot.discordBot.passiveCommands.randomReactInit
 import org.matkija.bot.discordBot.passiveCommands.sauceSender.sauceSenderInit
+import org.matkija.bot.utils.TsihPoggers
 import java.io.File
 import kotlin.system.exitProcess
 
@@ -21,7 +22,7 @@ private fun getBotsConfig(): List<Bot>? {
     try {
         return Json.decodeFromString<List<Bot>>(File("data/config.json").readText())
     } catch (e: Exception) {
-        e.printStackTrace()
+        TsihPoggers.POG.error(e.toString())
         return null
     }
 }
@@ -32,7 +33,8 @@ fun main() {
 
     val bot = bots[0]
 
-    println("Logging in as ${bot.name}")
+    TsihPoggers.POG.info("Logging in as ${bot.name}")
+
     val jda = default(bot.token) {
         intents += listOf(
             GatewayIntent.MESSAGE_CONTENT,
