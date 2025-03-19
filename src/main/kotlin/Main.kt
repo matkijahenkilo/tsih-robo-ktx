@@ -47,7 +47,7 @@ fun main() {
     load passive commands listeners
      */
     sauceSenderInit(jda)
-//    randomReactInit(jda)
+    randomReactInit(jda)
 
     /*
     load slash command listeners and return their slash commands
