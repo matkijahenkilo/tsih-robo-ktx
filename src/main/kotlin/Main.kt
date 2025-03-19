@@ -1,15 +1,14 @@
 package org.matkija.bot
 
-import dev.minn.jda.ktx.events.listener
 import dev.minn.jda.ktx.jdabuilder.default
 import dev.minn.jda.ktx.jdabuilder.intents
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import net.dv8tion.jda.api.requests.GatewayIntent
 import org.matkija.bot.discordBot.commands.music.musicInit
-import org.matkija.bot.discordBot.sauceSender.SauceSender
-import org.matkija.bot.discordBot.sauceSender.canIFixIt
+import org.matkija.bot.discordBot.commands.question.questionInit
+import org.matkija.bot.discordBot.passiveCommands.randomReactInit
+import org.matkija.bot.discordBot.passiveCommands.sauceSender.sauceSenderInit
 import java.io.File
 import kotlin.system.exitProcess
 
@@ -41,43 +40,21 @@ fun main() {
         )
     }
     jda.awaitReady()
-    val ownerId = jda.retrieveApplicationInfo().complete().owner.id
-//    val dataBaseHandler = DatabaseHandler(bot.name)
+    //val ownerId = jda.retrieveApplicationInfo().complete().owner.id
+    // val dataBaseHandler = DatabaseHandler(bot.name)
 
     /*
-    fix links
+    load passive commands listeners
      */
-    jda.listener<MessageReceivedEvent> { event ->
-        if (event.author.id == event.jda.selfUser.id) return@listener
-        if (event.author.isBot) return@listener
-        val c = event.message.contentRaw.replace("\n", " ").replace("||", "")
-
-        if (c.contains("https://"))
-            if (canIFixIt(c)) {
-                try {
-                    SauceSender(event, c).sendSauce()
-                } catch (e: Exception) {
-                    println(e)
-                }
-            }
-    }
+    sauceSenderInit(jda)
+//    randomReactInit(jda)
 
     /*
-    random react
-     */
-    jda.listener<MessageReceivedEvent> { event ->
-        if (event.author.id == event.jda.selfUser.id) return@listener
-        val c = event.message.contentRaw
-
-        if (Math.random() <= 0.02 || c.contains("tsih") || c.contains("nora"))
-            event.message.addReaction(event.guild.emojis.random()).queue()
-    }
-
-    /*
-    load command listeners and return their slash commands
+    load slash command listeners and return their slash commands
      */
     val commandList = listOf(
-        musicInit(jda)
+        musicInit(jda),
+//        questionInit(jda),
     )
     val updateCommands = jda.updateCommands()
     commandList.forEach {
