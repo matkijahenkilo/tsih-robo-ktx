@@ -5,6 +5,7 @@ import dev.minn.jda.ktx.jdabuilder.intents
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import net.dv8tion.jda.api.requests.GatewayIntent
+import org.matkija.bot.discordBot.commands.avatar.avatarInit
 import org.matkija.bot.discordBot.commands.music.musicInit
 import org.matkija.bot.discordBot.commands.question.questionInit
 import org.matkija.bot.discordBot.passiveCommands.randomReactInit
@@ -54,7 +55,8 @@ fun main() {
      */
     val commandList = listOf(
         musicInit(jda),
-//        questionInit(jda),
+        questionInit(jda),
+        avatarInit(jda),
     )
     val updateCommands = jda.updateCommands()
     commandList.forEach {
