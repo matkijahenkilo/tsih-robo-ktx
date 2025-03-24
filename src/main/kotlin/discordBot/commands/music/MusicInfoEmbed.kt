@@ -14,7 +14,7 @@ import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
 import net.dv8tion.jda.api.interactions.components.LayoutComponent
 import org.matkija.bot.discordBot.commands.music.audio.GuildMusicManager
 import org.matkija.bot.discordBot.commands.music.audio.TrackScheduler
-import org.matkija.bot.discordBot.utils.getTimestamp
+import org.matkija.bot.utils.getTimestamp
 import java.time.Instant
 
 object MusicInfoEmbed {

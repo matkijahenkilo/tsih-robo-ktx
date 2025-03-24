@@ -1,4 +1,4 @@
-package org.matkija.bot.discordBot.utils
+package org.matkija.bot.utils
 
 import java.util.concurrent.TimeUnit
 
