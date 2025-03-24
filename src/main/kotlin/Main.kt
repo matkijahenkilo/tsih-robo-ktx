@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.requests.GatewayIntent
 import org.matkija.bot.discordBot.commands.avatar.avatarInit
 import org.matkija.bot.discordBot.commands.music.musicInit
 import org.matkija.bot.discordBot.commands.question.questionInit
+import discordBot.commands.toolPost.toolPosterInit
 import org.matkija.bot.discordBot.passiveCommands.randomReactInit
 import org.matkija.bot.discordBot.passiveCommands.sauceSender.sauceSenderInit
 import org.matkija.bot.utils.TsihPoggers
@@ -59,6 +60,7 @@ fun main() {
         musicInit(jda),
         questionInit(jda),
         avatarInit(jda),
+        toolPosterInit(jda),
     )
     val updateCommands = jda.updateCommands()
     commandList.forEach {
