@@ -14,10 +14,10 @@ object MusicCommands {
     const val MUSIC_PLAY = "play"
 
     //TODO: make a playnext command to be placed in first position of the list, regardless of shuffle
-    const val MUSIC_OPTION_LINK = "link_ou_pesquisa"
-    const val MUSIC_OPTION_SEARCH = "sites_de_pesquisa"
-    const val MUSIC_RESUME_TRACK_LIST = "resumir_tracklist"
-    const val MUSIC_SHOW_TRACK_LIST = "mostrar_tracklist"
+    const val MUSIC_OPTION_LINK = "url_or_search"
+    const val MUSIC_OPTION_SEARCH = "website_for_search"
+    const val MUSIC_RESUME_TRACK_LIST = "resume_tracklist"
+    const val MUSIC_SHOW_TRACK_LIST = "show_tracklist"
 
     private const val ID_MUSIC = "music"
     const val PLAY = "$ID_MUSIC:play"
@@ -27,20 +27,23 @@ object MusicCommands {
     const val SHUFFLE = "$ID_MUSIC:shuffle"
 
     fun getCommands(): SlashCommandData =
-        Commands.slash(MUSIC, "Pesquiso ou toco músicas direto através de um link.").addSubcommands(
-            Subcommand(MUSIC_PLAY, "Irei pesquisar ou tocar alguma música no chat de voz!").addOptions(
-                OptionData(OptionType.STRING, MUSIC_OPTION_LINK, "Irei tocar uma música no chat!", true),
+        Commands.slash(MUSIC, "I search or play songs directly from a link nanora!").addSubcommands(
+            Subcommand(MUSIC_PLAY, "I'll search or play something in voice chat nora!").addOptions(
+                OptionData(OptionType.STRING, MUSIC_OPTION_LINK, "I'll play a song in voice chat!", true),
                 OptionData(
                     OptionType.STRING,
                     MUSIC_OPTION_SEARCH,
-                    "Força uma pesquisa em um site específico para a opção $MUSIC_PLAY.",
+                    "Forces a search in a specific website for the option $MUSIC_PLAY.",
                     false
                 ).addChoices(
                     Command.Choice("YouTube", "ytsearch:"),
-                    // Command.Choice("Spotify", "spsearch:") // needs auth in yaml, not going to happen
+                    // Command.Choice("Spotify", "spsearch:") // needs auth in yaml
                 )
             ),
-            Subcommand(MUSIC_RESUME_TRACK_LIST, "Resumo a tracklist salva desde a última vez que estive em call~"),
-            Subcommand(MUSIC_SHOW_TRACK_LIST, "Mostro a tracklist atual~")
+            Subcommand(
+                MUSIC_RESUME_TRACK_LIST,
+                "Resumes a saved playlist from the last time I've been in voice chat nora~"
+            ),
+            Subcommand(MUSIC_SHOW_TRACK_LIST, "I show the current tracklist nora~")
         )
 }

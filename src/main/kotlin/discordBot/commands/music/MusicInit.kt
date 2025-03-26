@@ -27,7 +27,7 @@ private fun isSameVC(event: ButtonInteractionEvent): Boolean =
         false
     }
 
-private const val notInVC = "Entra no chat de voz com os manos!"
+private const val notInVC = "You're not in a vc, nora!"
 
 /**
  * This function acts like a module
@@ -67,7 +67,7 @@ fun musicInit(jda: JDA): SlashCommandData {
 
     jda.onCommand(MusicCommands.MUSIC) { event ->
         if (!event.isFromGuild) {
-            event.reply("Você nem está num servidor!").queue()
+            event.reply("You're not even in a server nanora!").queue()
             return@onCommand
         }
 
@@ -91,7 +91,7 @@ fun musicInit(jda: JDA): SlashCommandData {
             event.guild!!.audioManager.closeAudioConnection()
         }
         musicManagers.remove(event.guild!!.id.toLong())
-        event.reply(event.user.name + " me mandou parar~").queue()
+        event.reply(event.user.name + " told me to stop, nora~").queue()
     }
 
     jda.onButton(MusicCommands.PLAY) { event ->
@@ -112,7 +112,7 @@ fun musicInit(jda: JDA): SlashCommandData {
         }
 
         val guildAudioPlayer = getGuildAudioPlayer(event.guild!!, event.messageChannel)
-        event.reply("Pulando...").queue()
+        event.reply(event.user.name + " skipped, nora...").queue()
         guildAudioPlayer.scheduler.nextTrack(true)
     }
 

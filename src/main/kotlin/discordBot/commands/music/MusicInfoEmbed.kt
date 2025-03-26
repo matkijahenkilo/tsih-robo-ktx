@@ -24,11 +24,26 @@ object MusicInfoEmbed {
     private var repeatText = "Repeating:"
 
     private val mocks = listOf(
-        "Vamos cantar essa juntos!",
-        "Escute esse banger!",
-        "Essa daqui é meio paia mas vou tocar mesmo assim~",
-        "Essa daqui é uma obra-prima!",
-        "O T-Tesouro  g-gosta dessa... 🤮"
+        "Listen to this banger!",
+        "This one is is kinda meh but I'll play it anyway~",
+        "this one is a masterpiece!",
+        "T-Tesouro l-likes this one... 🤮",
+        "You have a pitiful taste in music nora.",
+        "Really?",
+        "Pretty normie ngl nora."
+    )
+
+    private val userMocks = listOf(
+        "%s asked for this shit",
+        "%s asked for this crap",
+        "%s asked for this noise",
+        "%s have a terrible taste in music",
+        "%s has a good taste in music",
+        "what is this shit, %s?",
+        "asked by %s",
+        "%s, I expected more from you",
+        "%s, really???",
+        "%s, nanako has a better taste than you",
     )
 
     fun loadComponents(): List<LayoutComponent> {
@@ -49,7 +64,7 @@ object MusicInfoEmbed {
             timestamp = Instant.now()
             description = mocks.random()
             footer {
-                name = "${user.name} asked for this shit"
+                name = String.format(userMocks.random(), user.name)
                 iconUrl = user.avatarUrl
             }
             author {

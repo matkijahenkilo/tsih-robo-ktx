@@ -16,8 +16,8 @@ import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionE
 import net.dv8tion.jda.api.managers.AudioManager
 import org.matkija.bot.discordBot.abstracts.SlashCommand
 import org.matkija.bot.discordBot.commands.music.audio.GuildMusicManager
-import org.matkija.bot.utils.getTimestamp
 import org.matkija.bot.utils.TsihPoggers
+import org.matkija.bot.utils.getTimestamp
 import kotlin.time.Duration.Companion.minutes
 
 class Music(
@@ -46,14 +46,14 @@ class Music(
         when (event.subcommandName) {
             MusicCommands.MUSIC_PLAY -> {
                 if (option != null) {
-                    event.hook.editMessage(content = "Carregando música(s)...")
+                    event.hook.editMessage(content = "Loading song(s)...")
                         .queue()
                     loadAndPlay(event, option, null)
                     if (option.contains(YT_SEARCH)) {
-                        event.hook.editMessage(content = "Carreguei o primeiro resultado de `$originalOption`!")
+                        event.hook.editMessage(content = "Loaded the first song of result `$originalOption` nanora!")
                             .queue()
                     } else {
-                        event.hook.editMessage(content = "Carreguei a [música ou playlist](<${option}>)!")
+                        event.hook.editMessage(content = "Loaded a [song or playlist](<${option}>) nanora!")
                             .queue()
                     }
                 }
@@ -62,14 +62,14 @@ class Music(
             MusicCommands.MUSIC_RESUME_TRACK_LIST -> {
                 if (musicManager.player.playingTrack != null) {
                     event.hook.editMessage(
-                        content = "Uma playlist já está sendo tocada."
+                        content = "A playlist is already being played nanora."
                     ).queue()
                     return
                 }
 
                 var loaded = false
 
-                event.hook.editMessage(content = "Resumindo playlist anteriormente salva...")
+                event.hook.editMessage(content = "Resuming a saved playlist nora...")
                     .queue()
 
                 playlistJsonHandler.getPlaylist().forEach {
@@ -79,10 +79,10 @@ class Music(
                 }
                 if (!loaded) {
                     event.hook.editMessage(
-                        content = "A playlist salva está vazia! Use `/${MusicCommands.MUSIC} ${MusicCommands.MUSIC_PLAY}` para começar uma nova playlist~"
+                        content = "There's no playlist saved nanora! Use `/${MusicCommands.MUSIC} ${MusicCommands.MUSIC_PLAY}` to start a new one nora~"
                     ).queue()
                 } else {
-                    event.hook.editMessage(content = "Retomei a playlist salva!")
+                    event.hook.editMessage(content = "Resumed the saved playlist nanora!")
                         .queue()
                 }
             }
@@ -101,7 +101,7 @@ class Music(
                     val time = getTimestamp(audioContent.track.info.length)
                     content.add(
                         String.format(
-                            "%s. [%s](%s) (%s) por %s\n",
+                            "%s. [%s](%s) (%s) by %s\n",
                             index,
                             audioContent.track.info.title,
                             audioContent.track.info.uri,
@@ -113,11 +113,11 @@ class Music(
                         var str = ""
                         content.forEach { str += it }
                         var embed = EmbedBuilder {
-                            title = "As próximas a serem tocadas..."
+                            title = "The next songs to be played..."
                             description = str
                             color = 0xff80fd
                             footer {
-                                name = "Duração total desta track list: $totalTime"
+                                name = "Total duration of the playlist: $totalTime nora!"
                             }
                         }
                         embed = MusicInfoEmbed.fillFields(embed, musicManager.scheduler, musicManager.player.isPaused)
@@ -130,7 +130,7 @@ class Music(
                 if (pages.size != 0) {
                     event.hook.sendPaginator(pages = pages.toTypedArray(), expireAfter = 5.minutes).queue()
                 } else {
-                    event.hook.editMessage(content = "Nada na playlist!").queue()
+                    event.hook.editMessage(content = "Nothing in playlist nanora!").queue()
                 }
             }
         }
@@ -170,12 +170,12 @@ class Music(
             }
 
             override fun noMatches() {
-                channel.sendMessage("Nada encontrado de $trackUrl").queue()
+                channel.sendMessage("Nothing found in $trackUrl nora.").queue()
             }
 
             override fun loadFailed(exception: FriendlyException) {
                 TsihPoggers.POG.error(exception.stackTraceToString())
-                channel.sendMessage("Não pude tocar nada... razão: ${exception.message}")
+                channel.sendMessage("I couldn't play anything nora!\nreason: ${exception.message}")
                     .queue()
             }
         })
