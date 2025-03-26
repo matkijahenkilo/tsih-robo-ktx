@@ -93,6 +93,9 @@
     </build>
 
     <dependencies>
+        <!--
+            core
+        -->
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-test-junit5</artifactId>
@@ -111,6 +114,9 @@
             <version>${kotlin.version}</version>
         </dependency>
 
+        <!--
+            JDA, core library for discord and JDA-KTX for useful kotlin additions
+        -->
         <!-- https://github.com/discord-jda/JDA -->
         <dependency>
             <groupId>net.dv8tion</groupId>
@@ -125,6 +131,9 @@
             <version>${jdaktx.version}</version>
         </dependency>
 
+        <!--
+            database
+        -->
         <!-- https://mvnrepository.com/artifact/org.xerial/sqlite-jdbc -->
         <dependency>
             <groupId>org.xerial</groupId>
@@ -132,6 +141,24 @@
             <version>3.49.1.0</version>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/org.hibernate/hibernate-core -->
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-core</artifactId>
+            <version>6.6.11.Final</version>
+            <type>pom</type>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.flywaydb/flyway-core -->
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+            <version>11.4.1</version>
+        </dependency>
+
+        <!--
+            json serialization for writing/reading json, duh
+        -->
         <!-- https://mvnrepository.com/artifact/org.jetbrains.kotlinx/kotlinx-serialization-json -->
         <dependency>
             <groupId>org.jetbrains.kotlinx</groupId>
@@ -139,6 +166,9 @@
             <version>${serialization.version}</version>
         </dependency>
 
+        <!--
+            music
+        -->
         <!-- https://central.sonatype.com/artifact/dev.arbjerg/lavaplayer -->
         <dependency>
             <groupId>dev.arbjerg</groupId>
@@ -153,20 +183,9 @@
             <version>${lavalinkyoutube.version}</version>
         </dependency>
 
-        <!-- https://central.sonatype.com/artifact/commons-codec/commons-codec -->
-        <dependency>
-            <groupId>commons-codec</groupId>
-            <artifactId>commons-codec</artifactId>
-            <version>1.18.0</version>
-        </dependency>
-
-        <!-- https://mvnrepository.com/artifact/org.json/json -->
-        <dependency>
-            <groupId>org.json</groupId>
-            <artifactId>json</artifactId>
-            <version>20250107</version>
-        </dependency>
-
+        <!--
+            custom logger for JDA
+        -->
         <!-- https://mvnrepository.com/artifact/ch.qos.logback/logback-classic -->
         <dependency>
             <groupId>ch.qos.logback</groupId>
