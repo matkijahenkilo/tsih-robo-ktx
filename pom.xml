@@ -18,10 +18,12 @@
         <jupiter.version>5.12.1</jupiter.version>
 
         <!-- JDA -->
+        <!-- https://github.com/discord-jda/JDA -->
         <jda.version>5.3.0</jda.version>
         <jdaktx.version>0.12.0</jdaktx.version>
 
         <!-- lavaplayer -->
+        <!-- https://central.sonatype.com/artifact/dev.arbjerg/lavaplayer -->
         <lavaplayer.version>2.2.3</lavaplayer.version>
         <lavalinkyoutube.version>1.11.5</lavalinkyoutube.version>
     </properties>
