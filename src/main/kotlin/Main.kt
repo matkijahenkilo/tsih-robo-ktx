@@ -11,8 +11,10 @@ import org.matkija.bot.discordBot.commands.question.questionInit
 import discordBot.commands.toolPost.toolPosterInit
 import org.matkija.bot.discordBot.passiveCommands.randomReactInit
 import org.matkija.bot.discordBot.passiveCommands.sauceSender.sauceSenderInit
+import org.matkija.bot.discordBot.timedEvents.randomStatus.RandomStatus
 import org.matkija.bot.utils.TsihPoggers
 import java.io.File
+import java.util.concurrent.TimeUnit
 import kotlin.system.exitProcess
 
 
@@ -67,4 +69,9 @@ fun main() {
         updateCommands.addCommands(it)
     }
     updateCommands.queue()
+
+    /*
+    timed functions
+     */
+    RandomStatus(jda).startScheduler(TimeUnit.MINUTES, 0, 1)
 }
