@@ -250,7 +250,7 @@ class SauceSender(
                     name = String.format("%s (@%s)", e.nick, e.username)
                 }
 
-                title = "owo"
+                title = "   "
                 description = e.text
 
                 field {
