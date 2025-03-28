@@ -3,7 +3,6 @@ package org.matkija.bot.discordBot.passiveCommands.sauceSender
 
 fun canIFixIt(content: String): Boolean = list.any { content.contains(it, ignoreCase = true) }
 
-// TODO: if >10mb just link it
 private val list = listOf(
     "https://x.com/",
     "https://hitomi.la/",
@@ -21,7 +20,7 @@ private val list = listOf(
 
     "https://e621.net/",
     "https://booru.io/",
-    "https://pawoo.net/",
+//    "https://pawoo.net/",
     "https://misskey.io/",
     "https://nijie.info/",
     "https://nhentai.net/",
