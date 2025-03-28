@@ -1,12 +1,6 @@
-package org.matkija.bot.utils
+package org.matkija.bot.discordBot.commands.music
 
 import java.util.concurrent.TimeUnit
-
-data class SongLength(
-    val hour: String,
-    val minute: String,
-    val second: String
-)
 
 fun getTimestamp(ms: Long): String {
     val songLength = getTranslatedSongLength(ms)
@@ -17,7 +11,7 @@ fun getTimestamp(ms: Long): String {
     }
 }
 
-fun getTranslatedSongLength(ms: Long): SongLength {
+private fun getTranslatedSongLength(ms: Long): SongLength {
     val h: Long = TimeUnit.MILLISECONDS.toHours(ms)
     val rawMinute: Long = TimeUnit.MILLISECONDS.toMinutes(ms)
     val m: Long = TimeUnit.MILLISECONDS.toMinutes(ms) - TimeUnit.HOURS.toMinutes(h)
