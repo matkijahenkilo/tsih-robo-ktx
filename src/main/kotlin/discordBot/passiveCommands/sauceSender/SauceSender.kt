@@ -1,18 +1,17 @@
 package org.matkija.bot.discordBot.passiveCommands.sauceSender
 
-import dev.minn.jda.ktx.messages.*
+import dev.minn.jda.ktx.messages.EmbedBuilder
+import dev.minn.jda.ktx.messages.InlineEmbed
+import dev.minn.jda.ktx.messages.reply_
 import kotlinx.coroutines.*
-import net.dv8tion.jda.api.entities.Message
-import net.dv8tion.jda.api.entities.Message.MentionType
 import net.dv8tion.jda.api.entities.MessageEmbed
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import net.dv8tion.jda.api.utils.FileUpload
+import org.matkija.bot.utils.TsihPoggers
 import java.io.File
-import java.util.Arrays
 
 // TODO: each server and room should have their own custom limit
 // TODO: embed is not as wide as Discordia's, while being wider than it should be for Misskey links lol
-// TODO: twitter may be slow at embeding images on discord, so make the bot wait twitter's response
 class SauceSender(
     private val event: MessageReceivedEvent,
     private val content: String,
@@ -20,12 +19,25 @@ class SauceSender(
     private val footerImage = "tsih-icon.png"
     private val footerImagePath = mutableListOf(FileUpload.fromData(File("data/images/sauce/tsih-icon.png")))
     private val discordSizeLimit = 10
+    private val links: List<String> = filterOutWords(content).distinct()
 
     fun sendSauce() = runBlocking {
-        val links = filterOutWords(content).distinct()
 
         val jobList = mutableListOf<Job>()
         links.forEach { link ->
+
+            // check if it's sensitive and decide if it should be ignored or not
+            // because depending on that, twitter and other websites can avoid
+            // getting embedded on discord.
+            // and if someone send many links in one message
+            // which being a mix of sensitive and non-sensitive posts
+            // it will download everything and send the images regardless of
+            // one of them not being sensitive.
+            //
+            // isSensitive() is not run if the link is neither Twitter nor Misskey.
+            if (((isTwitterLink(link) || isMisskeyLink(link)) && !isSensitive(link)) && links.size == 1)
+                return@forEach
+
             jobList += async {
                 val payload = Payload()
                 val command: List<String>
@@ -51,7 +63,7 @@ class SauceSender(
                     }
                 }
 
-                // organize files to list
+                // download and organize files to list
                 val child = spawnProcess(command)
                 val filesStdout = readProcess(child).stdout
                 val files = mutableListOf<File>()
@@ -85,10 +97,13 @@ class SauceSender(
 
                 // send it, embed or not
                 if (payload.files!!.size > 10) {
-                    sendFilesInParts(payload)
+                    sendFilesInParts(payload, link)
                 } else {
-                    sendFiles(payload)
+                    sendFiles(payload, link)
                 }
+
+                //delete user's message embed
+                event.message.suppressEmbeds(true).queue()
 
                 child.destroy() // readProcess has child.exit(), this ensures le fokin process is dead
             }
@@ -100,12 +115,13 @@ class SauceSender(
     // than 4 images per post while being a mastodon fork, because this is uncommon
     // I'd rather treat misskey links with more than 4 images as common websites that
     // doesn't need embeds
-    private fun sendFilesInParts(payload: Payload) {
+    private fun sendFilesInParts(payload: Payload, link: String) {
         val uploads = mutableListOf<FileUpload>()
         payload.files!!.forEach { file ->
             uploads.add(FileUpload.fromData(file))
             if (uploads.size == 10) {
                 event.message.reply_(
+                    content = if (links.size > 1) "<$link>" else "",
                     files = uploads
                 ).mentionRepliedUser(false).queue()
                 uploads.clear()
@@ -113,16 +129,25 @@ class SauceSender(
         }
     }
 
-    private fun sendFiles(payload: Payload) {
+    private fun sendFiles(payload: Payload, link: String) {
         val uploads = mutableListOf<FileUpload>()
         payload.files!!.forEach { file ->
             uploads.add(FileUpload.fromData(file))
         }
         val withFooterImage = uploads + footerImagePath
         event.message.reply_(
+            content = if (links.size > 1) "<$link>" else "",
             files = if (payload.embedInfo != null) withFooterImage else uploads,
             embeds = if (payload.embedInfo != null) payload.embedInfo!! else emptyList()
         ).mentionRepliedUser(false).queue()
+    }
+
+    private suspend fun isSensitive(link: String): Boolean {
+        val child = spawnProcess(makeSensitiveCheckCommand(link))
+        val isSensitive = readProcess(child).stdout
+            .replace("\n", "").replace("\r", "")
+            .toBoolean()
+        return isSensitive
     }
 
 
@@ -147,7 +172,10 @@ class SauceSender(
 
     private fun makeCommonCommand(link: String) = baseArgs + downloadArgs(link, 5)
 
-    private fun isTwitterLink(s: String) = "https://twitter.com" in s || "https://x.com" in s
+    private fun makeSensitiveCheckCommand(link: String): List<String> =
+        baseArgs + listOf("--filter", "print(sensitive)", "-s", link)
+
+    private fun isTwitterLink(s: String): Boolean = "https://twitter.com" in s || "https://x.com" in s
     private fun isMisskeyLink(s: String): Boolean = "https://misskey.io" in s
 
     private val baseArgs = listOf("gallery-dl", "--cookies", "./cookies.txt")
