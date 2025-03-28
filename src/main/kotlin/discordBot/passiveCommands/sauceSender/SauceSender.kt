@@ -1,21 +1,25 @@
 package org.matkija.bot.discordBot.passiveCommands.sauceSender
 
-import dev.minn.jda.ktx.messages.EmbedBuilder
-import dev.minn.jda.ktx.messages.InlineEmbed
-import dev.minn.jda.ktx.messages.send
+import dev.minn.jda.ktx.messages.*
 import kotlinx.coroutines.*
+import net.dv8tion.jda.api.entities.Message
+import net.dv8tion.jda.api.entities.Message.MentionType
 import net.dv8tion.jda.api.entities.MessageEmbed
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import net.dv8tion.jda.api.utils.FileUpload
 import java.io.File
+import java.util.Arrays
 
-
+// TODO: each server and room should have their own custom limit
+// TODO: embed is not as wide as Discordia's, while being wider than it should be for Misskey links lol
+// TODO: twitter may be slow at embeding images on discord, so make the bot wait twitter's response
 class SauceSender(
     private val event: MessageReceivedEvent,
     private val content: String,
 ) {
-    private val FOOTER_IMAGE = "tsih-icon.png"
-    private val FOOTER_IMAGE_PATH = mutableListOf(FileUpload.fromData(File("data/tsih-icon.png")))
+    private val footerImage = "tsih-icon.png"
+    private val footerImagePath = mutableListOf(FileUpload.fromData(File("data/images/sauce/tsih-icon.png")))
+    private val discordSizeLimit = 10
 
     fun sendSauce() = runBlocking {
         val links = filterOutWords(content).distinct()
@@ -26,17 +30,20 @@ class SauceSender(
                 val payload = Payload()
                 val command: List<String>
                 var infoCommand: List<String> = emptyList()
+                var website: String? = null
 
                 // make command for each website, and get info for embed if possible
                 when {
                     isTwitterLink(link) -> {
                         command = makeTwitterCommand(link)
                         infoCommand = makeTwitterCommand(link, true)
+                        website = "Twitter.com"
                     }
 
                     isMisskeyLink(link) -> {
                         command = makeMisskeyCommand(link)
                         infoCommand = makeMisskeyCommand(link, true)
+                        website = "Misskey.io"
                     }
 
                     else -> {
@@ -57,7 +64,7 @@ class SauceSender(
                             .replace("# ", "")
                             .replace("./", "/")
                         val file = File("./data", clearFilePath)
-                        if (file.exists() && file.length() < 10 * 1024 * 1024)
+                        if (file.exists() && file.length() < discordSizeLimit * 1024 * 1024)
                             files.add(file)
                     }
                 }
@@ -73,11 +80,10 @@ class SauceSender(
                 if (infoCommand.isNotEmpty()) {
                     val infoChild = spawnProcess(infoCommand)
                     val out = readProcess(infoChild).stdout
-                    payload.embedInfo = buildEmbed(out, link, payload.files!!)
+                    payload.embedInfo = buildEmbed(out, link, payload.files!!, website)
                 }
 
                 // send it, embed or not
-                // TODO: refer the previous message
                 if (payload.files!!.size > 10) {
                     sendFilesInParts(payload)
                 } else {
@@ -90,13 +96,18 @@ class SauceSender(
         jobList.joinAll()
     }
 
-    // no embed for the wicked
+    // as far as I know, misskey is the only website that allows users to send more
+    // than 4 images per post while being a mastodon fork, because this is uncommon
+    // I'd rather treat misskey links with more than 4 images as common websites that
+    // doesn't need embeds
     private fun sendFilesInParts(payload: Payload) {
         val uploads = mutableListOf<FileUpload>()
         payload.files!!.forEach { file ->
             uploads.add(FileUpload.fromData(file))
             if (uploads.size == 10) {
-                event.channel.send(files = uploads).queue()
+                event.message.reply_(
+                    files = uploads
+                ).mentionRepliedUser(false).queue()
                 uploads.clear()
             }
         }
@@ -107,17 +118,21 @@ class SauceSender(
         payload.files!!.forEach { file ->
             uploads.add(FileUpload.fromData(file))
         }
-        val withFooterImage = uploads + FOOTER_IMAGE_PATH
-        event.channel.send(
+        val withFooterImage = uploads + footerImagePath
+        event.message.reply_(
             files = if (payload.embedInfo != null) withFooterImage else uploads,
             embeds = if (payload.embedInfo != null) payload.embedInfo!! else emptyList()
-        ).queue()
+        ).mentionRepliedUser(false).queue()
     }
+
+
+    /*
+    related to making commands for gallery-dl and preparing list of link inputs
+     */
 
     private fun filterOutWords(content: String): List<String> =
         content.split(" ").filter { it.contains("https://") }.toList()
 
-    // TODO: each server and room should have their own custom limit
     private fun makeTwitterCommand(link: String, shouldGetInfoOnly: Boolean = false, limit: Int = 5): List<String> =
         baseArgs + if (shouldGetInfoOnly) infoArgs(link, twitterFilters) else downloadArgs(link, limit)
 
@@ -142,7 +157,10 @@ class SauceSender(
         "print(user['name']) or print(user['username']) or print(user['avatarUrl']) or print(renoteCount) or print(reactionCount) or print(date) or print(text) or abort()"
 
 
-    // processes
+    /*
+    related to processes
+     */
+
     private data class ProcessOutput(
         val stdout: String,
         val stderr: String
@@ -167,13 +185,15 @@ class SauceSender(
         var embedInfo: List<MessageEmbed>? = null,
     )
 
-    //related to embeds
-    //TODO: embed is not as wide as Discordia's, while being wider than it should be for Misskey links lol
+
+    /*
+    related to embeds
+     */
     private fun buildEmbed(
         stdout: String,
         sourceLink: String,
         filesPath: MutableList<File>,
-        desc: String? = null
+        footerText: String? = null
     ): List<MessageEmbed> {
         val lines = stdout.lines()
 
@@ -214,8 +234,8 @@ class SauceSender(
                 }
 
                 footer {
-                    iconUrl = "attachment://$FOOTER_IMAGE"
-                    name = desc ?: "Tsih-Robo-KTX!"
+                    iconUrl = "attachment://$footerImage"
+                    name = footerText ?: "tsih-robo-ktx~"
                 }
             }
         )
@@ -232,8 +252,8 @@ class SauceSender(
             embeds.add(EmbedBuilder {
                 url = embeds[0].url
                 title = embeds[0].title
-                image =
-                    "attachment://${file}" //if this doesn't work, be sure file doesn't have any schizo character that discord hates
+                //if this doesn't work, be sure file doesn't have any schizo character that discord hates
+                image = "attachment://${file}"
             })
         }
         return embeds
