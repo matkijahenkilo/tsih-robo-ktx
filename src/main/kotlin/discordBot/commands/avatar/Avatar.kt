@@ -8,12 +8,18 @@ import org.matkija.bot.discordBot.abstracts.SlashCommand
 class Avatar : SlashCommand() {
     override fun execute(event: GenericCommandInteractionEvent) {
         val user = event.getOption(AvatarSlashOptions.AVATAR_OPTION_USER)
+        val avatarUrl =
+            (if (user?.asUser != null) user.asUser.effectiveAvatarUrl else event.user.effectiveAvatarUrl) + "?size=2048"
         event.reply_(
             embeds = listOf(
                 EmbedBuilder {
-                    description = "Fascinating..."
+                    title = "This is a nice avatar nanora!"
                     color = 0xff80fd
-                    image = if (user?.asUser != null) user.asUser.avatarUrl else event.user.avatarUrl
+                    field {
+                        name = "What a lazy adult!"
+                        value = "They look like holding a lot of shiny stars..."
+                    }
+                    image = avatarUrl
                 }.build()
             )
         ).queue()
