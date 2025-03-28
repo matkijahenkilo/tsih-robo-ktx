@@ -7,7 +7,6 @@ import kotlinx.coroutines.*
 import net.dv8tion.jda.api.entities.MessageEmbed
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import net.dv8tion.jda.api.utils.FileUpload
-import org.matkija.bot.utils.TsihPoggers
 import java.io.File
 
 // TODO: each server and room should have their own custom limit
@@ -236,7 +235,8 @@ class SauceSender(
         )
 
         // replace file path to be only the file name, otherwise discord doesn't embed the image
-        val filesName = filesPath.map { it.toString().substringAfter("./data/temp/") }
+        val filesNames: MutableList<String> =
+            filesPath.map { it.toString().substringAfter("./data/temp/") }.toMutableList()
 
         val embeds = mutableListOf(
             EmbedBuilder {
@@ -249,7 +249,7 @@ class SauceSender(
                     name = String.format("%s (@%s)", e.nick, e.username)
                 }
 
-                title = " "
+                title = "owo"
                 description = e.text
 
                 field {
@@ -269,13 +269,15 @@ class SauceSender(
         )
 
         var updatedEmbeds = emptyList<InlineEmbed>()
-        if (!hasVideos(filesName))
-            updatedEmbeds = addAdditionalAttachments(embeds, filesName)
+        if (!hasVideos(filesNames))
+            updatedEmbeds = addAdditionalAttachments(embeds, filesNames)
 
         return buildEmbeds(updatedEmbeds.ifEmpty { embeds })
     }
 
-    private fun addAdditionalAttachments(embeds: MutableList<InlineEmbed>, files: List<String>): List<InlineEmbed> {
+    private fun addAdditionalAttachments(embeds: MutableList<InlineEmbed>, files: MutableList<String>): List<InlineEmbed> {
+        embeds[0].image = "attachment://${files[0]}" //lol
+        files.removeAt(0)
         files.forEach { file ->
             embeds.add(EmbedBuilder {
                 url = embeds[0].url
