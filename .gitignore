@@ -40,6 +40,10 @@ build/
 # nix
 result
 
+# related artifact building
+out/
+src/main/resources/META-INF/
+
 # ...
 src/test/**
 
