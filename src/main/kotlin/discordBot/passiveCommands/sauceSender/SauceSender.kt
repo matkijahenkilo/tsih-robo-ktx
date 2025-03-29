@@ -14,7 +14,7 @@ import java.io.File
 // TODO: if >10mb just link it
 class SauceSender(
     private val event: MessageReceivedEvent,
-    private val content: String,
+    content: String,
 ) {
     private val footerImage = "tsih-icon.png"
     private val footerImagePath = mutableListOf(FileUpload.fromData(File("data/images/sauce/tsih-icon.png")))
