@@ -58,7 +58,22 @@ class Music(
                 }
             }
 
-            MusicCommands.MUSIC_RESUME_TRACK_LIST -> {
+            MusicCommands.MUSIC_PLAY_NEXT -> {
+                if (option != null) {
+                    event.hook.editMessage(content = "Loading song(s)...")
+                        .queue()
+                    loadAndPlay(event, option, null, true)
+                    if (option.contains(YT_SEARCH)) {
+                        event.hook.editMessage(content = "Loaded the first song of result `$originalOption` nanora!")
+                            .queue()
+                    } else {
+                        event.hook.editMessage(content = "Loaded a [song or playlist](<${option}>) nanora!")
+                            .queue()
+                    }
+                }
+            }
+
+            MusicCommands.MUSIC_RESUME_QUEUE -> {
                 if (musicManager.player.playingTrack != null) {
                     event.hook.editMessage(
                         content = "A playlist is already being played nanora."
@@ -86,21 +101,19 @@ class Music(
                 }
             }
 
-            MusicCommands.MUSIC_SHOW_TRACK_LIST -> {
-                val originalQueueContents = musicManager.scheduler.originalQueue
+            MusicCommands.MUSIC_SHOW_QUEUE -> {
+                val queueContents = musicManager.scheduler.priorityQueue + musicManager.scheduler.originalQueue
                 val pages = mutableSetOf<MessageEmbed>()
                 var content = mutableListOf<String>()
                 var index = 1
-                var totalLength: Long = 0
 
-                originalQueueContents.forEach { totalLength += it.track.info.length }
-                val totalTime = getTimestamp(totalLength)
+                val totalTime = getTimestamp(queueContents.sumOf { it.track.info.length })
 
-                originalQueueContents.forEach { audioContent ->
+                queueContents.forEach { audioContent ->
                     val time = getTimestamp(audioContent.track.info.length)
                     content.add(
                         String.format(
-                            "%s. [%s](%s) (%s) by %s\n",
+                            "%s. [%s](%s) (%s) by %s",
                             index,
                             audioContent.track.info.title,
                             audioContent.track.info.uri,
@@ -108,9 +121,8 @@ class Music(
                             audioContent.requester.name
                         )
                     )
-                    if (content.size == ENTRY_LIMIT || index == originalQueueContents.size) {
-                        var str = ""
-                        content.forEach { str += it }
+                    if (content.size == ENTRY_LIMIT || index == queueContents.size) {
+                        val str = content.joinToString("\n")
                         var embed = EmbedBuilder {
                             title = "The next songs to be played..."
                             description = str
@@ -135,13 +147,18 @@ class Music(
         }
     }
 
-    private fun loadAndPlay(event: GenericCommandInteractionEvent, trackUrl: String, oldRequester: User?) {
+    private fun loadAndPlay(
+        event: GenericCommandInteractionEvent,
+        trackUrl: String,
+        oldRequester: User?,
+        isPriority: Boolean = false
+    ) {
         val channel = event.messageChannel
         val guild = event.guild!!
 
         playerManager.loadItemOrdered(musicManager, trackUrl, object : AudioLoadResultHandler {
             override fun trackLoaded(track: AudioTrack) {
-                play(guild, musicManager, event.member!!, track, oldRequester)
+                play(guild, musicManager, event.member!!, track, oldRequester, isPriority)
 
                 if (musicManager.scheduler.isShuffled) {
                     musicManager.scheduler.shuffle(false)
@@ -156,10 +173,10 @@ class Music(
                 }
 
                 if (playlist.name.contains(SEARCH_INDICATOR)) {
-                    play(guild, musicManager, event.member!!, firstTrack, oldRequester)
+                    play(guild, musicManager, event.member!!, firstTrack, oldRequester, isPriority)
                 } else {
                     playlist.tracks.forEach { track ->
-                        play(guild, musicManager, event.member!!, track, oldRequester)
+                        play(guild, musicManager, event.member!!, track, oldRequester, isPriority)
                     }
                 }
 
@@ -188,10 +205,11 @@ class Music(
         musicManager: GuildMusicManager,
         member: Member,
         track: AudioTrack,
-        oldRequester: User?
+        oldRequester: User?,
+        isPriority: Boolean
     ) {
         connectToMemberVC(guild.audioManager, member)
-        musicManager.scheduler.queue(member, track, oldRequester)
+        musicManager.scheduler.queue(member, track, oldRequester, isPriority)
     }
 
     private fun connectToMemberVC(audioManager: AudioManager, member: Member) {

@@ -22,10 +22,11 @@ class TrackScheduler(
 
     private var queue: BlockingQueue<AudioContent> = LinkedBlockingQueue()
     val originalQueue: BlockingQueue<AudioContent> = LinkedBlockingQueue()
+    val priorityQueue: BlockingQueue<AudioContent> = LinkedBlockingQueue()
     private var lastContent: AudioContent? = null
-    private val playlistJsonHandler = PlaylistJsonHandler("data/playlist.json")
-    var isShuffled = false
-    var isRepeating = false
+    private val playlistJsonHandler: PlaylistJsonHandler = PlaylistJsonHandler("data/playlist.json")
+    var isShuffled: Boolean = false
+    var isRepeating: Boolean = false
 
     /**
      * Add the next track to queue or play right away if nothing is in the queue.
@@ -33,8 +34,9 @@ class TrackScheduler(
      * @param member The user to show who requested it.
      * @param track The track to play or add to queue.
      * @param oldRequester The previous requester from the playlist.json, if available.
+     * @param isPriority If the track should be played next regardless of the queue size
      */
-    fun queue(member: Member, track: AudioTrack, oldRequester: User?) {
+    fun queue(member: Member, track: AudioTrack, oldRequester: User?, isPriority: Boolean) {
         val content = if (oldRequester == null) {
             AudioContent(track, member.user)
         } else {
@@ -42,7 +44,10 @@ class TrackScheduler(
         }
 
         if (!player.startTrack(content.track, true)) {
-            queue.offer(content)
+            if (isPriority)
+                priorityQueue.offer(content)
+            else
+                queue.offer(content)
             originalQueue.offer(content)
             savePlaylist()
         } else {
@@ -59,7 +64,7 @@ class TrackScheduler(
             lastContent = AudioContent(lastContent!!.track.makeClone(), lastContent!!.requester)
             player.startTrack(lastContent!!.track, true)
         } else {
-            val content = queue.poll()
+            val content = priorityQueue.poll() ?: queue.poll()
 
             lastContent = AudioContent(content.track.makeClone(), content.requester)
             player.startTrack(content.track, false)

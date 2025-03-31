@@ -12,12 +12,13 @@ object MusicCommands {
 
     const val MUSIC = "music"
     const val MUSIC_PLAY = "play"
+    const val MUSIC_PLAY_NEXT = "play_next"
 
     //TODO: make a playnext command to be placed in first position of the list, regardless of shuffle
     const val MUSIC_OPTION_LINK = "url_or_search"
     const val MUSIC_OPTION_SEARCH = "website_for_search"
-    const val MUSIC_RESUME_TRACK_LIST = "resume_tracklist"
-    const val MUSIC_SHOW_TRACK_LIST = "show_tracklist"
+    const val MUSIC_RESUME_QUEUE = "resume_queue"
+    const val MUSIC_SHOW_QUEUE = "show_queue"
 
     private const val ID_MUSIC = "music"
     const val PLAY = "$ID_MUSIC:play"
@@ -26,24 +27,35 @@ object MusicCommands {
     const val REPEAT = "$ID_MUSIC:repeat"
     const val SHUFFLE = "$ID_MUSIC:shuffle"
 
+    private fun linkInputOptionData(): OptionData = OptionData(
+        OptionType.STRING,
+        MUSIC_OPTION_SEARCH,
+        "Forces a search in a specific website for the option $MUSIC_PLAY.",
+        false
+    ).addChoices(
+        Command.Choice("YouTube", "ytsearch:"),
+        // Command.Choice("Spotify", "spsearch:") // needs auth in yaml
+    )
+
     fun getCommands(): SlashCommandData =
         Commands.slash(MUSIC, "I search or play songs directly from a link nanora!").addSubcommands(
             Subcommand(MUSIC_PLAY, "I'll search or play something in voice chat nora!").addOptions(
                 OptionData(OptionType.STRING, MUSIC_OPTION_LINK, "I'll play a song in voice chat!", true),
+                linkInputOptionData()
+            ),
+            Subcommand(MUSIC_PLAY_NEXT, "Prioritizes a track to be played next nora~").addOptions(
                 OptionData(
                     OptionType.STRING,
-                    MUSIC_OPTION_SEARCH,
-                    "Forces a search in a specific website for the option $MUSIC_PLAY.",
-                    false
-                ).addChoices(
-                    Command.Choice("YouTube", "ytsearch:"),
-                    // Command.Choice("Spotify", "spsearch:") // needs auth in yaml
-                )
+                    MUSIC_OPTION_LINK,
+                    "I'll prioritize this song to play next nanora!",
+                    true
+                ),
+                linkInputOptionData()
             ),
             Subcommand(
-                MUSIC_RESUME_TRACK_LIST,
+                MUSIC_RESUME_QUEUE,
                 "Resumes a saved playlist from the last time I've been in voice chat nora~"
             ),
-            Subcommand(MUSIC_SHOW_TRACK_LIST, "I show the current tracklist nora~")
+            Subcommand(MUSIC_SHOW_QUEUE, "I show the current queue nora~")
         )
 }
