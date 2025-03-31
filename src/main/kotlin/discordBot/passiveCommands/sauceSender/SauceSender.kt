@@ -24,91 +24,102 @@ class SauceSender(
     fun sendSauce() = runBlocking {
 
         val jobList = mutableListOf<Job>()
+        var shouldDownloadAndSuppressEmbeds = false
+
+        // check if it's sensitive and decide if it should be ignored or not
+        // because depending on that, twitter and other websites can avoid
+        // getting embedded on discord.
+        // and if someone send many links in one message
+        // which being a mix of sensitive and non-sensitive posts
+        // it will download everything and send the images regardless of
+        // one of them not being sensitive.
+        if (links.size > 1) {
+            shouldDownloadAndSuppressEmbeds = true
+        } else {
+            links.forEach { link ->
+                // isSensitive() is not run if the link is neither Twitter nor Misskey.
+                if (((isTwitterLink(link) || isMisskeyLink(link)) && isSensitive(link))) {
+                    shouldDownloadAndSuppressEmbeds = true
+                    return@forEach
+                }
+            }
+        }
+
         links.forEach { link ->
+            if (shouldDownloadAndSuppressEmbeds) {
+                jobList += async {
+                    val payload = Payload()
+                    val command: List<String>
+                    var infoCommand: List<String> = emptyList()
+                    var website: String? = null
 
-            // check if it's sensitive and decide if it should be ignored or not
-            // because depending on that, twitter and other websites can avoid
-            // getting embedded on discord.
-            // and if someone send many links in one message
-            // which being a mix of sensitive and non-sensitive posts
-            // it will download everything and send the images regardless of
-            // one of them not being sensitive.
-            //
-            // isSensitive() is not run if the link is neither Twitter nor Misskey.
-            if (((isTwitterLink(link) || isMisskeyLink(link)) && !isSensitive(link)) && links.size == 1)
-                return@forEach
+                    // make command for each website, and get info for embed if possible
+                    when {
+                        isTwitterLink(link) -> {
+                            command = makeTwitterCommand(link)
+                            infoCommand = makeTwitterCommand(link, true)
+                            website = "Twitter.com"
+                        }
 
-            jobList += async {
-                val payload = Payload()
-                val command: List<String>
-                var infoCommand: List<String> = emptyList()
-                var website: String? = null
+                        isMisskeyLink(link) -> {
+                            command = makeMisskeyCommand(link)
+                            infoCommand = makeMisskeyCommand(link, true)
+                            website = "Misskey.io"
+                        }
 
-                // make command for each website, and get info for embed if possible
-                when {
-                    isTwitterLink(link) -> {
-                        command = makeTwitterCommand(link)
-                        infoCommand = makeTwitterCommand(link, true)
-                        website = "Twitter.com"
+                        else -> {
+                            command = makeCommonCommand(link)
+                        }
                     }
 
-                    isMisskeyLink(link) -> {
-                        command = makeMisskeyCommand(link)
-                        infoCommand = makeMisskeyCommand(link, true)
-                        website = "Misskey.io"
+                    // download and organize files to list
+                    val child = spawnProcess(command)
+                    val filesStdout = readProcess(child).stdout
+                    val files = mutableListOf<File>()
+                    filesStdout.lines().forEach { filePath ->
+                        if (filePath.isNotEmpty()) {
+                            val clearFilePath = filePath
+                                .replace("\n", "")
+                                .replace("\r", "")
+                                .replace("\\", "/")
+                                .replace("# ", "")
+                                .replace("./", "/")
+                            val file = File("./data", clearFilePath)
+                            if (file.exists() && file.length() < discordSizeLimit * 1024 * 1024)
+                                files.add(file)
+                        }
                     }
 
-                    else -> {
-                        command = makeCommonCommand(link)
+                    // if failing to fetch anything
+                    if (files.isEmpty()) {
+                        child.destroy()
+                        return@async
                     }
-                }
+                    payload.files = files
 
-                // download and organize files to list
-                val child = spawnProcess(command)
-                val filesStdout = readProcess(child).stdout
-                val files = mutableListOf<File>()
-                filesStdout.lines().forEach { filePath ->
-                    if (filePath.isNotEmpty()) {
-                        val clearFilePath = filePath
-                            .replace("\n", "")
-                            .replace("\r", "")
-                            .replace("\\", "/")
-                            .replace("# ", "")
-                            .replace("./", "/")
-                        val file = File("./data", clearFilePath)
-                        if (file.exists() && file.length() < discordSizeLimit * 1024 * 1024)
-                            files.add(file)
+                    // deal with embed
+                    if (infoCommand.isNotEmpty()) {
+                        val infoChild = spawnProcess(infoCommand)
+                        val out = readProcess(infoChild).stdout
+                        payload.embedInfo = buildEmbed(out, link, payload.files!!, website)
                     }
+
+                    // send it, embed or not
+                    if (payload.files!!.size > 10) {
+                        sendFilesInParts(payload, link)
+                    } else {
+                        sendFiles(payload, link)
+                    }
+
+                    child.destroy() // readProcess has child.exit(), this ensures le fokin process is dead
                 }
-
-                // if failing to fetch anything
-                if (files.isEmpty()) {
-                    child.destroy()
-                    return@async
-                }
-                payload.files = files
-
-                // deal with embed
-                if (infoCommand.isNotEmpty()) {
-                    val infoChild = spawnProcess(infoCommand)
-                    val out = readProcess(infoChild).stdout
-                    payload.embedInfo = buildEmbed(out, link, payload.files!!, website)
-                }
-
-                // send it, embed or not
-                if (payload.files!!.size > 10) {
-                    sendFilesInParts(payload, link)
-                } else {
-                    sendFiles(payload, link)
-                }
-
-                //delete user's message embed
-                event.message.suppressEmbeds(true).queue()
-
-                child.destroy() // readProcess has child.exit(), this ensures le fokin process is dead
             }
         }
         jobList.joinAll()
+
+        //delete user's message embed
+        if (!event.message.isSuppressedEmbeds && shouldDownloadAndSuppressEmbeds)
+            event.message.suppressEmbeds(true).queue()
     }
 
     // as far as I know, misskey is the only website that allows users to send more
