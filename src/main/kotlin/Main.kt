@@ -1,5 +1,6 @@
 package org.matkija.bot
 
+import dev.lavalink.youtube.YoutubeAudioSourceManager
 import dev.minn.jda.ktx.jdabuilder.default
 import dev.minn.jda.ktx.jdabuilder.intents
 import kotlinx.serialization.Serializable
@@ -30,7 +31,16 @@ private fun getBotsConfig(): List<Bot>? {
     }
 }
 
-fun main() {
+fun main(args: Array<String>) {
+
+    if (args.isNotEmpty()) {
+        if (args[0] == "-t") {
+            YoutubeAudioSourceManager().useOauth2(null, false)
+            TsihPoggers.POG.info("After you get the token, save it to data/oauth.txt and restart me")
+        } else {
+            TsihPoggers.POG.error("Unknown arguments.")
+        }
+    }
 
     val bots = getBotsConfig() ?: exitProcess(2)
 
