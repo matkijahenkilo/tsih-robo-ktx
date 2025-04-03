@@ -12,7 +12,10 @@ object TOCSlashCommands {
     fun getCommands(): SlashCommandData =
         Commands.slash(TSIH_O_CLOCK, "I'll send a scheduled image everyday nanora~")
             .addSubcommands(
-                SubcommandData(TSIH_O_CLOCK_SUBSCRIBE, "I'll start sending Tsih O'Clock images in this channel nanora!"),
+                SubcommandData(
+                    TSIH_O_CLOCK_SUBSCRIBE,
+                    "I'll start sending Tsih O'Clock images in this channel nanora!"
+                ),
                 SubcommandData(TSIH_O_CLOCK_UNSUSCRIBE, "I'll stop sending Tsih O'Clock images in this channel nanora!")
             )
 }

@@ -38,7 +38,7 @@ class TsihOClockTimer(private val jda: JDA) {
                         embeds = listOf(
                             EmbedBuilder {
                                 title = randomTitle()
-                                color= if (count % 2 == 0) 0xff80fd else 0x80fdff
+                                color = if (count % 2 == 0) 0xff80fd else 0x80fdff
                                 field {
                                     name = randomName()
                                     value = randomValue()

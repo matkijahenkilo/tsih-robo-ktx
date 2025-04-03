@@ -106,8 +106,8 @@ class SauceSender(
                     // deal with embed
                     if (infoCommand.isNotEmpty()) {
                         val infoChild = spawnProcess(infoCommand)
-                        val out = readProcess(infoChild).stdout
-                        payload.embedInfo = buildEmbed(out, link, payload.files!!, website)
+                        val infoStdout = readProcess(infoChild).stdout
+                        payload.embedInfo = buildEmbed(infoStdout, link, payload.files!!, website)
                     }
 
                     // send it, embed or not
@@ -298,7 +298,10 @@ class SauceSender(
         return buildEmbeds(updatedEmbeds.ifEmpty { embeds })
     }
 
-    private fun addAdditionalAttachments(embeds: MutableList<InlineEmbed>, files: MutableList<String>): List<InlineEmbed> {
+    private fun addAdditionalAttachments(
+        embeds: MutableList<InlineEmbed>,
+        files: MutableList<String>
+    ): List<InlineEmbed> {
         embeds[0].image = "attachment://${files[0]}" //lol
         files.removeAt(0)
         files.forEach { file ->

@@ -4,7 +4,7 @@ import net.dv8tion.jda.api.JDA
 import net.dv8tion.jda.api.entities.Activity
 import org.matkija.bot.discordBot.abstracts.TimedEvent
 
-class RandomStatus(private val jda: JDA): TimedEvent() {
+class RandomStatus(private val jda: JDA) : TimedEvent() {
 
     override val task: Runnable = Runnable {
         jda.presence.activity = Activity.customStatus(statusList.random())
