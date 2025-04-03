@@ -17,9 +17,15 @@ class SauceSender(
     content: String,
 ) {
     private val footerImage = "tsih-icon.png"
-    private val footerImagePath = mutableListOf(FileUpload.fromData(File("data/images/sauce/tsih-icon.png")))
+    private var footerImagePath: MutableList<FileUpload>? = null
     private val discordSizeLimit = 10
     private val links: List<String> = filterOutWords(content).distinct()
+
+    init {
+        val footerImage = File("data/images/sauce/tsih-icon.png")
+        if (footerImage.exists())
+            footerImagePath = mutableListOf(FileUpload.fromData(footerImage))
+    }
 
     fun sendSauce() = runBlocking {
 
@@ -145,7 +151,12 @@ class SauceSender(
         payload.files!!.forEach { file ->
             uploads.add(FileUpload.fromData(file))
         }
-        val withFooterImage = uploads + footerImagePath
+
+        var withFooterImage = uploads
+        if (footerImagePath != null) {
+            withFooterImage = (uploads + footerImagePath!!).toMutableList()
+        }
+
         event.message.reply_(
             content = if (links.size > 1) "<$link>" else "",
             files = if (payload.embedInfo != null) withFooterImage else uploads,
