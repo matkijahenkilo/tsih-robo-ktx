@@ -8,6 +8,8 @@ import net.dv8tion.jda.api.entities.MessageEmbed
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import net.dv8tion.jda.api.utils.FileUpload
 import org.matkija.bot.utils.clearCRLF
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import java.io.File
 
 // TODO: each server and room should have their own custom limit
@@ -21,6 +23,7 @@ class SauceSender(
     private var footerImagePath: MutableList<FileUpload>? = null
     private val discordSizeLimit = 10
     private val links: List<String> = filterOutWords(content).distinct()
+    private val logger: Logger = LoggerFactory.getLogger(SauceSender::class.java)
 
     init {
         val footerImage = File("data/images/sauce/tsih-icon.png")
@@ -81,7 +84,8 @@ class SauceSender(
 
                     // download and organize files to list
                     val child = spawnProcess(command)
-                    val filesStdout = readProcess(child).stdout
+                    val exitedChild = readProcess(child)
+                    val filesStdout = exitedChild.stdout
                     val files = mutableListOf<File>()
                     filesStdout.lines().forEach { filePath ->
                         if (filePath.isNotEmpty()) {
@@ -93,12 +97,15 @@ class SauceSender(
                             val file = File("./data", clearFilePath)
                             if (file.exists() && file.length() < discordSizeLimit * 1024 * 1024)
                                 files.add(file)
+                            else
+                                logger.error("File $file was bigger than ${discordSizeLimit}mb")
                         }
                     }
 
                     // if failing to fetch anything
                     if (files.isEmpty()) {
                         child.destroy()
+                        logger.error("Failed to fetch anything from $link: ${exitedChild.stderr.clearCRLF()}")
                         return@async
                     }
                     payload.files = files
@@ -109,6 +116,8 @@ class SauceSender(
                         val infoStdout = readProcess(infoChild).stdout
                         payload.embedInfo = buildEmbed(infoStdout, link, payload.files!!, website)
                     }
+
+                    logger.info("Sending content from $link")
 
                     // send it, embed or not
                     if (payload.files!!.size > 10) {
