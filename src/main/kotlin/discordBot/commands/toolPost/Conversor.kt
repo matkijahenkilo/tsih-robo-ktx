@@ -1,5 +1,6 @@
 package discordBot.commands.toolPost
 
+import org.matkija.bot.utils.clearCRLF
 import java.io.File
 import java.time.Instant
 
@@ -65,9 +66,7 @@ fun downloadAudio(link: String): String? {
 
         child.waitFor()
 
-        var stdout = child.inputStream.bufferedReader().readText()
-        stdout = stdout.replace("\n", "")
-        stdout = stdout.replace("\r", "")
+        val stdout = child.inputStream.bufferedReader().readText().clearCRLF()
 
         return if (stdout.isEmpty()) {
             null

@@ -7,6 +7,7 @@ import kotlinx.coroutines.*
 import net.dv8tion.jda.api.entities.MessageEmbed
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import net.dv8tion.jda.api.utils.FileUpload
+import org.matkija.bot.utils.clearCRLF
 import java.io.File
 
 // TODO: each server and room should have their own custom limit
@@ -85,8 +86,7 @@ class SauceSender(
                     filesStdout.lines().forEach { filePath ->
                         if (filePath.isNotEmpty()) {
                             val clearFilePath = filePath
-                                .replace("\n", "")
-                                .replace("\r", "")
+                                .clearCRLF()
                                 .replace("\\", "/")
                                 .replace("# ", "")
                                 .replace("./", "/")
@@ -167,7 +167,7 @@ class SauceSender(
     private suspend fun isSensitive(link: String): Boolean {
         val child = spawnProcess(makeSensitiveCheckCommand(link))
         val isSensitive = readProcess(child).stdout
-            .replace("\n", "").replace("\r", "")
+            .clearCRLF()
             .toBoolean()
         return isSensitive
     }
