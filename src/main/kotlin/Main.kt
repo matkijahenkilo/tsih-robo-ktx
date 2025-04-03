@@ -13,7 +13,8 @@ import discordBot.commands.toolPost.toolPosterInit
 import org.matkija.bot.discordBot.passiveCommands.randomReactInit
 import org.matkija.bot.discordBot.passiveCommands.sauceSender.sauceSenderInit
 import org.matkija.bot.discordBot.timedEvents.randomStatus.RandomStatus
-import org.matkija.bot.utils.TsihPoggers
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import java.io.File
 import java.util.concurrent.TimeUnit
 import kotlin.system.exitProcess
@@ -26,19 +27,21 @@ private fun getBotsConfig(): List<Bot>? {
     try {
         return Json.decodeFromString<List<Bot>>(File("data/config.json").readText())
     } catch (e: Exception) {
-        TsihPoggers.POG.error(e.toString())
+        LOG.error(e.toString())
         return null
     }
 }
+
+val LOG: Logger = LoggerFactory.getLogger("Tsih")
 
 fun main(args: Array<String>) {
 
     if (args.isNotEmpty()) {
         if (args[0] == "-t") {
             YoutubeAudioSourceManager().useOauth2(null, false)
-            TsihPoggers.POG.info("After you get the token, save it to data/oauth.txt and restart me")
+            LOG.info("After you get the token, save it to data/oauth.txt and restart me")
         } else {
-            TsihPoggers.POG.error("Unknown arguments.")
+            LOG.error("Unknown arguments.")
         }
     }
 
@@ -46,7 +49,7 @@ fun main(args: Array<String>) {
 
     val bot = bots[0]
 
-    TsihPoggers.POG.info("Logging in as ${bot.name}")
+    LOG.info("Logging in as ${bot.name}")
 
     val jda = default(bot.token) {
         intents += listOf(

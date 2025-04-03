@@ -1,6 +1,6 @@
 package org.matkija.bot.discordBot.abstracts
 
-import org.matkija.bot.utils.TsihPoggers
+import org.matkija.bot.LOG
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
@@ -26,6 +26,6 @@ abstract class TimedEvent {
     fun startScheduler(every: TimeUnit, initialDelay: Long, period: Long): Any = try {
         scheduler.scheduleAtFixedRate(task, initialDelay, period, every)
     } catch (e: Exception) {
-        TsihPoggers.POG.error(e.toString())
+        LOG.error(e.toString())
     }
 }

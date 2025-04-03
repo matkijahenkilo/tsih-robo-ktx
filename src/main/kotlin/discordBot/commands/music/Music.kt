@@ -14,9 +14,9 @@ import net.dv8tion.jda.api.entities.MessageEmbed
 import net.dv8tion.jda.api.entities.User
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent
 import net.dv8tion.jda.api.managers.AudioManager
+import org.matkija.bot.LOG
 import org.matkija.bot.discordBot.abstracts.SlashCommand
 import org.matkija.bot.discordBot.commands.music.audio.GuildMusicManager
-import org.matkija.bot.utils.TsihPoggers
 import kotlin.time.Duration.Companion.minutes
 
 class Music(
@@ -190,7 +190,7 @@ class Music(
             }
 
             override fun loadFailed(exception: FriendlyException) {
-                TsihPoggers.POG.error(exception.stackTraceToString())
+                LOG.error(exception.stackTraceToString())
                 channel.sendMessage("I couldn't play anything nora!\nreason: ${exception.message}")
                     .queue()
             }

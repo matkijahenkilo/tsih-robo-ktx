@@ -10,8 +10,8 @@ import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData
+import org.matkija.bot.LOG
 import org.matkija.bot.discordBot.commands.music.audio.GuildMusicManager
-import org.matkija.bot.utils.TsihPoggers
 import java.io.File
 
 
@@ -58,7 +58,7 @@ fun musicInit(jda: JDA): SlashCommandData {
         val refreshToken = oauthFile.readText()
         ytSourceManager.useOauth2(refreshToken, true)
     } else {
-        TsihPoggers.POG.warn("HOIST UP THE SAILS LOOK OUT YOU LANDLUBBERS, It is recommended to use oauth in order to use services such as YouTube. Restar the program with -t argument")
+        LOG.warn("HOIST UP THE SAILS LOOK OUT YOU LANDLUBBERS, It is recommended to use oauth in order to use services such as YouTube. Restar the program with -t argument")
     }
 
     fun getGuildAudioPlayer(guild: Guild, channel: MessageChannel): GuildMusicManager {
