@@ -20,16 +20,24 @@ class TrackScheduler(
     private val channel: MessageChannel
 ) : AudioEventAdapter() {
 
-    private var queue: BlockingQueue<AudioContent> = LinkedBlockingQueue()
-    val originalQueue: BlockingQueue<AudioContent> = LinkedBlockingQueue()
+    // priority over currentQueue
     val priorityQueue: BlockingQueue<AudioContent> = LinkedBlockingQueue()
+
+    // this is what plays on the bot, can be shuffled and unshuffled
+    private var currentQueue: BlockingQueue<AudioContent> = LinkedBlockingQueue()
+
+    // used to keep track of the entire track and to be saved to disk
+    val originalQueue: BlockingQueue<AudioContent> = LinkedBlockingQueue()
+
+    // used to repeat the audio without deleting it from another queue with .poll()
     private var lastContent: AudioContent? = null
+
     private val playlistJsonHandler: PlaylistJsonHandler = PlaylistJsonHandler("data/playlist.json")
     var isShuffled: Boolean = false
     var isRepeating: Boolean = false
 
     /**
-     * Add the next track to queue or play right away if nothing is in the queue.
+     * Add the next track to queue or play right away if nothing is in the current queue.
      *
      * @param member The user to show who requested it.
      * @param track The track to play or add to queue.
@@ -44,11 +52,12 @@ class TrackScheduler(
         }
 
         if (!player.startTrack(content.track, true)) {
-            if (isPriority)
+            if (isPriority) {
                 priorityQueue.offer(content)
-            else
-                queue.offer(content)
-            originalQueue.offer(content)
+            } else {
+                currentQueue.offer(content)
+                originalQueue.offer(content)
+            }
             savePlaylist()
         } else {
             lastContent = AudioContent(content.track.makeClone(), content.requester)
@@ -58,13 +67,15 @@ class TrackScheduler(
 
     /**
      * Start the next track, stopping the current one if it is playing.
+     *
+     * @param skip if scheduler should skip the current track for the next one in BlockingQueue
      */
     fun nextTrack(skip: Boolean) {
         if (isRepeating && !skip) {
             lastContent = AudioContent(lastContent!!.track.makeClone(), lastContent!!.requester)
             player.startTrack(lastContent!!.track, true)
         } else {
-            val content = priorityQueue.poll() ?: queue.poll()
+            val content = priorityQueue.poll() ?: currentQueue.poll()
 
             lastContent = AudioContent(content.track.makeClone(), content.requester)
             player.startTrack(content.track, false)
@@ -81,9 +92,8 @@ class TrackScheduler(
     ).queue()
 
     private fun savePlaylist() {
-        val list = mutableListOf<PlaylistJsonHandler.SongEntry>()
-        originalQueue.forEach {
-            list.add(PlaylistJsonHandler.SongEntry(it.track.info.uri, it.requester.id.toLong()))
+        val list = (priorityQueue + originalQueue).map {
+            PlaylistJsonHandler.SongEntry(it.track.info.uri, it.requester.id.toLong())
         }
         playlistJsonHandler.setPlaylist(list)
     }
@@ -91,20 +101,24 @@ class TrackScheduler(
     /**
      * Shuffles the playlist and save it to the current queue.
      * If undoing the shuffle, the original queue before shuffling will be the new playlist again with the removed tracks.
+     *
+     * @param toggleShuffle if the scheduler should enable/disable shuffling. Passing `true` will invert its current
+     * status while passing `false` won't change its status. Regardless of the param received,
+     * if `isShuffled` is currently `true`, the playlist will be shuffled
      */
     fun shuffle(toggleShuffle: Boolean) {
         if (toggleShuffle)
-            isShuffled = !isShuffled
+            isShuffled = !this.isShuffled
 
-        queue = if (isShuffled) {
-            LinkedBlockingQueue(queue.shuffled())
+        currentQueue = if (isShuffled) {
+            LinkedBlockingQueue(currentQueue.shuffled())
         } else {
             originalQueue
         }
     }
 
     fun toggleRepeat() {
-        isRepeating = !isRepeating
+        isRepeating = !this.isRepeating
     }
 
     override fun onTrackEnd(player: AudioPlayer?, track: AudioTrack?, endReason: AudioTrackEndReason) {
