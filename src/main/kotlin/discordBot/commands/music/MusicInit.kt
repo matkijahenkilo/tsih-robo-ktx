@@ -2,6 +2,15 @@ package org.matkija.bot.discordBot.commands.music
 
 import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager
 import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers
+import dev.lavalink.youtube.clients.Android
+import dev.lavalink.youtube.clients.AndroidMusic
+import dev.lavalink.youtube.clients.AndroidVr
+import dev.lavalink.youtube.clients.Ios
+import dev.lavalink.youtube.clients.MWeb
+import dev.lavalink.youtube.clients.Tv
+import dev.lavalink.youtube.clients.TvHtml5Embedded
+import dev.lavalink.youtube.clients.Web
+import dev.lavalink.youtube.clients.WebEmbedded
 import dev.minn.jda.ktx.events.onButton
 import dev.minn.jda.ktx.events.onCommand
 import net.dv8tion.jda.api.JDA
@@ -40,7 +49,17 @@ fun musicInit(jda: JDA): SlashCommandData {
     val musicManagers = mutableMapOf<Long, GuildMusicManager>()
     val playerManager = DefaultAudioPlayerManager()
     // creating new audio source manager from dev.lavalink.youtube.YoutubeAudioSourceManager
-    val ytSourceManager = dev.lavalink.youtube.YoutubeAudioSourceManager()
+    val ytSourceManager = dev.lavalink.youtube.YoutubeAudioSourceManager(true,
+        Web(),
+        dev.lavalink.youtube.clients.Music(),
+        MWeb(),
+        WebEmbedded(),
+        AndroidMusic(),
+        AndroidVr(),
+        Ios(),
+        Tv(),
+        TvHtml5Embedded()
+    )
     // registering it into playerManager
     playerManager.registerSourceManager(ytSourceManager)
     // excluding deprecated audioSourceManager
