@@ -11,8 +11,6 @@ import org.matkija.bot.utils.clearCRLF
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.File
-import java.time.Duration
-import kotlin.time.Duration.Companion.seconds
 
 // TODO: each server and room should have their own custom limit
 // TODO: embed is not as wide as Discordia's, while being wider than it should be for Misskey links lol
@@ -36,35 +34,21 @@ class SauceSender(
     fun sendSauce() = runBlocking {
 
         val jobList = mutableListOf<Job>()
-        var shouldDownloadAndSuppressEmbeds = false
+        var altTwitterFix = AltTwitterFix("", true)
 
-        // check if it's sensitive and decide if it should be ignored or not
-        // because depending on that, twitter and other websites can avoid
-        // getting embedded on discord.
-        // and if someone send many links in one message
-        // which being a mix of sensitive and non-sensitive posts
-        // it will download everything and send the images regardless of
-        // one of them not being sensitive.
-        if (links.size > 1) {
-            shouldDownloadAndSuppressEmbeds = true
-        } else {
-            links.forEach { link ->
-                if ((isTwitterLink(link) || isMisskeyLink(link)) && hasEmbedImage()) {
-                    if (isSensitive(link)) {
-                        shouldDownloadAndSuppressEmbeds = true
-                        return@forEach
-                    }
-                } else {
-                    shouldDownloadAndSuppressEmbeds = true
-                    return@forEach
-                }
+        links.forEach { link ->
+            if (isTwitterLink(link)) {
+                altTwitterFix = isTwitterWorking(link)
+                return@forEach
             }
         }
 
         links.forEach { link ->
-            if (shouldDownloadAndSuppressEmbeds) {
-                jobList += async {
-                    logger.info("Trying to send $link")
+            jobList += async {
+                if (isTwitterLink(link) && !altTwitterFix.works) {
+                    logger.info("Sending alternative fix for $link")
+                    sendAlternativeFix(link, altTwitterFix.content)
+                } else {
                     val payload = Payload()
                     val command: List<String>
                     var infoCommand: List<String> = emptyList()
@@ -140,7 +124,7 @@ class SauceSender(
         jobList.joinAll()
 
         //delete user's message embed
-        if (!event.message.isSuppressedEmbeds && shouldDownloadAndSuppressEmbeds)
+        if (!event.message.isSuppressedEmbeds)
             event.message.suppressEmbeds(true).queue()
     }
 
@@ -180,43 +164,42 @@ class SauceSender(
         ).mentionRepliedUser(false).queue()
     }
 
+
+    /*
+    related to checking if Twitter is working and sending alternative fix
+     */
+
     // empty embeds doesn't always mean that it is sensitive, for some twitter™️ reason (￣ー￣)
-    private suspend fun isSensitive(link: String): Boolean {
+    private suspend fun isTwitterWorking(link: String): AltTwitterFix {
         val child = spawnProcess(makeSensitiveCheckCommand(link))
         val readChild = readProcess(child)
 
-        if (readChild.stdout == "") {
+        return if (readChild.stdout == "") {
             logger.error("Twitter is fucking with me: ${readChild.stderr}")
             val ownerName: String = event.jda.retrieveApplicationInfo().complete().owner.name
-            event.message.reply_(content = "Twitter is messing with me, please annoy the HECK out of $ownerName to fix that!")
+            AltTwitterFix("Twitter is fucking with me, please annoy the FUCK out of $ownerName to fix me!", false)
+        } else {
+            AltTwitterFix("", true)
+        }
+    }
+
+    private fun sendAlternativeFix(link: String, content: String) {
+        val newLink = link.replace(
+            if (link.contains("twitter.com")) {
+                "twitter.com"
+            } else {
+                "x.com"
+            }, "stupidpenisx.com"
+        )
+        event.message.reply_(content = "$content\n$newLink")
             .mentionRepliedUser(false)
             .queue()
-            return true
-        }
-
-        val isSensitive = readChild.stdout
-            .clearCRLF()
-            .toBoolean()
-        return isSensitive
     }
 
-    /**
-     * this will always return false if the twitter link was never sent before
-     * because bot have to wait for a MessageUpdatedEvent, of which I have no idea how to make it synchronous
-     *
-     * TODO: become smarter
-     */
-    private fun hasEmbedImage(): Boolean {
-        return if (event.message.embeds.isNotEmpty()) {
-            val image = event.message.embeds[0].image
-            return if (image != null)
-                (image.height != 0 && image.width != 0) // if values is not 0, then it has image... lol
-            else
-                false
-        } else {
-            false
-        }
-    }
+    data class AltTwitterFix(
+        val content: String,
+        val works: Boolean
+    )
 
 
     /*
@@ -338,7 +321,7 @@ class SauceSender(
         )
 
         var updatedEmbeds = emptyList<InlineEmbed>()
-        if (!hasVideos(filesNames))
+        if (!hasVideos(filesNames)) // don't embed videos, otherwise it won't play
             updatedEmbeds = addAdditionalAttachments(embeds, filesNames)
 
         return buildEmbeds(updatedEmbeds.ifEmpty { embeds })
