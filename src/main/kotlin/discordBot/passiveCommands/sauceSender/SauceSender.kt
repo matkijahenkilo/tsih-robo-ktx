@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.entities.MessageEmbed
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import net.dv8tion.jda.api.utils.FileUpload
 import org.matkija.bot.utils.clearCRLF
+import org.matkija.bot.utils.getRandomColor
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.File
@@ -26,7 +27,7 @@ class SauceSender(
     private val logger: Logger = LoggerFactory.getLogger(SauceSender::class.java)
 
     init {
-        val footerImage = File("data/images/sauce/$footerImage")
+        val footerImage = File("data/images/$footerImage")
         if (footerImage.exists())
             footerImagePath = mutableListOf(FileUpload.fromData(footerImage))
     }
@@ -292,7 +293,7 @@ class SauceSender(
 
         val embeds = mutableListOf(
             EmbedBuilder {
-                color = 0x80fdff
+                color = getRandomColor()
 //            timestamp = e.timestamp
                 url = sourceLink
                 author {
