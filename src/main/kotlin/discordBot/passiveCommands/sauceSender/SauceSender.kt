@@ -11,6 +11,8 @@ import org.matkija.bot.utils.clearCRLF
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.File
+import java.time.Duration
+import kotlin.time.Duration.Companion.seconds
 
 // TODO: each server and room should have their own custom limit
 // TODO: embed is not as wide as Discordia's, while being wider than it should be for Misskey links lol
@@ -19,14 +21,14 @@ class SauceSender(
     private val event: MessageReceivedEvent,
     content: String,
 ) {
-    private val footerImage = "tsih-icon.png"
+    private val footerImage = "sauce-footer.png"
     private var footerImagePath: MutableList<FileUpload>? = null
     private val discordSizeLimit = 10
     private val links: List<String> = filterOutWords(content).distinct()
     private val logger: Logger = LoggerFactory.getLogger(SauceSender::class.java)
 
     init {
-        val footerImage = File("data/images/sauce/tsih-icon.png")
+        val footerImage = File("data/images/sauce/$footerImage")
         if (footerImage.exists())
             footerImagePath = mutableListOf(FileUpload.fromData(footerImage))
     }
@@ -47,8 +49,12 @@ class SauceSender(
             shouldDownloadAndSuppressEmbeds = true
         } else {
             links.forEach { link ->
-                // isSensitive() is not run if the link is neither Twitter nor Misskey.
-                if (((isTwitterLink(link) || isMisskeyLink(link)) && isSensitive(link))) {
+                if ((isTwitterLink(link) || isMisskeyLink(link)) && hasEmbedImage()) {
+                    if (isSensitive(link)) {
+                        shouldDownloadAndSuppressEmbeds = true
+                        return@forEach
+                    }
+                } else {
                     shouldDownloadAndSuppressEmbeds = true
                     return@forEach
                 }
@@ -58,6 +64,7 @@ class SauceSender(
         links.forEach { link ->
             if (shouldDownloadAndSuppressEmbeds) {
                 jobList += async {
+                    logger.info("Trying to send $link")
                     val payload = Payload()
                     val command: List<String>
                     var infoCommand: List<String> = emptyList()
@@ -173,12 +180,42 @@ class SauceSender(
         ).mentionRepliedUser(false).queue()
     }
 
+    // empty embeds doesn't always mean that it is sensitive, for some twitter™️ reason (￣ー￣)
     private suspend fun isSensitive(link: String): Boolean {
         val child = spawnProcess(makeSensitiveCheckCommand(link))
-        val isSensitive = readProcess(child).stdout
+        val readChild = readProcess(child)
+
+        if (readChild.stdout == "") {
+            logger.error("Twitter is fucking with me: ${readChild.stderr}")
+            val ownerName: String = event.jda.retrieveApplicationInfo().complete().owner.name
+            event.message.reply_(content = "Twitter is messing with me, please annoy the HECK out of $ownerName to fix that!")
+            .mentionRepliedUser(false)
+            .queue()
+            return true
+        }
+
+        val isSensitive = readChild.stdout
             .clearCRLF()
             .toBoolean()
         return isSensitive
+    }
+
+    /**
+     * this will always return false if the twitter link was never sent before
+     * because bot have to wait for a MessageUpdatedEvent, of which I have no idea how to make it synchronous
+     *
+     * TODO: become smarter
+     */
+    private fun hasEmbedImage(): Boolean {
+        return if (event.message.embeds.isNotEmpty()) {
+            val image = event.message.embeds[0].image
+            return if (image != null)
+                (image.height != 0 && image.width != 0) // if values is not 0, then it has image... lol
+            else
+                false
+        } else {
+            false
+        }
     }
 
 
