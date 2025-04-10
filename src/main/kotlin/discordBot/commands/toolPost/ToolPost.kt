@@ -40,7 +40,8 @@ class ToolPost : SlashCommand() {
                 event.hook.editMessage(content = "Failed to fetch song from link nanora...").queue()
             }
         } else {
-            event.reply("An important file is missing from the hosts' computer, annoy the HECK out of my host nanora!")
+            val ownerName: String = event.jda.retrieveApplicationInfo().complete().owner.name
+            event.reply("An important file is missing from the hosts' computer, annoy the HECK out of $ownerName nanora!")
                 .queue()
         }
     }

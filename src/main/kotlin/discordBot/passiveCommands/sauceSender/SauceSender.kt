@@ -178,7 +178,10 @@ class SauceSender(
         return if (readChild.stdout == "") {
             logger.error("Twitter is fucking with me: ${readChild.stderr}")
             val ownerName: String = event.jda.retrieveApplicationInfo().complete().owner.name
-            AltTwitterFix("Twitter is fucking with me, please annoy the FUCK out of $ownerName to fix me!", false)
+            AltTwitterFix(
+                "||Either this link doesn't have media or Twitter is fucking with me, if that's so please annoy the FUCK out of $ownerName to fix me!||",
+                false
+            )
         } else {
             AltTwitterFix("", true)
         }

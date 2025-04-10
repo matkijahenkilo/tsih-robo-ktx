@@ -43,6 +43,7 @@ result
 # related artifact building
 out/
 src/main/resources/META-INF/
+tsih-robo.jar
 
 # ...
 src/test/**
