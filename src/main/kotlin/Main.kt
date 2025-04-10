@@ -54,7 +54,6 @@ fun main(args: Array<String>) {
     val jda = default(bot.token) {
         intents += listOf(
             GatewayIntent.MESSAGE_CONTENT,
-            GatewayIntent.GUILD_MEMBERS,
             GatewayIntent.GUILD_MESSAGES
         )
     }
