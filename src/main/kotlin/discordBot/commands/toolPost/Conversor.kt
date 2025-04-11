@@ -45,7 +45,7 @@ fun mergeAudioWithVideo(audioFileName: String): File? {
 
         return File("$PATH/$now")
     } catch (e: Exception) {
-        e.toString()
+        ToolPost.POG.error(e.toString())
         return null
     }
 }
@@ -74,7 +74,7 @@ fun downloadAudio(link: String): String? {
             stdout + AUDIO_FORMAT
         }
     } catch (e: Exception) {
-        e.printStackTrace()
+        ToolPost.POG.error(e.toString())
         return null
     }
 }
@@ -103,7 +103,7 @@ fun trimAudio(audio: String, seconds: Double): String {
 
         trimmedAudioName = newAudioName
     } catch (e: Exception) {
-        e.printStackTrace()
+        ToolPost.POG.error(e.toString())
     }
     return trimmedAudioName
 }

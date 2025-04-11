@@ -37,11 +37,13 @@ class ToolPost : SlashCommand() {
                 event.hook.editMessage(content = "Created toolpost from <$link>").queue()
                 event.messageChannel.send(files = listOf(video)).queue()
             } else {
-                event.hook.editMessage(content = "Failed to fetch song from link nanora...").queue()
+                event.hook.editMessage(content = "Failed to fetch song from link, maybe I'm not old enough to what this video nanora~").queue()
             }
         } else {
             val ownerName: String = event.jda.retrieveApplicationInfo().complete().owner.name
+            POG.error("original.mp4 is missing from data/toolpost/")
             event.reply("An important file is missing from the hosts' computer, annoy the HECK out of $ownerName nanora!")
+                .setEphemeral(true)
                 .queue()
         }
     }
@@ -54,7 +56,7 @@ class ToolPost : SlashCommand() {
             File("$PATH/$trimmedAudio").delete()
             return output
         } else {
-            POG.warn("Audio file returned null from $link")
+            POG.error("Audio file returned null from $link")
             return null
         }
     }
