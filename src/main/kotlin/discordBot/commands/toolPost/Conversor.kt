@@ -1,41 +1,74 @@
 package discordBot.commands.toolPost
 
-import org.matkija.bot.utils.clearCRLF
 import java.io.File
 import java.time.Instant
 
 
-const val AUDIO_FORMAT = ".mp3"
 const val ORIGINAL_VIDEO = "original.mp4"
 
-//val FFMPEG_MERGE_COMMAND = listOf(
-//    "ffmpeg",
-//    "-y",
-//    "-i %s",
-//    "-i $ORIGINAL_VIDEO",
-//    "-c:v copy",
-//    "-c:a aac",
-//    "-shortest",
-//    OUTPUT_NAME
-//)
-const val FFMPEG_MERGE_COMMAND = "ffmpeg -y -i %s -i $ORIGINAL_VIDEO -c:v copy -c:a aac -shortest %s"
-const val FFMPEG_TRIM_SECONDS_COMMAND = "ffmpeg -y -i %s -ss %s -vcodec copy -acodec copy %s"
-const val YT_DLP_COMMAND = "yt-dlp -x --audio-format mp3 --print filename --no-simulate --no-playlist -o %(id)s REPLACE"
+val FFMPEG_BASE_COMMAND = listOf("ffmpeg", "-y", "-i")
+
+private fun makeMergeCommand(contentFileName: String, outputName: String): List<String> =
+    FFMPEG_BASE_COMMAND + listOf(
+        contentFileName,
+        "-i",
+        ORIGINAL_VIDEO,
+        "-c:v",
+        "copy",
+        "-c:a",
+        "aac",
+        "-map",
+        "1:v:0", //Maps the first video stream from the second input
+        "-map",
+        "0:a:0", //Maps the first audio stream from the first input
+        "-shortest",
+        outputName
+    )
+
+private fun makeTrimSecondsCommand(contentName: String, seconds: String, newContentName: String): List<String> =
+    FFMPEG_BASE_COMMAND + listOf(contentName, "-ss", seconds) + listOf(
+        "-vcodec",
+        "copy",
+        "-acodec",
+        "copy",
+        newContentName
+    )
+
+private fun makeYtDlpDownloadCommand(link: String): List<String> =
+    listOf(
+        "yt-dlp",
+        "--print",
+        "filename",
+        "--no-simulate",
+        "--no-playlist",
+        "-o",
+        "%(id)s.%(ext)s",
+        link
+    )
 
 const val PATH = "data/toolpost"
 val workingDir = File(PATH)
 
+private fun String.replaceInstantChars(): String = this
+    .replace(":", "")
+    .replace("-", "")
+    .replace("T", "-")
+private fun String.replaceLast(toReplace: String, newChar: String): String =
+    if (last() in toReplace)
+        dropLast(1) + newChar
+    else
+        this
+
 /**
- * Merges an audio file with video original.mp4 and outputs it in assets/
- * @param audioFileName The audio file name
- * @return the File object of the merged video
+ * Merges a file's audio with original.mp4's video and outputs it
+ * @param fileName
+ * @return the path to the merged video
  */
-fun mergeAudioWithVideo(audioFileName: String): File? {
+fun mergeContentWithVideo(fileName: String): File? {
     try {
-        val now = Instant.now().toString().replace(":", "").replace("-", "").replace("T", "-") + ".mp4"
-        val command = FFMPEG_MERGE_COMMAND.format(audioFileName, now)
-        val parts = command.split("\\s".toRegex())
-        val child = ProcessBuilder(*parts.toTypedArray())
+        val now = Instant.now().toString().replaceInstantChars() + ".mp4"
+        val command = makeMergeCommand(fileName, now)
+        val child = ProcessBuilder(command)
             .directory(workingDir)
             .redirectOutput(ProcessBuilder.Redirect.PIPE)
             .redirectError(ProcessBuilder.Redirect.PIPE)
@@ -51,14 +84,14 @@ fun mergeAudioWithVideo(audioFileName: String): File? {
 }
 
 /**
- * Downloads an audio file as .mp3 using yt-dlp and outputs it in a folder
+ * Downloads a file using yt-dlp and outputs it in a folder
  * @return File name with the extension
+ * @param link link to download the file from
  */
-fun downloadAudio(link: String): String? {
+fun downloadContent(link: String): String? {
     try {
-        val command = YT_DLP_COMMAND.replace("REPLACE", link) // lol
-        val parts = command.split("\\s".toRegex())
-        val child = ProcessBuilder(*parts.toTypedArray())
+        val command = makeYtDlpDownloadCommand(link)
+        val child = ProcessBuilder(command)
             .directory(workingDir)
             .redirectOutput(ProcessBuilder.Redirect.PIPE)
             .redirectError(ProcessBuilder.Redirect.PIPE)
@@ -66,32 +99,31 @@ fun downloadAudio(link: String): String? {
 
         child.waitFor()
 
-        val stdout = child.inputStream.bufferedReader().readText().clearCRLF()
+        val stdout = child.inputStream.bufferedReader()
+            .readText()
+            .replace("\r", "")
+            .replace("\n", ".")
+            .replaceLast(".", "")
 
-        return if (stdout.isEmpty()) {
-            null
-        } else {
-            stdout + AUDIO_FORMAT
-        }
+        return stdout.ifEmpty { null }
     } catch (e: Exception) {
         ToolPost.POG.error(e.toString())
         return null
     }
 }
 
-//todo: get audio length to stop command if length < 10 seconds
+//todo: get file length to do something that doesn't fuck the process
 /**
- * Trims seconds from the start of an audio using ffmpeg and outputs it in a folder, replacing the previous audio file
- * @param audio File name
+ * Trims seconds from the start of a file using ffmpeg and outputs it in a folder, replacing the previous content file
+ * @param fileName
  * @param seconds Seconds to trim from the start
  */
-fun trimAudio(audio: String, seconds: Double): String {
-    var trimmedAudioName = ""
+fun trimContent(fileName: String, seconds: Double): String {
+    var trimmedContentName = ""
     try {
-        val newAudioName = "trimmed-$audio".replace(".mp4", ".mp3")
-        val command = FFMPEG_TRIM_SECONDS_COMMAND.format(audio, seconds, newAudioName)
-        val parts = command.split("\\s".toRegex()) // lol
-        val child = ProcessBuilder(*parts.toTypedArray())
+        val newFileName = "trimmed-$fileName".replace(".mp4", ".mp3")
+        val command = makeTrimSecondsCommand(fileName, seconds.toString(), newFileName)
+        val child = ProcessBuilder(command)
             .directory(workingDir)
             .redirectOutput(ProcessBuilder.Redirect.PIPE)
             .redirectError(ProcessBuilder.Redirect.PIPE)
@@ -99,13 +131,13 @@ fun trimAudio(audio: String, seconds: Double): String {
 
         child.waitFor()
 
-        File("$PATH/$audio").delete()
+        File("$PATH/$fileName").delete()
 
-        trimmedAudioName = newAudioName
+        trimmedContentName = newFileName
     } catch (e: Exception) {
         ToolPost.POG.error(e.toString())
     }
-    return trimmedAudioName
+    return trimmedContentName
 }
 
 fun baseVideoExists(): Boolean = File(PATH, ORIGINAL_VIDEO).exists()

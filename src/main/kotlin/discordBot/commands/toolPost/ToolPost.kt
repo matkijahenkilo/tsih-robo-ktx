@@ -49,11 +49,11 @@ class ToolPost : SlashCommand() {
     }
 
     private fun createToolPost(link: String, timeToTrim: Double): File? {
-        val audioFile = downloadAudio(link)
-        if (audioFile != null) {
-            val trimmedAudio = trimAudio(audioFile, timeToTrim)
-            val output = mergeAudioWithVideo(trimmedAudio)
-            File("$PATH/$trimmedAudio").delete()
+        val content = downloadContent(link)
+        if (content != null) {
+            val trimmedContent = trimContent(content, timeToTrim)
+            val output = mergeContentWithVideo(trimmedContent)
+            File("$PATH/$trimmedContent").delete()
             return output
         } else {
             POG.error("Audio file returned null from $link")
