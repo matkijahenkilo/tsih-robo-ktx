@@ -302,7 +302,7 @@ class SauceSender(
                 author {
                     url = sourceLink
                     iconUrl = e.avatar
-                    name = String.format("%s (@%s)", e.nick, e.username)
+                    name = String.format("%s (@%s)", e.username, e.nick)
                 }
 
                 title = "   "
