@@ -46,9 +46,9 @@ class SauceSender(
 
         links.forEach { link ->
             jobList += async {
-                if (isTwitterLink(link) && !altTwitterFix.works) {
+                if (isTwitterLink(link) && !altTwitterFix.worksOrHasMedia) {
                     logger.info("Sending alternative fix for $link")
-                    sendAlternativeFix(link, altTwitterFix.content)
+                    sendAlternativeFix(link, altTwitterFix.errorMsg)
                 } else {
                     val payload = Payload()
                     val command: List<String>
@@ -172,14 +172,16 @@ class SauceSender(
 
     // empty embeds doesn't always mean that it is sensitive, for some twitter™️ reason (￣ー￣)
     private suspend fun isTwitterWorking(link: String): AltTwitterFix {
-        val child = spawnProcess(makeSensitiveCheckCommand(link))
+        val child = spawnProcess(makeMediaCheckCommand(link))
         val readChild = readProcess(child)
-
-        return if (readChild.stdout == "") {
+        // if -g returns a "No results for" then twitter works but no media was in the post
+        return if (readChild.stderr.clearCRLF().contains("No results for", true)) {
+            AltTwitterFix("", false)
+        } else if (readChild.stderr.clearCRLF().contains("AuthenticationError", true)) {
             logger.error("Twitter is fucking with me: ${readChild.stderr}")
             val ownerName: String = event.jda.retrieveApplicationInfo().complete().owner.name
             AltTwitterFix(
-                "-# ||No media detected. If I'm wrong, please annoy the FUCK out of $ownerName to fix me!!||",
+                "-# ||I got an authentication error, please annoy the FUCK out of $ownerName to fix me!!||",
                 false
             )
         } else {
@@ -201,8 +203,8 @@ class SauceSender(
     }
 
     data class AltTwitterFix(
-        val content: String,
-        val works: Boolean
+        val errorMsg: String,
+        val worksOrHasMedia: Boolean
     )
 
 
@@ -227,8 +229,8 @@ class SauceSender(
 
     private fun makeCommonCommand(link: String) = baseArgs + downloadArgs(link, 5)
 
-    private fun makeSensitiveCheckCommand(link: String): List<String> =
-        baseArgs + listOf("--filter", "print(sensitive)", "-s", link)
+    private fun makeMediaCheckCommand(link: String): List<String> =
+        baseArgs + listOf("-g", "-s", link)
 
     private fun isTwitterLink(s: String): Boolean = "https://twitter.com" in s || "https://x.com" in s
     private fun isMisskeyLink(s: String): Boolean = "https://misskey.io" in s
