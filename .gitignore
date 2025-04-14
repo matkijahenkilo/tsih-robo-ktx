@@ -46,8 +46,7 @@ src/main/resources/META-INF/
 tsih-robo.jar
 
 # don't ask me
-src/test/**
-!src/test/kotlin/sql
+src/test/kotlin/GalleryDl.kt
 
 # fuck off inc.
 data/*

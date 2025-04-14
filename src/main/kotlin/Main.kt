@@ -4,15 +4,18 @@ import dev.lavalink.youtube.YoutubeAudioSourceManager
 import dev.minn.jda.ktx.jdabuilder.default
 import dev.minn.jda.ktx.jdabuilder.intents
 import discordBot.commands.toolPost.toolPosterInit
+import discordBot.timedEvents.tsihOClockTimer.TsihOClockTimer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import net.dv8tion.jda.api.requests.GatewayIntent
 import org.matkija.bot.discordBot.commands.avatar.avatarInit
 import org.matkija.bot.discordBot.commands.music.musicInit
 import org.matkija.bot.discordBot.commands.question.questionInit
+import org.matkija.bot.discordBot.commands.tsihOClock.tsihOClockInit
 import org.matkija.bot.discordBot.passiveCommands.randomReactInit
 import org.matkija.bot.discordBot.passiveCommands.sauceSender.sauceSenderInit
 import org.matkija.bot.discordBot.timedEvents.randomStatus.RandomStatus
+import org.matkija.bot.sql.DatabaseHandler
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.File
@@ -59,7 +62,7 @@ fun main(args: Array<String>) {
     }
     jda.awaitReady()
     //val ownerId = jda.retrieveApplicationInfo().complete().owner.id
-    // val dataBaseHandler = DatabaseHandler(bot.name)
+    val dataBaseHandler = DatabaseHandler(bot.name)
 
     /*
     load passive commands listeners
@@ -75,6 +78,7 @@ fun main(args: Array<String>) {
         questionInit(jda),
         avatarInit(jda),
         toolPosterInit(jda),
+        tsihOClockInit(jda, dataBaseHandler)
     )
     val updateCommands = jda.updateCommands()
     commandList.forEach {
@@ -85,5 +89,6 @@ fun main(args: Array<String>) {
     /*
     timed functions
      */
-    RandomStatus(jda).startScheduler(TimeUnit.MINUTES, 0, 1)
+    RandomStatus(jda).startScheduler(TimeUnit.MINUTES, 0, 5)
+    TsihOClockTimer(jda, dataBaseHandler).startScheduler(TimeUnit.HOURS, 0, 1)
 }

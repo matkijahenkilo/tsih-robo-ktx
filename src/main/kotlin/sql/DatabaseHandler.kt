@@ -9,7 +9,7 @@ class DatabaseHandler(dbName: String) {
     private val connection: Connection
 
     init {
-        val url = "jdbc:sqlite:%s".format(dbName)
+        val url = "jdbc:sqlite:%s.db".format(dbName)
         connection = DriverManager.getConnection(url)
         val statements = listOf(
             TOCAttributes.CREATE_TABLE_SCRIPT
@@ -23,7 +23,7 @@ class DatabaseHandler(dbName: String) {
         st.close()
     }
 
-    fun getReturn(statement: String): ResultSet? {
+    fun getResult(statement: String): ResultSet? {
         val st = connection.createStatement()
         return st.executeQuery(statement)
     }
