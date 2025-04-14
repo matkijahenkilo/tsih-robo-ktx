@@ -45,8 +45,10 @@ out/
 src/main/resources/META-INF/
 tsih-robo.jar
 
-# ...
+# don't ask me
 src/test/**
+!src/test/kotlin/sql
 
 # fuck off inc.
 data/*
+*.db
