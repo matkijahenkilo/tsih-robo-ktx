@@ -4,64 +4,59 @@ import com.sedmelluq.discord.lavaplayer.player.AudioPlayer
 import com.sedmelluq.discord.lavaplayer.player.event.AudioEventAdapter
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason
-import net.dv8tion.jda.api.entities.Member
-import net.dv8tion.jda.api.entities.User
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel
-import org.matkija.bot.discordBot.commands.music.AudioContent
 import org.matkija.bot.discordBot.commands.music.MusicInfoEmbed
-import org.matkija.bot.discordBot.commands.music.PlaylistJsonHandler
+import org.matkija.bot.discordBot.commands.music.RequestedTrackInfo
+import org.matkija.bot.discordBot.commands.music.TrackListEventInterface
+import org.matkija.bot.sql.jpa.PersistenceUtil
 import java.util.concurrent.BlockingQueue
 import java.util.concurrent.LinkedBlockingQueue
 
 
 class TrackScheduler(
-    private val player: AudioPlayer,
-    private val channel: MessageChannel
-) : AudioEventAdapter() {
+    private val player: AudioPlayer, private val channel: MessageChannel
+) : AudioEventAdapter(), TrackListEventInterface {
 
     // priority over currentQueue
-    val priorityQueue: BlockingQueue<AudioContent> = LinkedBlockingQueue()
+    val priorityQueue: BlockingQueue<RequestedTrackInfo> = LinkedBlockingQueue()
 
     // this is what plays on the bot, can be shuffled and unshuffled
-    private var currentQueue: BlockingQueue<AudioContent> = LinkedBlockingQueue()
+    private var currentQueue: BlockingQueue<RequestedTrackInfo> = LinkedBlockingQueue()
 
     // used to keep track of the entire track and to be saved to disk
-    val originalQueue: BlockingQueue<AudioContent> = LinkedBlockingQueue()
+    val originalQueue: BlockingQueue<RequestedTrackInfo> = LinkedBlockingQueue()
 
     // used to repeat the audio without deleting it from another queue with .poll()
-    private var lastContent: AudioContent? = null
+    private var lastContent: RequestedTrackInfo? = null
 
-    private val playlistJsonHandler: PlaylistJsonHandler = PlaylistJsonHandler("data/playlist.json")
     var isShuffled: Boolean = false
     var isRepeating: Boolean = false
 
     /**
      * Add the next track to queue or play right away if nothing is in the current queue.
      *
-     * @param member The user to show who requested it.
-     * @param track The track to play or add to queue.
-     * @param oldRequester The previous requester from the playlist.json, if available.
+     * @param requestedTracksInfo List of information containing AudioTracks and the User who requested it
      * @param isPriority If the track should be played next regardless of the queue size
+     * @param shouldSaveToDb Decides if the given list should also be saved to the database
      */
-    fun queue(member: Member, track: AudioTrack, oldRequester: User?, isPriority: Boolean) {
-        val content = if (oldRequester == null) {
-            AudioContent(track, member.user)
-        } else {
-            AudioContent(track, oldRequester)
+    fun queueSongs(requestedTracksInfo: List<RequestedTrackInfo>, isPriority: Boolean, shouldSaveToDb: Boolean) {
+        requestedTracksInfo.forEach { entry ->
+            if (entry.track != null) {
+                if (!player.startTrack(entry.track, true)) {
+                    if (isPriority) {
+                        priorityQueue.offer(entry)
+                    } else {
+                        currentQueue.offer(entry)
+                        originalQueue.offer(entry)
+                    }
+                } else {
+                    lastContent = entry
+                    MusicInfoEmbed.postEmbed(entry, channel, this, player)
+                }
+            }
         }
 
-        if (!player.startTrack(content.track, true)) {
-            if (isPriority) {
-                priorityQueue.offer(content)
-            } else {
-                currentQueue.offer(content)
-                originalQueue.offer(content)
-            }
-            savePlaylist()
-        } else {
-            lastContent = AudioContent(content.track.makeClone(), content.requester)
-            MusicInfoEmbed.postEmbed(content, channel, this, player)
-        }
+        if (shouldSaveToDb) saveTracks(requestedTracksInfo)
     }
 
     /**
@@ -71,25 +66,21 @@ class TrackScheduler(
      */
     fun nextTrack(skip: Boolean) {
         if (isRepeating && !skip) {
-            lastContent = AudioContent(lastContent!!.track.makeClone(), lastContent!!.requester)
+            lastContent =
+                RequestedTrackInfo(lastContent!!.track!!.makeClone(), lastContent!!.requester, lastContent!!.guild)
             player.startTrack(lastContent!!.track, true)
         } else {
             val content = priorityQueue.poll() ?: currentQueue.poll()
 
-            lastContent = AudioContent(content.track.makeClone(), content.requester)
-            player.startTrack(content.track, false)
-            originalQueue.remove(content)
-            MusicInfoEmbed.postEmbed(content!!, channel, this, player)
-
-            savePlaylist()
+            if (content == null) { // if there's nothing left to play in track list
+                player.startTrack(null, false)
+            } else {
+                lastContent = RequestedTrackInfo(content.track!!.makeClone(), content.requester, content.guild)
+                player.startTrack(content.track, false)
+                originalQueue.remove(content)
+                MusicInfoEmbed.postEmbed(content, channel, this, player)
+            }
         }
-    }
-
-    private fun savePlaylist() {
-        val list = (priorityQueue + originalQueue).map {
-            PlaylistJsonHandler.SongEntry(it.track.info.uri, it.requester.id.toLong())
-        }
-        playlistJsonHandler.setPlaylist(list)
     }
 
     /**
@@ -101,8 +92,7 @@ class TrackScheduler(
      * if `isShuffled` is currently `true`, the playlist will be shuffled
      */
     fun shuffle(toggleShuffle: Boolean) {
-        if (toggleShuffle)
-            isShuffled = !this.isShuffled
+        if (toggleShuffle) isShuffled = !this.isShuffled
 
         currentQueue = if (isShuffled) {
             LinkedBlockingQueue(currentQueue.shuffled())
@@ -117,10 +107,18 @@ class TrackScheduler(
 
     override fun onTrackEnd(player: AudioPlayer?, track: AudioTrack?, endReason: AudioTrackEndReason) {
         // Only start the next track if the end reason is suitable for it (FINISHED or LOAD_FAILED)
-        if (endReason.mayStartNext) {
+        if (endReason.mayStartNext)
             nextTrack(false)
-        }
+
+        // this can delete duplicates, what to do?
+        if (track != null) deleteTrack(track.info.uri, lastContent!!.guild!!.idLong)
     }
 
-    override fun onTrackStart(player: AudioPlayer?, track: AudioTrack?) {}
+    override fun saveTracks(requestedTrackInfos: List<RequestedTrackInfo>) {
+        PersistenceUtil.savePlaylistEntries(requestedTrackInfos)
+    }
+
+    override fun deleteTrack(link: String, guildId: Long) {
+        PersistenceUtil.deletePlaylistByStringAndId(link, guildId)
+    }
 }

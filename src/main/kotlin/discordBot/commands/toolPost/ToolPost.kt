@@ -37,7 +37,8 @@ class ToolPost : SlashCommand() {
                 event.hook.editMessage(content = "Created toolpost from <$link>").queue()
                 event.messageChannel.send(files = listOf(video)).queue()
             } else {
-                event.hook.editMessage(content = "Failed to fetch song from link, maybe I'm not old enough to what this video nanora~").queue()
+                event.hook.editMessage(content = "Failed to fetch song from link, maybe I'm not old enough to what this video nanora~")
+                    .queue()
             }
         } else {
             val ownerName: String = event.jda.retrieveApplicationInfo().complete().owner.name

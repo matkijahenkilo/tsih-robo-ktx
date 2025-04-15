@@ -50,7 +50,7 @@ object MusicInfoEmbed {
     )
 
     fun postEmbed(
-        content: AudioContent,
+        content: RequestedTrackInfo,
         channel: MessageChannel,
         trackScheduler: TrackScheduler,
         player: AudioPlayer
@@ -58,8 +58,8 @@ object MusicInfoEmbed {
         components = loadComponents(),
         embeds = listOf(
             loadPlayingEmbed(
-                content.requester,
-                content.track.info,
+                content.requester!!,
+                content.track!!.info,
                 trackScheduler,
                 player.isPaused
             )

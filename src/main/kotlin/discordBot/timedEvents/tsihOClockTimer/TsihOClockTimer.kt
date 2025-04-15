@@ -9,15 +9,14 @@ import org.matkija.bot.discordBot.abstracts.TimedEvent
 import org.matkija.bot.discordBot.timedEvents.tsihOClockTimer.randomName
 import org.matkija.bot.discordBot.timedEvents.tsihOClockTimer.randomTitle
 import org.matkija.bot.discordBot.timedEvents.tsihOClockTimer.randomValue
-import org.matkija.bot.sql.DatabaseHandler
-import org.matkija.bot.sql.TOCAttributes
+import org.matkija.bot.sql.jpa.PersistenceUtil
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.time.Instant
 import java.time.LocalTime
 
-class TsihOClockTimer(private val jda: JDA, private val db: DatabaseHandler) : TimedEvent() {
+class TsihOClockTimer(private val jda: JDA) : TimedEvent() {
 
     private val pog: Logger = LoggerFactory.getLogger(TsihOClockTimer::class.java)
 
@@ -31,12 +30,8 @@ class TsihOClockTimer(private val jda: JDA, private val db: DatabaseHandler) : T
     }
 
     override val task: Runnable = Runnable {
-        val resultSet =
-            db.getResult("SELECT * FROM ${TOCAttributes.TABLE_NAME}") ?: return@Runnable
 
-        val channelList = mutableListOf<Long>()
-        while (resultSet.next())
-            channelList.add(resultSet.getLong(1))
+        val channelList = PersistenceUtil.getAllTsihOClockRooms()
 
         if (channelList.isNotEmpty()) {
             // TODO: run this code exactly at 18:00
@@ -47,9 +42,9 @@ class TsihOClockTimer(private val jda: JDA, private val db: DatabaseHandler) : T
                     val files = File("data/images/tsihoclock").listFiles()!!
                     val jobList = mutableListOf<Job>()
                     pog.info("Sending images to ${channelList.size} channels")
-                    channelList.forEach { channelId ->
+                    channelList.forEach { obj ->
                         jobList += async {
-                            val channel = jda.getTextChannelById(channelId)
+                            val channel = jda.getTextChannelById(obj.roomId)
                             val file = files.random()
                             val fileUpload = listOf(FileUpload.fromData(file))
                             var fileUploadWithFooterImage = fileUpload
@@ -77,7 +72,7 @@ class TsihOClockTimer(private val jda: JDA, private val db: DatabaseHandler) : T
                                     )
                                 ).queue()
                             } else {
-                                pog.warn("Id $channelId doesn't exist")
+                                pog.warn("Id $obj doesn't exist")
                             }
                         }
                     }

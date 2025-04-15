@@ -53,6 +53,7 @@ private fun String.replaceInstantChars(): String = this
     .replace(":", "")
     .replace("-", "")
     .replace("T", "-")
+
 private fun String.replaceLast(toReplace: String, newChar: String): String =
     if (last() in toReplace)
         dropLast(1) + newChar

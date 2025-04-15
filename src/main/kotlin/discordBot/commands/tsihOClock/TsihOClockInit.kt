@@ -7,17 +7,13 @@ import net.dv8tion.jda.api.JDA
 import net.dv8tion.jda.api.interactions.commands.OptionType
 import net.dv8tion.jda.api.interactions.commands.build.OptionData
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData
-import org.matkija.bot.sql.DatabaseHandler
-import org.matkija.bot.sql.TOCAttributes
 
-fun tsihOClockInit(jda: JDA, db: DatabaseHandler): SlashCommandData {
-
-    db.runUpdate(TOCAttributes.CREATE_TABLE_SCRIPT)
+fun tsihOClockInit(jda: JDA): SlashCommandData {
 
     jda.onCommand(TOCSlashCommands.TSIH_O_CLOCK) { event ->
         if (event.guild == null)
             event.reply("This only work in servers nanora!").queue()
-        TsihOClock(db).tryExecute(event)
+        TsihOClock().tryExecute(event)
     }
 
     jda.onCommandAutocomplete(TOCSlashCommands.TSIH_O_CLOCK) { event ->

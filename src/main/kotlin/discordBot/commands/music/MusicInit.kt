@@ -3,6 +3,7 @@ package org.matkija.bot.discordBot.commands.music
 import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager
 import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers
 import dev.lavalink.youtube.clients.*
+import dev.lavalink.youtube.clients.Music
 import dev.minn.jda.ktx.events.onButton
 import dev.minn.jda.ktx.events.onCommand
 import net.dv8tion.jda.api.JDA
@@ -32,12 +33,8 @@ private fun isSameVC(event: ButtonInteractionEvent): Boolean =
 
 private const val notInVC = "You're not in a vc, nora!"
 
-/**
- * This function acts like a module
- * Load it somewhere, get their returning value and place inside `jda.updateCommands().addCommand()`
- * to queue it and this entire package will start working~
- */
 fun musicInit(jda: JDA): SlashCommandData {
+
     val musicManagers = mutableMapOf<Long, GuildMusicManager>()
     val playerManager = DefaultAudioPlayerManager()
     // creating new audio source manager from dev.lavalink.youtube.YoutubeAudioSourceManager
@@ -70,7 +67,7 @@ fun musicInit(jda: JDA): SlashCommandData {
         val refreshToken = oauthFile.readText()
         ytSourceManager.useOauth2(refreshToken, true)
     } else {
-        LOG.warn("HOIST UP THE SAILS LOOK OUT YOU LANDLUBBERS, It is recommended to use oauth in order to use services such as YouTube. Restar the program with -t argument")
+        LOG.warn("HOIST UP THE SAILS LOOK OUT YOU LANDLUBBERS, It is recommended to use oauth in order to use services such as YouTube. Restart the program with -t argument")
     }
 
     fun getGuildAudioPlayer(guild: Guild, channel: MessageChannel): GuildMusicManager {

@@ -8,24 +8,20 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack
 import dev.minn.jda.ktx.interactions.components.sendPaginator
 import dev.minn.jda.ktx.messages.EmbedBuilder
 import dev.minn.jda.ktx.messages.editMessage
-import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.entities.Member
 import net.dv8tion.jda.api.entities.MessageEmbed
-import net.dv8tion.jda.api.entities.User
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent
 import net.dv8tion.jda.api.managers.AudioManager
 import org.matkija.bot.LOG
 import org.matkija.bot.discordBot.abstracts.SlashCommand
 import org.matkija.bot.discordBot.commands.music.audio.GuildMusicManager
+import org.matkija.bot.sql.jpa.PersistenceUtil
 import kotlin.time.Duration.Companion.minutes
 
 class Music(
     private val musicManager: GuildMusicManager,
     private val playerManager: AudioPlayerManager
 ) : SlashCommand() {
-
-    //TODO: make it work in many servers at the same time
-    private val playlistJsonHandler = PlaylistJsonHandler("data/playlist.json")
 
     override fun execute(event: GenericCommandInteractionEvent) {
         event.deferReply().queue()
@@ -45,31 +41,35 @@ class Music(
         when (event.subcommandName) {
             MusicSlashCommands.MUSIC_PLAY -> {
                 if (option != null) {
-                    event.hook.editMessage(content = "Loading song(s)...")
-                        .queue()
-                    loadAndPlay(event, option, null)
-                    if (option.contains(YT_SEARCH)) {
-                        event.hook.editMessage(content = "Loaded the first song of result `$originalOption` nanora!")
-                            .queue()
-                    } else {
-                        event.hook.editMessage(content = "Loaded a [song or playlist](<${option}>) nanora!")
-                            .queue()
-                    }
+                    preSongLoad(event)
+
+                    val requestedTrackInfoList = getSongsDependingOfOption(event, option)
+
+                    play(
+                        event = event,
+                        entries = requestedTrackInfoList,
+                        isPriority = false,
+                        shouldSaveToDb = true
+                    )
+
+                    postSongLoad(event, option, originalOption)
                 }
             }
 
             MusicSlashCommands.MUSIC_PLAY_NEXT -> {
                 if (option != null) {
-                    event.hook.editMessage(content = "Loading song(s)...")
-                        .queue()
-                    loadAndPlay(event, option, null, true)
-                    if (option.contains(YT_SEARCH)) {
-                        event.hook.editMessage(content = "Loaded the first song of result `$originalOption` nanora!")
-                            .queue()
-                    } else {
-                        event.hook.editMessage(content = "Loaded a [song or playlist](<${option}>) nanora!")
-                            .queue()
-                    }
+                    preSongLoad(event)
+
+                    val requestedTrackInfoList = getSongsDependingOfOption(event, option)
+
+                    play(
+                        event = event,
+                        entries = requestedTrackInfoList,
+                        isPriority = true,
+                        shouldSaveToDb = true
+                    )
+
+                    postSongLoad(event, option, originalOption)
                 }
             }
 
@@ -81,23 +81,33 @@ class Music(
                     return
                 }
 
-                var loaded = false
-
                 event.hook.editMessage(content = "Resuming a saved playlist nora...")
                     .queue()
 
-                playlistJsonHandler.getPlaylist().forEach {
-                    val requester = event.jda.retrieveUserById(it.requester).complete()
-                    loadAndPlay(event, it.link, requester)
-                    loaded = true
-                }
-                if (!loaded) {
+                val guildPlaylist = PersistenceUtil.getPlaylistsById(event.guild!!.id)
+
+                if (guildPlaylist.isNotEmpty()) {
+                    val requestedTrackInfoList = guildPlaylist.map {
+                        RequestedTrackInfo(
+                            loadAudioTracks(event, listOf(it.link))[0], // saved songs will never be a playlist link
+                            event.jda.getUserById(it.requester),
+                            event.jda.getGuildById(it.guildId)
+                        )
+                    }
+
+                    play(
+                        event = event,
+                        entries = requestedTrackInfoList,
+                        isPriority = true,
+                        shouldSaveToDb = false
+                    )
+
+                    event.hook.editMessage(content = "Resumed the saved playlist nanora!")
+                        .queue()
+                } else {
                     event.hook.editMessage(
                         content = "There's no playlist saved nanora! Use `/${MusicSlashCommands.MUSIC} ${MusicSlashCommands.MUSIC_PLAY}` to start a new one nora~"
                     ).queue()
-                } else {
-                    event.hook.editMessage(content = "Resumed the saved playlist nanora!")
-                        .queue()
                 }
             }
 
@@ -107,10 +117,10 @@ class Music(
                 var content = mutableListOf<String>()
                 var index = 1
 
-                val totalTime = getTimestamp(queueContents.sumOf { it.track.info.length })
+                val totalTime = getTimestamp(queueContents.sumOf { it.track!!.info.length })
 
                 queueContents.forEach { audioContent ->
-                    val time = getTimestamp(audioContent.track.info.length)
+                    val time = getTimestamp(audioContent.track!!.info.length)
                     content.add(
                         String.format(
                             "%s. [%s](%s) (%s) by %s",
@@ -118,7 +128,7 @@ class Music(
                             audioContent.track.info.title,
                             audioContent.track.info.uri,
                             time,
-                            audioContent.requester.name
+                            audioContent.requester!!.name
                         )
                     )
                     if (content.size == ENTRY_LIMIT || index == queueContents.size) {
@@ -147,22 +157,17 @@ class Music(
         }
     }
 
-    private fun loadAndPlay(
+    private fun loadAudioTrackFromSearch(
         event: GenericCommandInteractionEvent,
-        trackUrl: String,
-        oldRequester: User?,
-        isPriority: Boolean = false
-    ) {
+        search: String
+    ): List<AudioTrack> {
+
         val channel = event.messageChannel
-        val guild = event.guild!!
+        val trackList = mutableListOf<AudioTrack>()
 
-        playerManager.loadItemOrdered(musicManager, trackUrl, object : AudioLoadResultHandler {
+        playerManager.loadItemSync(search, object : AudioLoadResultHandler {
             override fun trackLoaded(track: AudioTrack) {
-                play(guild, musicManager, event.member!!, track, oldRequester, isPriority)
-
-                if (musicManager.scheduler.isShuffled) {
-                    musicManager.scheduler.shuffle(false)
-                }
+                trackList.add(track)
             }
 
             override fun playlistLoaded(playlist: AudioPlaylist) {
@@ -173,20 +178,16 @@ class Music(
                 }
 
                 if (playlist.name.contains(SEARCH_INDICATOR)) {
-                    play(guild, musicManager, event.member!!, firstTrack, oldRequester, isPriority)
+                    trackList.add(firstTrack)
                 } else {
                     playlist.tracks.forEach { track ->
-                        play(guild, musicManager, event.member!!, track, oldRequester, isPriority)
+                        trackList.add(track)
                     }
-                }
-
-                if (musicManager.scheduler.isShuffled) {
-                    musicManager.scheduler.shuffle(false)
                 }
             }
 
             override fun noMatches() {
-                channel.sendMessage("Nothing found in $trackUrl nora.").queue()
+                channel.sendMessage("Nothing found in $search nora.").queue()
             }
 
             override fun loadFailed(exception: FriendlyException) {
@@ -195,21 +196,69 @@ class Music(
                     .queue()
             }
         })
+
+        if (musicManager.scheduler.isShuffled) musicManager.scheduler.shuffle(false)
+
+        return trackList
+    }
+
+    private fun loadAudioTracks(
+        event: GenericCommandInteractionEvent,
+        links: List<String>
+    ): List<AudioTrack> {
+        val channel = event.messageChannel
+        val trackList = mutableListOf<AudioTrack>()
+
+        links.forEach { trackUrl ->
+            playerManager.loadItemSync(trackUrl, object : AudioLoadResultHandler {
+                override fun trackLoaded(track: AudioTrack) {
+                    trackList.add(track)
+                }
+
+                override fun playlistLoaded(playlist: AudioPlaylist) {
+                    var firstTrack = playlist.selectedTrack
+
+                    if (firstTrack == null) {
+                        firstTrack = playlist.tracks[0]
+                    }
+
+                    if (playlist.name.contains(SEARCH_INDICATOR)) {
+                        trackList.add(firstTrack)
+                    } else {
+                        playlist.tracks.forEach { track ->
+                            trackList.add(track)
+                        }
+                    }
+                }
+
+                override fun noMatches() {
+                    channel.sendMessage("Nothing found in $trackUrl nora.").queue()
+                }
+
+                override fun loadFailed(exception: FriendlyException) {
+                    LOG.error(exception.stackTraceToString())
+                    channel.sendMessage("I couldn't play anything nora!\nreason: ${exception.message}")
+                        .queue()
+                }
+            })
+        }
+
+        if (musicManager.scheduler.isShuffled) musicManager.scheduler.shuffle(false)
+
+        return trackList
     }
 
     /**
      * Plays or queue an AudioTrack
      */
     private fun play(
-        guild: Guild,
-        musicManager: GuildMusicManager,
-        member: Member,
-        track: AudioTrack,
-        oldRequester: User?,
-        isPriority: Boolean
+        event: GenericCommandInteractionEvent,
+        entries: List<RequestedTrackInfo>,
+        isPriority: Boolean,
+        shouldSaveToDb: Boolean,
     ) {
-        connectToMemberVC(guild.audioManager, member)
-        musicManager.scheduler.queue(member, track, oldRequester, isPriority)
+        connectToMemberVC(event.guild!!.audioManager, event.member!!)
+        musicManager.scheduler.queueSongs(entries, isPriority, shouldSaveToDb)
     }
 
     private fun connectToMemberVC(audioManager: AudioManager, member: Member) {
@@ -217,6 +266,48 @@ class Music(
             audioManager.openAudioConnection(member.voiceState!!.channel)
         }
     }
+
+    private fun preSongLoad(event: GenericCommandInteractionEvent) {
+        event.hook.editMessage(content = "Loading song(s)...")
+            .queue()
+
+        // clear saved playlist since users can forget about it
+        // this avoids the database from getting huge uwu
+        if (musicManager.player.playingTrack == null)
+            PersistenceUtil.deletePlaylistById(event.guild!!.idLong)
+    }
+
+    private fun postSongLoad(event: GenericCommandInteractionEvent, option: String, originalOption: String?) {
+        if (option.contains(YT_SEARCH)) {
+            event.hook.editMessage(content = "Loaded the first song of result `$originalOption` nanora!")
+                .queue()
+        } else {
+            event.hook.editMessage(content = "Loaded a [song or playlist](<${option}>) nanora!")
+                .queue()
+        }
+    }
+
+    private fun getSongsDependingOfOption(
+        event: GenericCommandInteractionEvent,
+        option: String
+    ): List<RequestedTrackInfo> =
+        if (option.contains(YT_SEARCH))
+            loadAudioTrackFromSearch(event, option).map {
+                RequestedTrackInfo(
+                    it,
+                    event.member!!.user,
+                    event.guild!!
+                )
+            }
+        else {
+            loadAudioTracks(event, option.split(" ")).map {
+                RequestedTrackInfo(
+                    it,
+                    event.member!!.user,
+                    event.guild!!
+                )
+            }
+        }
 
     companion object {
         private const val SEARCH_INDICATOR = "Search results for:"
