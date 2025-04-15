@@ -4,7 +4,6 @@ import com.sedmelluq.discord.lavaplayer.player.AudioPlayer
 import com.sedmelluq.discord.lavaplayer.player.event.AudioEventAdapter
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason
-import dev.minn.jda.ktx.messages.send
 import net.dv8tion.jda.api.entities.Member
 import net.dv8tion.jda.api.entities.User
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel
@@ -61,7 +60,7 @@ class TrackScheduler(
             savePlaylist()
         } else {
             lastContent = AudioContent(content.track.makeClone(), content.requester)
-            postEmbed(content)
+            MusicInfoEmbed.postEmbed(content, channel, this, player)
         }
     }
 
@@ -80,16 +79,11 @@ class TrackScheduler(
             lastContent = AudioContent(content.track.makeClone(), content.requester)
             player.startTrack(content.track, false)
             originalQueue.remove(content)
-            postEmbed(content!!)
+            MusicInfoEmbed.postEmbed(content!!, channel, this, player)
 
             savePlaylist()
         }
     }
-
-    private fun postEmbed(content: AudioContent) = channel.send(
-        components = MusicInfoEmbed.loadComponents(),
-        embeds = listOf(MusicInfoEmbed.loadPlayingEmbed(content.requester, content.track.info, this, player.isPaused))
-    ).queue()
 
     private fun savePlaylist() {
         val list = (priorityQueue + originalQueue).map {

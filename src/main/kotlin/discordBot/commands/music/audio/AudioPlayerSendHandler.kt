@@ -12,7 +12,6 @@ import java.nio.ByteBuffer
  * provide20MsAudio().
  *
  * @param audioPlayer Audio player to wrap.
- *
  */
 class AudioPlayerSendHandler(private var audioPlayer: AudioPlayer) : AudioSendHandler {
 

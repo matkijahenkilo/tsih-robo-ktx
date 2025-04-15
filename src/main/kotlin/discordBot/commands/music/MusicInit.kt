@@ -2,15 +2,7 @@ package org.matkija.bot.discordBot.commands.music
 
 import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager
 import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers
-import dev.lavalink.youtube.clients.Android
-import dev.lavalink.youtube.clients.AndroidMusic
-import dev.lavalink.youtube.clients.AndroidVr
-import dev.lavalink.youtube.clients.Ios
-import dev.lavalink.youtube.clients.MWeb
-import dev.lavalink.youtube.clients.Tv
-import dev.lavalink.youtube.clients.TvHtml5Embedded
-import dev.lavalink.youtube.clients.Web
-import dev.lavalink.youtube.clients.WebEmbedded
+import dev.lavalink.youtube.clients.*
 import dev.minn.jda.ktx.events.onButton
 import dev.minn.jda.ktx.events.onCommand
 import net.dv8tion.jda.api.JDA
@@ -49,9 +41,10 @@ fun musicInit(jda: JDA): SlashCommandData {
     val musicManagers = mutableMapOf<Long, GuildMusicManager>()
     val playerManager = DefaultAudioPlayerManager()
     // creating new audio source manager from dev.lavalink.youtube.YoutubeAudioSourceManager
-    val ytSourceManager = dev.lavalink.youtube.YoutubeAudioSourceManager(true,
+    val ytSourceManager = dev.lavalink.youtube.YoutubeAudioSourceManager(
+        true,
         Web(),
-        dev.lavalink.youtube.clients.Music(),
+        Music(),
         MWeb(),
         WebEmbedded(),
         AndroidMusic(),
@@ -94,7 +87,7 @@ fun musicInit(jda: JDA): SlashCommandData {
         return musicManager
     }
 
-    jda.onCommand(MusicCommands.MUSIC) { event ->
+    jda.onCommand(MusicSlashCommands.MUSIC) { event ->
         if (!event.isFromGuild) {
             event.reply("You're not even in a server nanora!").queue()
             return@onCommand
@@ -108,7 +101,7 @@ fun musicInit(jda: JDA): SlashCommandData {
         }
     }
 
-    jda.onButton(MusicCommands.STOP) { event ->
+    jda.onButton(MusicSlashCommands.STOP) { event ->
         if (!isSameVC(event)) {
             event.reply(notInVC).setEphemeral(true).queue()
             return@onButton
@@ -123,7 +116,7 @@ fun musicInit(jda: JDA): SlashCommandData {
         event.reply(event.user.name + " told me to stop, nora~").queue()
     }
 
-    jda.onButton(MusicCommands.PLAY) { event ->
+    jda.onButton(MusicSlashCommands.PLAY) { event ->
         if (!isSameVC(event)) {
             event.reply(notInVC).setEphemeral(true).queue()
             return@onButton
@@ -134,7 +127,7 @@ fun musicInit(jda: JDA): SlashCommandData {
         event.editMessageEmbeds(listOf(MusicInfoEmbed.getUpdatedEmbed(event, guildAudioPlayer))).queue()
     }
 
-    jda.onButton(MusicCommands.SKIP) { event ->
+    jda.onButton(MusicSlashCommands.SKIP) { event ->
         if (!isSameVC(event)) {
             event.reply(notInVC).setEphemeral(true).queue()
             return@onButton
@@ -145,7 +138,7 @@ fun musicInit(jda: JDA): SlashCommandData {
         guildAudioPlayer.scheduler.nextTrack(true)
     }
 
-    jda.onButton(MusicCommands.REPEAT) { event ->
+    jda.onButton(MusicSlashCommands.REPEAT) { event ->
         if (!isSameVC(event)) {
             event.reply(notInVC).setEphemeral(true).queue()
             return@onButton
@@ -156,7 +149,7 @@ fun musicInit(jda: JDA): SlashCommandData {
         event.editMessageEmbeds(listOf(MusicInfoEmbed.getUpdatedEmbed(event, guildAudioPlayer))).queue()
     }
 
-    jda.onButton(MusicCommands.SHUFFLE) { event ->
+    jda.onButton(MusicSlashCommands.SHUFFLE) { event ->
         if (!isSameVC(event)) {
             event.reply(notInVC).setEphemeral(true).queue()
             return@onButton
@@ -167,5 +160,5 @@ fun musicInit(jda: JDA): SlashCommandData {
         event.editMessageEmbeds(listOf(MusicInfoEmbed.getUpdatedEmbed(event, guildAudioPlayer))).queue()
     }
 
-    return MusicCommands.getCommands()
+    return MusicSlashCommands.getCommands()
 }

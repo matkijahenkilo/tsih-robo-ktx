@@ -6,12 +6,11 @@ import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel
 
 /**
  * Holder for the player, a track scheduler and a channel to send messages for one guild.
- */
-class GuildMusicManager
-/**
+ *
  * Creates a player and a track scheduler.
  * @param manager Audio player manager to use for creating the player.
- */(manager: AudioPlayerManager, channel: MessageChannel) {
+ */
+class GuildMusicManager(manager: AudioPlayerManager, channel: MessageChannel) {
     /**
      * Audio player for the guild.
      */

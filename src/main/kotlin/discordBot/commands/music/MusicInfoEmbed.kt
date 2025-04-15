@@ -1,5 +1,6 @@
 package org.matkija.bot.discordBot.commands.music
 
+import com.sedmelluq.discord.lavaplayer.player.AudioPlayer
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackInfo
 import dev.minn.jda.ktx.interactions.components.danger
 import dev.minn.jda.ktx.interactions.components.primary
@@ -7,8 +8,10 @@ import dev.minn.jda.ktx.interactions.components.row
 import dev.minn.jda.ktx.messages.EmbedBuilder
 import dev.minn.jda.ktx.messages.InlineEmbed
 import dev.minn.jda.ktx.messages.into
+import dev.minn.jda.ktx.messages.send
 import net.dv8tion.jda.api.entities.MessageEmbed
 import net.dv8tion.jda.api.entities.User
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel
 import net.dv8tion.jda.api.entities.emoji.Emoji
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
 import net.dv8tion.jda.api.interactions.components.LayoutComponent
@@ -37,7 +40,7 @@ object MusicInfoEmbed {
         "%s asked for this shit",
         "%s asked for this crap",
         "%s asked for this noise",
-        "%s have a terrible taste in music",
+        "%s has a terrible taste in music",
         "%s has a good taste in music",
         "what is this shit, %s?",
         "asked by %s",
@@ -46,16 +49,38 @@ object MusicInfoEmbed {
         "%s, nanako has a better taste than you",
     )
 
-    fun loadComponents(): List<LayoutComponent> {
-        val stop = danger(MusicCommands.STOP, emoji = Emoji.fromUnicode("🛑"))
-        val pauseOrStart = primary(MusicCommands.PLAY, emoji = Emoji.fromUnicode("⏯"))
-        val skip = primary(MusicCommands.SKIP, emoji = Emoji.fromUnicode("⏭"))
-        val repeat = primary(MusicCommands.REPEAT, emoji = Emoji.fromUnicode("🔂"))
-        val shuffle = primary(MusicCommands.SHUFFLE, emoji = Emoji.fromUnicode("🔀"))
+    fun postEmbed(
+        content: AudioContent,
+        channel: MessageChannel,
+        trackScheduler: TrackScheduler,
+        player: AudioPlayer
+    ) = channel.send(
+        components = loadComponents(),
+        embeds = listOf(
+            loadPlayingEmbed(
+                content.requester,
+                content.track.info,
+                trackScheduler,
+                player.isPaused
+            )
+        )
+    ).queue()
+
+    private fun loadComponents(): List<LayoutComponent> {
+        val stop = danger(MusicSlashCommands.STOP, emoji = Emoji.fromUnicode("🛑"))
+        val pauseOrStart = primary(MusicSlashCommands.PLAY, emoji = Emoji.fromUnicode("⏯"))
+        val skip = primary(MusicSlashCommands.SKIP, emoji = Emoji.fromUnicode("⏭"))
+        val repeat = primary(MusicSlashCommands.REPEAT, emoji = Emoji.fromUnicode("🔂"))
+        val shuffle = primary(MusicSlashCommands.SHUFFLE, emoji = Emoji.fromUnicode("🔀"))
         return row(stop, pauseOrStart, skip, repeat, shuffle).into()
     }
 
-    fun loadPlayingEmbed(user: User, info: AudioTrackInfo, scheduler: TrackScheduler, isPaused: Boolean): MessageEmbed {
+    private fun loadPlayingEmbed(
+        user: User,
+        info: AudioTrackInfo,
+        scheduler: TrackScheduler,
+        isPaused: Boolean
+    ): MessageEmbed {
         var embed = EmbedBuilder {
             thumbnail = info.artworkUrl
             title = info.title + "\n(${getTimestamp(info.length)})"

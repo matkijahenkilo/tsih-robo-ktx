@@ -8,7 +8,7 @@ import net.dv8tion.jda.api.interactions.commands.build.OptionData
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData
 
 
-object MusicCommands {
+object MusicSlashCommands {
 
     const val MUSIC = "music"
     const val MUSIC_PLAY = "play"

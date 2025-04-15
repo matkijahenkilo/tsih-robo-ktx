@@ -30,9 +30,9 @@ class Music(
     override fun execute(event: GenericCommandInteractionEvent) {
         event.deferReply().queue()
 
-        var option = event.getOption(MusicCommands.MUSIC_OPTION_LINK)?.asString
+        var option = event.getOption(MusicSlashCommands.MUSIC_OPTION_LINK)?.asString
         val originalOption = option
-        val website = event.getOption(MusicCommands.MUSIC_OPTION_SEARCH)?.asString
+        val website = event.getOption(MusicSlashCommands.MUSIC_OPTION_SEARCH)?.asString
 
         if (option != null) {
             if (website != null) {
@@ -43,7 +43,7 @@ class Music(
         }
 
         when (event.subcommandName) {
-            MusicCommands.MUSIC_PLAY -> {
+            MusicSlashCommands.MUSIC_PLAY -> {
                 if (option != null) {
                     event.hook.editMessage(content = "Loading song(s)...")
                         .queue()
@@ -58,7 +58,7 @@ class Music(
                 }
             }
 
-            MusicCommands.MUSIC_PLAY_NEXT -> {
+            MusicSlashCommands.MUSIC_PLAY_NEXT -> {
                 if (option != null) {
                     event.hook.editMessage(content = "Loading song(s)...")
                         .queue()
@@ -73,7 +73,7 @@ class Music(
                 }
             }
 
-            MusicCommands.MUSIC_RESUME_QUEUE -> {
+            MusicSlashCommands.MUSIC_RESUME_QUEUE -> {
                 if (musicManager.player.playingTrack != null) {
                     event.hook.editMessage(
                         content = "A playlist is already being played nanora."
@@ -93,7 +93,7 @@ class Music(
                 }
                 if (!loaded) {
                     event.hook.editMessage(
-                        content = "There's no playlist saved nanora! Use `/${MusicCommands.MUSIC} ${MusicCommands.MUSIC_PLAY}` to start a new one nora~"
+                        content = "There's no playlist saved nanora! Use `/${MusicSlashCommands.MUSIC} ${MusicSlashCommands.MUSIC_PLAY}` to start a new one nora~"
                     ).queue()
                 } else {
                     event.hook.editMessage(content = "Resumed the saved playlist nanora!")
@@ -101,7 +101,7 @@ class Music(
                 }
             }
 
-            MusicCommands.MUSIC_SHOW_QUEUE -> {
+            MusicSlashCommands.MUSIC_SHOW_QUEUE -> {
                 val queueContents = musicManager.scheduler.priorityQueue + musicManager.scheduler.originalQueue
                 val pages = mutableSetOf<MessageEmbed>()
                 var content = mutableListOf<String>()
