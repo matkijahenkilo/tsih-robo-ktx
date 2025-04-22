@@ -6,7 +6,7 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 
 fun randomReactInit(jda: JDA) {
     jda.listener<MessageReceivedEvent> { event ->
-        if (event.author.id == event.jda.selfUser.id) return@listener
+        if (event.author.id == event.jda.selfUser.id || event.author.isBot) return@listener
         val c = event.message.contentRaw
 
         if (Math.random() <= 0.02 || c.contains("tsih") || c.contains("nora")) {
