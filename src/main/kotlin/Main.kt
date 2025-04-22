@@ -36,7 +36,6 @@ private fun getBotsConfig(): List<Bot>? {
 }
 
 val LOG: Logger = LoggerFactory.getLogger("Tsih")
-var botName: String = "tsih-robo"
 
 fun main(args: Array<String>) {
 
@@ -55,7 +54,6 @@ fun main(args: Array<String>) {
     val bots = getBotsConfig() ?: exitProcess(2)
 
     val bot = bots[0]
-    botName = bot.name
 
     LOG.info("Logging in as ${bot.name}")
 
