@@ -28,12 +28,27 @@ class ToolPost : SlashCommand() {
                 return
             }
 
+            val fileDuration = getFileDuration(link)
+
+            if (fileDuration < 16) {
+                event.reply("This song is too short nanora!").setEphemeral(true).queue()
+                return
+            }
+
             event.deferReply().queue()
 
+            // it's hard for the user to input the length in seconds
+            // what if the song's climax is at 3:46? it's annoying to calculate this time into seconds
+            // maybe something good todo is to use the opposite of org.matkija.bot.discordBot.commands.music.AudioLengthUtil
             var timeToTrim = event.getOption(ToolPostOptions.TOOLPOST_OPTION_TRIM)?.asDouble
-            if (timeToTrim != null && timeToTrim >= TOOLPOST_DROP) timeToTrim -= TOOLPOST_DROP
+            if (timeToTrim != null && timeToTrim >= TOOLPOST_DROP) {
+                if (timeToTrim >= fileDuration)
+                    timeToTrim = null
+                else
+                    timeToTrim -= TOOLPOST_DROP
+            }
 
-            val output = createToolPost(link, timeToTrim ?: Random.nextDouble(10.0, 50.0))
+            val output = createToolPost(link, timeToTrim = timeToTrim ?: Random.nextDouble(0.0, fileDuration))
 
             if (output != null) {
                 val video = FileUpload.fromData(output)

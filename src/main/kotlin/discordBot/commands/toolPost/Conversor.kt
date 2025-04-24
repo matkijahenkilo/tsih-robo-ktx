@@ -1,5 +1,6 @@
 package discordBot.commands.toolPost
 
+import org.matkija.bot.utils.clearCRLF
 import java.io.File
 import java.time.Instant
 
@@ -43,6 +44,15 @@ private fun makeYtDlpDownloadCommand(link: String): List<String> =
         "--no-playlist",
         "-o",
         "%(id)s.%(ext)s",
+        link
+    )
+
+private fun makeYtDlpGetDurationCommand(link: String): List<String> =
+    listOf(
+        "yt-dlp",
+        "--print",
+        "duration",
+        "--no-playlist",
         link
     )
 
@@ -126,6 +136,30 @@ fun trimContent(fileName: String, seconds: Double): String {
         ToolPost.POG.error(e.toString())
     }
     return trimmedContentName
+}
+
+/**
+ * Returns the length of the video in seconds
+ * @param link
+ * @return the... guess what? length of the video in seconds but it's Double
+ */
+fun getFileDuration(link: String): Double {
+    try {
+        val command = makeYtDlpGetDurationCommand(link)
+        val child = spawnProcess(command)
+
+        child.waitFor()
+
+        val output = child.inputStream.bufferedReader().readText().clearCRLF()
+
+        return if (output.isNotEmpty())
+            output.toDouble()
+        else
+            0.0
+    } catch (e: Exception) {
+        ToolPost.POG.error(e.toString())
+    }
+    return 0.0
 }
 
 private fun spawnProcess(command: List<String>): Process =
