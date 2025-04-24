@@ -28,17 +28,17 @@ class ToolPost : SlashCommand() {
                 return
             }
 
+            event.deferReply().queue()
+
             val fileDuration = getFileDuration(link)
 
             if (fileDuration < 16) {
-                event.reply("This song is too short nanora!").setEphemeral(true).queue()
+                event.hook.editMessage(content = "This song is too short nanora!").queue()
                 return
             } else if (fileDuration >= 900) {
-                event.reply("This song is too long nanora!").setEphemeral(true).queue()
+                event.hook.editMessage(content = "This song is too long nanora! max length is 15 minutes nora.").queue()
                 return
             }
-
-            event.deferReply().queue()
 
             // it's hard for the user to input the length in seconds
             // what if the song's climax is at 3:46? it's annoying to calculate this time into seconds
@@ -64,8 +64,7 @@ class ToolPost : SlashCommand() {
         } else {
             val ownerName: String = event.jda.retrieveApplicationInfo().complete().owner.name
             POG.error("original.mp4 is missing from data/toolpost/")
-            event.reply("An important file is missing from the hosts' computer, annoy the HECK out of $ownerName nanora!")
-                .setEphemeral(true)
+            event.hook.editMessage(content = "An important file is missing from the hosts' computer, annoy the HECK out of $ownerName nanora!")
                 .queue()
         }
     }
