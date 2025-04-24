@@ -14,12 +14,12 @@ import kotlin.random.Random
 class ToolPost : SlashCommand() {
 
     companion object {
-        val POG: Logger = LoggerFactory.getLogger(ToolPost::class.java)
+        val log: Logger = LoggerFactory.getLogger(ToolPost::class.java)
         private const val TOOLPOST_DROP = 8 // climax of the video is at 8 seconds mark
     }
 
     override fun execute(event: GenericCommandInteractionEvent) {
-        if (baseVideoExists()) {
+        if (toolPostBaseVideoExists()) {
 
             val link = event.getOption(ToolPostOptions.TOOLPOST_OPTION_LINK)!!.asString
 
@@ -63,7 +63,7 @@ class ToolPost : SlashCommand() {
             }
         } else {
             val ownerName: String = event.jda.retrieveApplicationInfo().complete().owner.name
-            POG.error("original.mp4 is missing from data/toolpost/")
+            log.error("original.mp4 is missing from data/toolpost/")
             event.hook.editMessage(content = "An important file is missing from the hosts' computer, annoy the HECK out of $ownerName nanora!")
                 .queue()
         }
@@ -77,8 +77,10 @@ class ToolPost : SlashCommand() {
             File("$PATH/$trimmedContent").delete()
             return output
         } else {
-            POG.error("Audio file returned null from $link")
+            log.error("Audio file returned null from $link")
             return null
         }
     }
+
+    private fun toolPostBaseVideoExists(): Boolean = File(PATH, ORIGINAL_VIDEO).exists()
 }

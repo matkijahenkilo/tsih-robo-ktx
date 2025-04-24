@@ -35,6 +35,11 @@ private fun getBotsConfig(): List<Bot>? {
     }
 }
 
+private fun tsihOClockExists(): Boolean {
+    val path = File("data/images/tsihoclock/")
+    return if (path.exists()) path.listFiles()!!.isNotEmpty() else false
+}
+
 val LOG: Logger = LoggerFactory.getLogger("Tsih")
 
 fun main(args: Array<String>) {
@@ -74,13 +79,19 @@ fun main(args: Array<String>) {
     /*
     load slash command listeners and return their slash commands
      */
-    val commandList = listOf(
+    val commandList = mutableListOf(
         musicInit(jda),
         questionInit(jda),
         avatarInit(jda),
         toolPosterInit(jda),
-        tsihOClockInit(jda)
     )
+    if (tsihOClockExists()) {
+        commandList.add(tsihOClockInit(jda)).also {
+            TsihOClockTimer(jda).startScheduler(TimeUnit.HOURS, 0, 1)
+        }
+    } else {
+        LOG.warn("images in data/images/tsihoclock/ are missing, avoiding creation of command. If you want to use it just insert images into that folder.")
+    }
     val updateCommands = jda.updateCommands()
     commandList.forEach {
         updateCommands.addCommands(it)
@@ -91,7 +102,6 @@ fun main(args: Array<String>) {
     timed functions
      */
     RandomStatus(jda).startScheduler(TimeUnit.MINUTES, 0, 5)
-    TsihOClockTimer(jda).startScheduler(TimeUnit.HOURS, 0, 1)
 
     LOG.info("Currently in the following servers:")
     jda.guilds.forEach {

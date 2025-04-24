@@ -85,7 +85,7 @@ fun mergeContentWithVideo(fileName: String): File? {
 
         return File("$PATH/$now")
     } catch (e: Exception) {
-        ToolPost.POG.error(e.toString())
+        ToolPost.log.error(e.toString())
         return null
     }
 }
@@ -110,7 +110,7 @@ fun downloadContent(link: String): String? {
 
         return stdout.ifEmpty { null }
     } catch (e: Exception) {
-        ToolPost.POG.error(e.toString())
+        ToolPost.log.error(e.toString())
         return null
     }
 }
@@ -133,7 +133,7 @@ fun trimContent(fileName: String, seconds: Double): String {
 
         trimmedContentName = newFileName
     } catch (e: Exception) {
-        ToolPost.POG.error(e.toString())
+        ToolPost.log.error(e.toString())
     }
     return trimmedContentName
 }
@@ -157,7 +157,7 @@ fun getFileDuration(link: String): Double {
         else
             0.0
     } catch (e: Exception) {
-        ToolPost.POG.error(e.toString())
+        ToolPost.log.error(e.toString())
     }
     return 0.0
 }
@@ -168,5 +168,3 @@ private fun spawnProcess(command: List<String>): Process =
         .redirectOutput(ProcessBuilder.Redirect.PIPE)
         .redirectError(ProcessBuilder.Redirect.PIPE)
         .start()
-
-fun baseVideoExists(): Boolean = File(PATH, ORIGINAL_VIDEO).exists()

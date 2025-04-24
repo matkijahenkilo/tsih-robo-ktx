@@ -48,6 +48,9 @@ tsih-robo.jar
 # don't ask me
 src/test/kotlin/GalleryDl.kt
 
+#assets
+!data/toolpost/original.mp4
+
 # fuck off inc.
 data/*
 *.db
