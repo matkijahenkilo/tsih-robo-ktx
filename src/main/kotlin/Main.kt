@@ -92,4 +92,9 @@ fun main(args: Array<String>) {
      */
     RandomStatus(jda).startScheduler(TimeUnit.MINUTES, 0, 5)
     TsihOClockTimer(jda).startScheduler(TimeUnit.HOURS, 0, 1)
+
+    LOG.info("Currently in the following servers:")
+    jda.guilds.forEach {
+        LOG.info("${it.name} (${it.id})")
+    }
 }
