@@ -33,6 +33,9 @@ class ToolPost : SlashCommand() {
             if (fileDuration < 16) {
                 event.reply("This song is too short nanora!").setEphemeral(true).queue()
                 return
+            } else if (fileDuration >= 900) {
+                event.reply("This song is too long nanora!").setEphemeral(true).queue()
+                return
             }
 
             event.deferReply().queue()
