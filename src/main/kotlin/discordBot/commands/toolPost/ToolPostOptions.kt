@@ -22,7 +22,7 @@ object ToolPostOptions {
                 OptionData(
                     OptionType.NUMBER,
                     TOOLPOST_OPTION_TRIM,
-                    "The part where the climax of the song occurs!",
+                    "The timestamp in seconds where the climax of the song occurs!",
                     false
                 )
             )
