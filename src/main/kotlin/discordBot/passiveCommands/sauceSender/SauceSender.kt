@@ -14,7 +14,6 @@ import org.slf4j.LoggerFactory
 import java.io.File
 
 // TODO: each server and room should have their own custom limit
-// TODO: embed is not as wide as Discordia's, while being wider than it should be for Misskey links lol
 // TODO: if >10mb just link it
 class SauceSender(
     private val event: MessageReceivedEvent,
