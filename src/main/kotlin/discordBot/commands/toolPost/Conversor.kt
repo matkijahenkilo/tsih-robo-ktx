@@ -69,11 +69,7 @@ fun mergeContentWithVideo(fileName: String): File? {
     try {
         val now = Instant.now().toString().replaceInstantChars() + ".mp4"
         val command = makeMergeCommand(fileName, now)
-        val child = ProcessBuilder(command)
-            .directory(workingDir)
-            .redirectOutput(ProcessBuilder.Redirect.PIPE)
-            .redirectError(ProcessBuilder.Redirect.PIPE)
-            .start()
+        val child = spawnProcess(command)
 
         child.waitFor()
 
@@ -92,11 +88,7 @@ fun mergeContentWithVideo(fileName: String): File? {
 fun downloadContent(link: String): String? {
     try {
         val command = makeYtDlpDownloadCommand(link)
-        val child = ProcessBuilder(command)
-            .directory(workingDir)
-            .redirectOutput(ProcessBuilder.Redirect.PIPE)
-            .redirectError(ProcessBuilder.Redirect.PIPE)
-            .start()
+        val child = spawnProcess(command)
 
         child.waitFor()
 
@@ -113,7 +105,6 @@ fun downloadContent(link: String): String? {
     }
 }
 
-//todo: get file length to do something that doesn't fuck the process
 /**
  * Trims seconds from the start of a file using ffmpeg and outputs it in a folder, replacing the previous content file
  * @param fileName
@@ -124,11 +115,7 @@ fun trimContent(fileName: String, seconds: Double): String {
     try {
         val newFileName = "trimmed-$fileName".replace(".mp4", ".mp3")
         val command = makeTrimSecondsCommand(fileName, seconds.toString(), newFileName)
-        val child = ProcessBuilder(command)
-            .directory(workingDir)
-            .redirectOutput(ProcessBuilder.Redirect.PIPE)
-            .redirectError(ProcessBuilder.Redirect.PIPE)
-            .start()
+        val child = spawnProcess(command)
 
         child.waitFor()
 
@@ -140,5 +127,12 @@ fun trimContent(fileName: String, seconds: Double): String {
     }
     return trimmedContentName
 }
+
+private fun spawnProcess(command: List<String>): Process =
+    ProcessBuilder(command)
+        .directory(workingDir)
+        .redirectOutput(ProcessBuilder.Redirect.PIPE)
+        .redirectError(ProcessBuilder.Redirect.PIPE)
+        .start()
 
 fun baseVideoExists(): Boolean = File(PATH, ORIGINAL_VIDEO).exists()
