@@ -15,6 +15,7 @@ class ToolPost : SlashCommand() {
 
     companion object {
         val POG: Logger = LoggerFactory.getLogger(ToolPost::class.java)
+        private const val TOOLPOST_DROP = 8 // climax of the video is at 8 seconds mark
     }
 
     override fun execute(event: GenericCommandInteractionEvent) {
@@ -29,7 +30,9 @@ class ToolPost : SlashCommand() {
 
             event.deferReply().queue()
 
-            val timeToTrim = event.getOption(ToolPostOptions.TOOLPOST_OPTION_TRIM)?.asDouble
+            var timeToTrim = event.getOption(ToolPostOptions.TOOLPOST_OPTION_TRIM)?.asDouble
+            if (timeToTrim != null && timeToTrim >= TOOLPOST_DROP) timeToTrim -= TOOLPOST_DROP
+
             val output = createToolPost(link, timeToTrim ?: Random.nextDouble(10.0, 50.0))
 
             if (output != null) {
