@@ -6,7 +6,7 @@ import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData
 
 fun avatarInit(jda: JDA): SlashCommandData {
     jda.onCommand(AvatarSlashOptions.AVATAR) { event ->
-        Avatar().tryExecute(event)
+        Avatar(event).tryExecute()
     }
 
     return AvatarSlashOptions.getCommands()

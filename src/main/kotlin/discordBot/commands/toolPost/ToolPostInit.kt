@@ -12,7 +12,7 @@ fun toolPosterInit(jda: JDA): SlashCommandData {
     }
 
     jda.onCommand(ToolPostOptions.TOOLPOST) { event ->
-        ToolPost().tryExecute(event)
+        ToolPost(event).tryExecute()
     }
 
     return ToolPostOptions.getCommands()

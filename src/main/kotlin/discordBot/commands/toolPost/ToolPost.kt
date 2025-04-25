@@ -11,14 +11,14 @@ import java.io.File
 import kotlin.random.Random
 
 
-class ToolPost : SlashCommand() {
+class ToolPost(private val event: GenericCommandInteractionEvent) : SlashCommand(event) {
 
     companion object {
         val log: Logger = LoggerFactory.getLogger(ToolPost::class.java)
         private const val TOOLPOST_DROP = 8 // climax of the video is at 8 seconds mark
     }
 
-    override fun execute(event: GenericCommandInteractionEvent) {
+    override fun execute() {
         if (toolPostBaseVideoExists()) {
 
             val link = event.getOption(ToolPostOptions.TOOLPOST_OPTION_LINK)!!.asString

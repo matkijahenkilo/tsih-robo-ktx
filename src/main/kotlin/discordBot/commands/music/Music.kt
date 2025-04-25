@@ -19,11 +19,12 @@ import org.matkija.bot.sql.jpa.PersistenceUtil
 import kotlin.time.Duration.Companion.minutes
 
 class Music(
+    private val event: GenericCommandInteractionEvent,
     private val musicManager: GuildMusicManager,
     private val playerManager: AudioPlayerManager
-) : SlashCommand() {
+) : SlashCommand(event) {
 
-    override fun execute(event: GenericCommandInteractionEvent) {
+    override fun execute() {
         event.deferReply().queue()
 
         var option = event.getOption(MusicSlashCommands.MUSIC_OPTION_LINK)?.asString
@@ -41,35 +42,33 @@ class Music(
         when (event.subcommandName) {
             MusicSlashCommands.MUSIC_PLAY -> {
                 if (option != null) {
-                    preSongLoad(event)
+                    preSongLoad()
 
-                    val requestedTrackInfoList = getSongsDependingOfOption(event, option)
+                    val requestedTrackInfoList = getSongsDependingOfOption(option)
 
                     play(
-                        event = event,
                         entries = requestedTrackInfoList,
                         isPriority = false,
                         shouldSaveToDb = true
                     )
 
-                    postSongLoad(event, option, originalOption)
+                    postSongLoad(option, originalOption)
                 }
             }
 
             MusicSlashCommands.MUSIC_PLAY_NEXT -> {
                 if (option != null) {
-                    preSongLoad(event)
+                    preSongLoad()
 
-                    val requestedTrackInfoList = getSongsDependingOfOption(event, option)
+                    val requestedTrackInfoList = getSongsDependingOfOption(option)
 
                     play(
-                        event = event,
                         entries = requestedTrackInfoList,
                         isPriority = true,
                         shouldSaveToDb = true
                     )
 
-                    postSongLoad(event, option, originalOption)
+                    postSongLoad(option, originalOption)
                 }
             }
 
@@ -89,14 +88,13 @@ class Music(
                 if (guildPlaylist.isNotEmpty()) {
                     val requestedTrackInfoList = guildPlaylist.map {
                         RequestedTrackInfo(
-                            loadAudioTracks(event, listOf(it.link))[0], // saved songs will never be a playlist link
+                            loadAudioTracks(listOf(it.link))[0], // saved songs will never be a playlist link
                             event.jda.getUserById(it.requester),
                             event.jda.getGuildById(it.guildId)
                         )
                     }
 
                     play(
-                        event = event,
                         entries = requestedTrackInfoList,
                         isPriority = true,
                         shouldSaveToDb = false
@@ -158,7 +156,6 @@ class Music(
     }
 
     private fun loadAudioTrackFromSearch(
-        event: GenericCommandInteractionEvent,
         search: String
     ): List<AudioTrack> {
 
@@ -203,7 +200,6 @@ class Music(
     }
 
     private fun loadAudioTracks(
-        event: GenericCommandInteractionEvent,
         links: List<String>
     ): List<AudioTrack> {
         val channel = event.messageChannel
@@ -252,7 +248,6 @@ class Music(
      * Plays or queue an AudioTrack
      */
     private fun play(
-        event: GenericCommandInteractionEvent,
         entries: List<RequestedTrackInfo>,
         isPriority: Boolean,
         shouldSaveToDb: Boolean,
@@ -267,7 +262,7 @@ class Music(
         }
     }
 
-    private fun preSongLoad(event: GenericCommandInteractionEvent) {
+    private fun preSongLoad() {
         event.hook.editMessage(content = "Loading song(s)...")
             .queue()
 
@@ -277,7 +272,7 @@ class Music(
             PersistenceUtil.deletePlaylistById(event.guild!!.idLong)
     }
 
-    private fun postSongLoad(event: GenericCommandInteractionEvent, option: String, originalOption: String?) {
+    private fun postSongLoad(option: String, originalOption: String?) {
         if (option.contains(YT_SEARCH)) {
             event.hook.editMessage(content = "Loaded the first song of result `$originalOption` nanora!")
                 .queue()
@@ -288,11 +283,10 @@ class Music(
     }
 
     private fun getSongsDependingOfOption(
-        event: GenericCommandInteractionEvent,
         option: String
     ): List<RequestedTrackInfo> =
         if (option.contains(YT_SEARCH))
-            loadAudioTrackFromSearch(event, option).map {
+            loadAudioTrackFromSearch(option).map {
                 RequestedTrackInfo(
                     it,
                     event.member!!.user,
@@ -300,7 +294,7 @@ class Music(
                 )
             }
         else {
-            loadAudioTracks(event, option.split(" ")).map {
+            loadAudioTracks(option.split(" ")).map {
                 RequestedTrackInfo(
                     it,
                     event.member!!.user,

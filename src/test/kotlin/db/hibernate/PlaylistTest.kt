@@ -38,10 +38,16 @@ class PlaylistsTest {
                 session.createQuery("from ${Playlist::class.java.simpleName}", Playlist::class.java).resultList
                     .forEach(Consumer { playlist -> assert(playlist.link == "http://example.com" || playlist.link == "http://example2.com") })
 
-                session.createQuery("from ${Playlist::class.java.simpleName} p where p.${Playlist::guildId.name} = 9876543210", Playlist::class.java).resultList
+                session.createQuery(
+                    "from ${Playlist::class.java.simpleName} p where p.${Playlist::guildId.name} = 9876543210",
+                    Playlist::class.java
+                ).resultList
                     .forEach(Consumer { playlist -> assert(playlist.link == "http://example.com") })
 
-                session.createQuery("from ${Playlist::class.java.simpleName} p where p.${Playlist::guildId.name} = 9876543212", Playlist::class.java).resultList
+                session.createQuery(
+                    "from ${Playlist::class.java.simpleName} p where p.${Playlist::guildId.name} = 9876543212",
+                    Playlist::class.java
+                ).resultList
                     .forEach(Consumer { playlist -> assert(playlist.link == "http://example2.com") })
             })
         } else {

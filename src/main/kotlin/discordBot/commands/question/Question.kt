@@ -21,8 +21,8 @@ private val answers = listOf(
     "Whooooa! n-no, nora!",
 )
 
-class Question : SlashCommand() {
-    override fun execute(event: GenericCommandInteractionEvent) {
+class Question(private val event: GenericCommandInteractionEvent) : SlashCommand(event) {
+    override fun execute() {
         val question = event.getOption(QuestionSlashOptions.QUESTION_OPTION_FIELD)!!.asString
         event.reply("> $question\n${answers.random()}").queue()
     }

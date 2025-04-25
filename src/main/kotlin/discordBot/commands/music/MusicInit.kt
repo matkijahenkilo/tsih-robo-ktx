@@ -92,7 +92,7 @@ fun musicInit(jda: JDA): SlashCommandData {
 
         val guildAudioPlayer = getGuildAudioPlayer(event.guild!!, event.messageChannel)
         if (isSameVC(event) || guildAudioPlayer.player.playingTrack == null) {
-            Music(guildAudioPlayer, playerManager).tryExecute(event)
+            Music(event, guildAudioPlayer, playerManager).tryExecute()
         } else {
             event.reply(notInVC).setEphemeral(true).queue()
         }

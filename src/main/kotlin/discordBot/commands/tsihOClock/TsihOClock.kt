@@ -6,18 +6,18 @@ import org.matkija.bot.discordBot.abstracts.SlashCommand
 import org.matkija.bot.sql.jpa.PersistenceUtil
 import org.matkija.bot.sql.jpa.TOCRoom
 
-class TsihOClock : SlashCommand() {
+class TsihOClock(private val event: GenericCommandInteractionEvent) : SlashCommand(event) {
 
-    override fun execute(event: GenericCommandInteractionEvent) {
+    override fun execute() {
         val option = event.getOption(TOCSlashCommands.OPTION_ACTION)!!.asInt
         if (option == 1) {
-            saveRoomId(event)
+            saveRoomId()
         } else if (option == 0) {
-            deleteRoomId(event)
+            deleteRoomId()
         }
     }
 
-    private fun saveRoomId(event: GenericCommandInteractionEvent) {
+    private fun saveRoomId() {
         val channelId = event.channelId!!.toLong()
 
         val allTsihOClockRooms = PersistenceUtil.getAllTsihOClockRooms()
@@ -30,7 +30,7 @@ class TsihOClock : SlashCommand() {
         }
     }
 
-    private fun deleteRoomId(event: GenericCommandInteractionEvent) {
+    private fun deleteRoomId() {
         val channelId = event.channelId!!.toLong()
 
         val allTsihOClockRooms = PersistenceUtil.getAllTsihOClockRooms()

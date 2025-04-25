@@ -13,7 +13,7 @@ fun tsihOClockInit(jda: JDA): SlashCommandData {
     jda.onCommand(TOCSlashCommands.TSIH_O_CLOCK) { event ->
         if (event.guild == null)
             event.reply("This only work in servers nanora!").queue()
-        TsihOClock().tryExecute(event)
+        TsihOClock(event).tryExecute()
     }
 
     jda.onCommandAutocomplete(TOCSlashCommands.TSIH_O_CLOCK) { event ->

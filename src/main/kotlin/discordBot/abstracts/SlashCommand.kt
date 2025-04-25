@@ -5,12 +5,12 @@ import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionE
 import org.matkija.bot.LOG
 
 
-abstract class SlashCommand {
+abstract class SlashCommand(private val event: GenericCommandInteractionEvent) {
 
-    protected abstract fun execute(event: GenericCommandInteractionEvent)
+    protected abstract fun execute()
 
-    fun tryExecute(event: GenericCommandInteractionEvent) = try {
-        execute(event)
+    fun tryExecute() = try {
+        execute()
     } catch (e: Exception) {
         LOG.error(e.toString())
         if (event.isAcknowledged) {
