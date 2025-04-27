@@ -183,6 +183,12 @@ class SauceSender(
                 "-# ||I got an authentication error, please annoy the FUCK out of $ownerName to fix me!!||",
                 false
             )
+        } else if (readChild.stderr.clearCRLF().contains("404 Not Found", true)) {
+            logger.error("404 Not Found (): ${readChild.stderr}")
+            AltTwitterFix(
+                "-# ||I got an unknown error, the website might have changed something that made me unable to login!||",
+                false
+            )
         } else {
             AltTwitterFix("", true)
         }
