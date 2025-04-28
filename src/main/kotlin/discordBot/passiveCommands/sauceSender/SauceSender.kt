@@ -96,7 +96,12 @@ class SauceSender(
                     // if failing to fetch anything
                     if (files.isEmpty()) {
                         child.destroy()
-                        logger.error("Failed to fetch anything from $link: ${exitedChild.stderr.clearCRLF()}")
+                        var msg = "Failed to fetch anything from $link: ${exitedChild.stderr.clearCRLF()}"
+                        if (isTwitterLink(link)) {
+                            msg += ", sending alternative fix instead"
+                            sendAlternativeFix(link, null)
+                        }
+                        logger.error(msg)
                         return@async
                     }
                     payload.files = files
@@ -190,11 +195,11 @@ class SauceSender(
                 false
             )
         } else {
-            AltTwitterFix("", true)
+            AltTwitterFix(null, true)
         }
     }
 
-    private fun sendAlternativeFix(link: String, content: String) {
+    private fun sendAlternativeFix(link: String, content: String?) {
         val newLink = link.replace(
             if (link.contains("twitter.com")) {
                 "twitter.com"
@@ -202,13 +207,14 @@ class SauceSender(
                 "x.com"
             }, "stupidpenisx.com"
         )
-        event.message.reply_(content = "$content\n$newLink")
+        val msg = if (content != null) "$content\n$newLink" else newLink
+        event.message.reply_(content = msg)
             .mentionRepliedUser(false)
             .queue()
     }
 
     data class AltTwitterFix(
-        val errorMsg: String,
+        val errorMsg: String?,
         val worksOrHasMedia: Boolean
     )
 
