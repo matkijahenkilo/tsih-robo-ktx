@@ -3,7 +3,11 @@ package org.matkija.bot.discordBot.passiveCommands.sauceSender
 import dev.minn.jda.ktx.messages.EmbedBuilder
 import dev.minn.jda.ktx.messages.InlineEmbed
 import dev.minn.jda.ktx.messages.reply_
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
+import kotlinx.coroutines.joinAll
+import kotlinx.coroutines.runBlocking
+import net.dv8tion.jda.api.Permission
 import net.dv8tion.jda.api.entities.MessageEmbed
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import net.dv8tion.jda.api.utils.FileUpload
@@ -129,7 +133,7 @@ class SauceSender(
         jobList.joinAll()
 
         //delete user's message embed
-        if (!event.message.isSuppressedEmbeds)
+        if (event.guild.selfMember.permissions.contains(Permission.MESSAGE_MANAGE) && !event.message.isSuppressedEmbeds)
             event.message.suppressEmbeds(true).queue()
     }
 
