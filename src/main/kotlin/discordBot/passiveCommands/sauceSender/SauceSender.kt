@@ -74,8 +74,8 @@ class SauceSender(
                     }
 
                     // download and organize files to list
-                    val child = spawnProcess(command)
-                    val exitedChild = readProcess(child)
+                    val child = spawnGallerydlProcess(command)
+                    val exitedChild = readGallerydlProcess(child)
                     val filesStdout = exitedChild.stdout
                     val files = mutableListOf<File>()
                     filesStdout.lines().forEach { filePath ->
@@ -103,8 +103,8 @@ class SauceSender(
 
                     // deal with embed
                     if (infoCommand.isNotEmpty()) {
-                        val infoChild = spawnProcess(infoCommand)
-                        val infoStdout = readProcess(infoChild).stdout
+                        val infoChild = spawnGallerydlProcess(infoCommand)
+                        val infoStdout = readGallerydlProcess(infoChild).stdout
                         payload.embedInfo = buildEmbed(infoStdout, link, payload.files!!, website)
                     }
 
@@ -171,8 +171,8 @@ class SauceSender(
 
     // empty embeds doesn't always mean that it is sensitive, for some twitter™️ reason (￣ー￣)
     private suspend fun isTwitterWorking(link: String): AltTwitterFix {
-        val child = spawnProcess(makeMediaCheckCommand(link))
-        val readChild = readProcess(child)
+        val child = spawnGallerydlProcess(makeMediaCheckCommand(link))
+        val readChild = readGallerydlProcess(child)
         // if -g returns a "No results for" then twitter works but no media was in the post
         return if (readChild.stderr.clearCRLF().contains("No results for", true)) {
             AltTwitterFix("", false)
@@ -210,69 +210,6 @@ class SauceSender(
     data class AltTwitterFix(
         val errorMsg: String,
         val worksOrHasMedia: Boolean
-    )
-
-
-    /*
-    related to making commands for gallery-dl and preparing list of link inputs
-     */
-
-    private fun filterOutWords(content: String): List<String> =
-        content.split(" ").filter { it.contains("https://") }.toList()
-
-    private fun makeTwitterCommand(link: String, shouldGetInfoOnly: Boolean = false, limit: Int = 5): List<String> =
-        baseArgs + if (shouldGetInfoOnly) infoArgs(link, twitterFilters) else downloadArgs(link, limit)
-
-    private fun makeMisskeyCommand(link: String, shouldGetInfoOnly: Boolean = false, limit: Int = 5): List<String> =
-        baseArgs + if (shouldGetInfoOnly) infoArgs(link, misskeyFilters) else downloadArgs(link, limit)
-
-    private fun downloadArgs(link: String, limit: Int): List<String> =
-        listOf("--range", "1-$limit", "--ugoira-conv", "-D", "./temp/", link)
-
-    private fun infoArgs(link: String, filter: String): List<String> =
-        listOf("--filter", filter, "-s", link)
-
-    private fun makeCommonCommand(link: String) = baseArgs + downloadArgs(link, 5)
-
-    private fun makeMediaCheckCommand(link: String): List<String> =
-        baseArgs + listOf("-g", "-s", link)
-
-    private fun isTwitterLink(s: String): Boolean = "https://twitter.com" in s || "https://x.com" in s
-    private fun isMisskeyLink(s: String): Boolean = "https://misskey.io" in s
-
-    private val baseArgs = listOf("gallery-dl", "--cookies", "./cookies.txt")
-    private val twitterFilters =
-        "print(user['name']) or print(user['nick']) or print(user['profile_image']) or print(retweet_count) or print(favorite_count) or print(date) or print(content) or abort()"
-    private val misskeyFilters =
-        "print(user['name']) or print(user['username']) or print(user['avatarUrl']) or print(renoteCount) or print(reactionCount) or print(date) or print(text) or abort()"
-
-
-    /*
-    related to processes
-     */
-
-    private data class ProcessOutput(
-        val stdout: String,
-        val stderr: String
-    )
-
-    private fun spawnProcess(command: List<String>): Process = ProcessBuilder(command)
-        .directory(File("./data"))
-        .redirectOutput(ProcessBuilder.Redirect.PIPE)
-        .redirectError(ProcessBuilder.Redirect.PIPE)
-        .start()
-
-    private suspend fun readProcess(child: Process): ProcessOutput = coroutineScope {
-        child.waitFor()
-        ProcessOutput(
-            child.inputStream.bufferedReader().readText().replace("\r", ""),
-            child.errorStream.bufferedReader().readText().replace("\r", "")
-        )
-    }
-
-    private data class Payload(
-        var files: MutableList<File>? = null,
-        var embedInfo: List<MessageEmbed>? = null,
     )
 
 
