@@ -3,6 +3,10 @@
   maven,
   jre,
   makeWrapper,
+
+  ffmpeg,
+  yt-dlp,
+  gallery-dl,
 }:
 let
   project-name = "tsih-robo-ktx";
@@ -18,6 +22,12 @@ maven.buildMavenPackage {
   mvnHash = "sha256-2AaVcKmnwoVzH+B2W+zfhIyE7RBZSPrZaqlbdWnmI3E=";
 
   nativeBuildInputs = [ makeWrapper ];
+
+  buildInputs = [
+    ffmpeg
+    yt-dlp
+    gallery-dl
+  ];
 
   installPhase = ''
     runHook preInstall
