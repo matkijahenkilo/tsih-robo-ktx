@@ -50,7 +50,19 @@ Runs something periodically
 
 ## Installation
 
-It requires the following CLI programs:
+Before anything, **dedicate a folder to run the bot**, in that folder create the file `data/config.json`
+and input the following model, replacing with your info:
+
+```json
+[
+  {
+    "name" : "your bot name here",
+    "token" : "your fancy token here"
+  }
+]
+```
+
+It also requires the following CLI programs:
 
 - for `/toolpost`
   - yt-dlp
@@ -59,7 +71,54 @@ It requires the following CLI programs:
   - gallery-dl
     - (and to be correctly configured)
 
-the rest is soon™️
+If you're using Nix, you don't have to download them manually.
+
+### Nix
+
+#### Live demo
+
+Run a live demo of the bot inside the dedicated folder by running:
+
+```
+nix run github:matkijahenkilo/tsih-robo-ktx
+```
+
+#### Nix flake
+
+Add in your flake inputs:
+
+```nix
+inputs = {
+  tsih-robo-ktx = {
+    url = "github:matkijahenkilo/tsih-robo-ktx";
+    inputs.nixpkgs.follows = "nixpkgs";
+  };
+};
+```
+
+then import into your environment:
+
+```nix
+home.packages = [
+  inputs.tsih-robo-ktx.packages.x86_64-linux.default
+];
+```
+
+or
+
+```nix
+environment.systemPackages = [
+  inputs.tsih-robo-ktx.packages.x86_64-linux.default
+];
+```
+
+Switch your current system, and you can execute Tsih with `tsih-robo-ktx` inside the dedicated folder.
+
+### Manually
+
+Install Java JDK at least on version 21.0.5 and Maven
+
+`git clone` this repository, then `cd` into it and run `mvn package`. The .jar file will be located at `target/tsih-robo-ktx-VERSION-jar-with-dependencies.jar` then execute it with `java -jar [.jar file with dependencies here]`
 
 ## Huge thanks
 
