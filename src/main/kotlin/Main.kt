@@ -44,6 +44,12 @@ val LOG: Logger = LoggerFactory.getLogger("Tsih")
 
 fun main(args: Array<String>) {
 
+    val bots = getBotsConfig()
+    if (bots == null) {
+        LOG.error("Bot config not provided.")
+        exitProcess(1)
+    }
+
     // creates/migrates db if necessary
     Flyway.configure().dataSource("jdbc:sqlite:tsih-robo.db", "", "").load().migrate()
 
@@ -55,8 +61,6 @@ fun main(args: Array<String>) {
             LOG.error("Unknown arguments.")
         }
     }
-
-    val bots = getBotsConfig() ?: exitProcess(2)
 
     val bot = bots[0]
 
