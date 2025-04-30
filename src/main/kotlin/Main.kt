@@ -1,5 +1,7 @@
 package org.matkija.bot
 
+import com.zaxxer.hikari.HikariConfig
+import com.zaxxer.hikari.HikariDataSource
 import dev.lavalink.youtube.YoutubeAudioSourceManager
 import dev.minn.jda.ktx.jdabuilder.default
 import dev.minn.jda.ktx.jdabuilder.intents
@@ -13,6 +15,7 @@ import org.matkija.bot.discordBot.commands.avatar.avatarInit
 import org.matkija.bot.discordBot.commands.music.musicInit
 import org.matkija.bot.discordBot.commands.question.questionInit
 import org.matkija.bot.discordBot.commands.tsihOClock.tsihOClockInit
+import org.matkija.bot.discordBot.hybridCommands.markov.markovPassiveInit
 import org.matkija.bot.discordBot.passiveCommands.randomReactInit
 import org.matkija.bot.discordBot.passiveCommands.sauceSender.sauceSenderInit
 import org.matkija.bot.discordBot.timedEvents.randomStatus.RandomStatus
@@ -21,6 +24,7 @@ import org.slf4j.LoggerFactory
 import java.io.File
 import java.util.concurrent.TimeUnit
 import kotlin.system.exitProcess
+import kotlin.time.Duration.Companion.seconds
 
 
 @Serializable
@@ -74,6 +78,11 @@ fun main(args: Array<String>) {
     }
     jda.awaitReady()
 
+    LOG.info("Currently in the following servers:")
+    jda.guilds.forEach {
+        LOG.info("${it.name} (${it.id})")
+    }
+
     /*
     load passive commands listeners
      */
@@ -88,6 +97,7 @@ fun main(args: Array<String>) {
         questionInit(jda),
         avatarInit(jda),
         toolPosterInit(jda),
+        markovPassiveInit(jda)
     )
     if (tsihOClockExists()) {
         commandList.add(tsihOClockInit(jda)).also {
@@ -106,9 +116,4 @@ fun main(args: Array<String>) {
     timed functions
      */
     RandomStatus(jda).startScheduler(TimeUnit.MINUTES, 0, 5)
-
-    LOG.info("Currently in the following servers:")
-    jda.guilds.forEach {
-        LOG.info("${it.name} (${it.id})")
-    }
 }
