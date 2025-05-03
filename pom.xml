@@ -28,7 +28,7 @@
         <!-- lavaplayer -->
         <!-- https://central.sonatype.com/artifact/dev.arbjerg/lavaplayer -->
         <lavaplayer.version>2.2.3</lavaplayer.version>
-        <lavalinkyoutube.version>1.13.0</lavalinkyoutube.version>
+        <lavalinkyoutube.version>1.13.2</lavalinkyoutube.version>
     </properties>
 
     <repositories>
