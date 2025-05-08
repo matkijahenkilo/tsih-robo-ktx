@@ -2,14 +2,11 @@ package org.matkija.bot.discordBot.hybridCommands.markov
 
 import dev.minn.jda.ktx.events.listener
 import dev.minn.jda.ktx.events.onCommand
-import dev.minn.jda.ktx.events.onCommandAutocomplete
 import dev.minn.jda.ktx.messages.send
 import net.dv8tion.jda.api.JDA
 import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
-import net.dv8tion.jda.api.interactions.commands.OptionType
-import net.dv8tion.jda.api.interactions.commands.build.OptionData
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData
 import org.matkija.bot.discordBot.hybridCommands.markov.passive.HistoryBuffer
 import org.matkija.bot.discordBot.hybridCommands.markov.passive.MarkovChain
@@ -135,23 +132,6 @@ fun markovPassiveInit(jda: JDA): SlashCommandData {
         MarkovRoomHandler(event).tryExecute()
         savedMarkovChannels = PersistenceUtil.getAllMarkovInfo()
         updateEntireMap()
-    }
-
-    jda.onCommandAutocomplete(MarkovRoomHandlerSlashCommands.MARKOV) { event ->
-        val option = if (event.subcommandName == MarkovRoomHandlerSlashCommands.OPTION_READ) {
-            OptionData(
-                OptionType.INTEGER,
-                MarkovRoomHandlerSlashCommands.OPTION_ACTION,
-                "Should I log this channel to feed my vocabulary?"
-            )
-                .addChoice("yes, log this channel", 1)
-                .addChoice("no, stop logging this channel", 0)
-        } else { // else will always be MarkovRoomHandlerSlashCommands.OPTION_TALK
-            OptionData(OptionType.INTEGER, MarkovRoomHandlerSlashCommands.OPTION_ACTION, "Should I talk here?")
-                .addChoice("talk", 1)
-                .addChoice("SHUT THE FUCK UP!!!", 0)
-        }
-        event.replyChoices(option.choices).queue()
     }
 
 
