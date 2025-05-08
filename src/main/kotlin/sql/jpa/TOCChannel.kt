@@ -3,10 +3,10 @@ package org.matkija.bot.sql.jpa
 import jakarta.persistence.*
 
 @Entity
-@Table(name = "tocrooms")
-data class TOCRoom(
+@Table(name = "tocChannels")
+data class TOCChannel(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val tocroomsId: Long? = null,
-    val roomId: Long
+    val tocChannelId: Long? = null,
+    val channelId: Long
 )

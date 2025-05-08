@@ -14,7 +14,7 @@ private val sessionFactory: SessionFactory =
         .addAnnotatedClasses(
             MarkovAllowedChannel::class.java,
             Playlist::class.java,
-            TOCRoom::class.java,
+            TOCChannel::class.java,
         )
         .buildMetadata()
         .buildSessionFactory()
@@ -63,18 +63,18 @@ object PersistenceUtil {
     }
 
 
-    fun saveTsihOClockRoom(tocRooms: TOCRoom) {
+    fun saveTsihOClockRoom(tocRooms: TOCChannel) {
         sessionFactory.inTransaction { session: Session ->
             session.persist(tocRooms)
         }
     }
 
-    fun getAllTsihOClockRooms(): List<TOCRoom> {
-        var ret: List<TOCRoom> = emptyList()
+    fun getAllTsihOClockRooms(): List<TOCChannel> {
+        var ret: List<TOCChannel> = emptyList()
         sessionFactory.inTransaction { session: Session ->
             ret = session.createSelectionQuery(
-                "from ${TOCRoom::class.java.name}",
-                TOCRoom::class.java
+                "from ${TOCChannel::class.java.name}",
+                TOCChannel::class.java
             ).resultList
         }
         return ret
@@ -83,7 +83,7 @@ object PersistenceUtil {
     fun deleteTsihOClockRoomById(id: Long) {
         sessionFactory.inTransaction { session: Session ->
             session.createMutationQuery(
-                "delete from ${TOCRoom::class.java.name} t where t.${TOCRoom::roomId.name} = $id"
+                "delete from ${TOCChannel::class.java.name} t where t.${TOCChannel::channelId.name} = $id"
             ).executeUpdate()
         }
     }
