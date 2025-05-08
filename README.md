@@ -53,6 +53,8 @@ Runs every time a message is sent to a text channel where the bot has permission
   - has a 0.05% chance to generate a random text based off a channel where `/markov read` were activated and send to a channel where `/markov talk` were activated.
     Is guaranteed when mentioning the bot, and can specify a word to begin with in between double quotes
 
+![tsih trying to english](https://raw.githubusercontent.com/matkijahenkilo/matkijahenkilo/refs/heads/main/imgs/2025-05-08_18-34-54.png)
+
 ### Scheduled events
 
 Runs something periodically
