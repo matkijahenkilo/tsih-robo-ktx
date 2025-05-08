@@ -71,7 +71,7 @@ fun musicInit(jda: JDA): SlashCommandData {
     }
 
     fun getGuildAudioPlayer(guild: Guild, channel: MessageChannel): GuildMusicManager {
-        val guildId = guild.id.toLong()
+        val guildId = guild.idLong
         var musicManager = musicManagers[guildId]
 
         if (musicManager == null) {
@@ -109,7 +109,7 @@ fun musicInit(jda: JDA): SlashCommandData {
         if (event.guild!!.audioManager.isConnected) {
             event.guild!!.audioManager.closeAudioConnection()
         }
-        musicManagers.remove(event.guild!!.id.toLong())
+        musicManagers.remove(event.guild!!.idLong)
         event.reply(event.user.name + " told me to stop, nora~").queue()
     }
 

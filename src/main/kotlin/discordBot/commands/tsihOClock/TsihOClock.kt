@@ -18,7 +18,7 @@ class TsihOClock(private val event: GenericCommandInteractionEvent) : SlashComma
     }
 
     private fun saveRoomId() {
-        val channelId = event.channelId!!.toLong()
+        val channelId = event.channelIdLong
 
         val allTsihOClockRooms = PersistenceUtil.getAllTsihOClockRooms()
 
@@ -31,7 +31,7 @@ class TsihOClock(private val event: GenericCommandInteractionEvent) : SlashComma
     }
 
     private fun deleteRoomId() {
-        val channelId = event.channelId!!.toLong()
+        val channelId = event.channelIdLong
 
         val allTsihOClockRooms = PersistenceUtil.getAllTsihOClockRooms()
 

@@ -14,5 +14,6 @@ object TOCSlashCommands {
             .addOptions(
                 OptionData(OptionType.INTEGER, OPTION_ACTION, "Should I save this room to send images?~", true)
                     .addChoice("subscribe", 1)
-                    .addChoice("unsubscribe", 0))
+                    .addChoice("unsubscribe", 0)
+            )
 }
