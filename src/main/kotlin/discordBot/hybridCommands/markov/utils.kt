@@ -13,3 +13,4 @@ fun String.clearForMarkovCorpus(): String = this
     .filterOutLinks()
     .filterOutMentionPatterns()
     .replaceDoubleSpacesIntoSingularSpace()
+    .trim()
