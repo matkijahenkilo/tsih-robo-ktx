@@ -5,7 +5,7 @@ A private [JDA](https://github.com/discord-jda/JDA) bot with multiple functions,
 ### Introduction
 
 Tsih-robo's primary function is to fix Twitter's horrible embeds on Discord's text chats by sending the post's content,
-this can also work on other websites. It works as a music bot as well.
+this can also work on other websites. It works as a music bot and markov chain bot as well.
 
 This repository is a complete remake of [tsih-robo](https://github.com/matkijahenkilo/tsih-robo) made with Discordia.
 
@@ -31,13 +31,21 @@ Runs when someone runs the command
     in a similar way of [Toolposting 1019](https://www.facebook.com/profile.php?id=100057113183628) page
 - `/tsihoclock`
   - saves or removes the text channel to receive a random art of Tsih
+- `/markov`
+  - manages bot's permissions on where to read and talk [meaningless text](https://en.wikipedia.org/wiki/Markov_chain#Markov_text_generators)
+    - `read` ⚠️ **will log a channel's messages** to feed to its vocabulary
+    - `talk` will use the saved vocabulary to spit out meaningless text
 
-### MessageReceived commands
+### MessageReceived "passive" commands
 
 Runs every time a message is sent to a text channel where the bot has permission to see
 
 - `sauceSender`
   - checks if it's a link that can have its embed "fixed"
+- `randomReact`
+  - has a 0.2% to react to a message with a random custom emoji from a random server
+- `markov`
+  - has a 0.05% chance to generate a random text based off a channel where `/markov read` were activated and send to a channel where `/markov talk` were activated
 
 ### Scheduled events
 
