@@ -55,7 +55,18 @@ fun main(args: Array<String>) {
     }
 
     // creates/migrates db if necessary
-    Flyway.configure().dataSource("jdbc:sqlite:tsih-robo.db", "", "").load().migrate()
+    Flyway.configure()
+        .dataSource(
+            HikariDataSource(HikariConfig().apply {
+                jdbcUrl = "jdbc:sqlite:tsih-robo.db"
+                maximumPoolSize = 2
+                leakDetectionThreshold = 10.seconds.inWholeMilliseconds
+            })
+        )
+        .validateMigrationNaming(true)
+        .loggers("slf4j")
+        .load()
+        .migrate()
 
     if (args.isNotEmpty()) {
         if (args[0] == "-t") {
