@@ -4,7 +4,7 @@ import discordBot.commands.tsihOClock.TOCSlashCommands
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent
 import org.matkija.bot.discordBot.abstracts.SlashCommand
 import org.matkija.bot.sql.jpa.PersistenceUtil
-import org.matkija.bot.sql.jpa.TOCRoom
+import org.matkija.bot.sql.jpa.TOCChannel
 
 class TsihOClock(private val event: GenericCommandInteractionEvent) : SlashCommand(event) {
 
@@ -25,7 +25,7 @@ class TsihOClock(private val event: GenericCommandInteractionEvent) : SlashComma
         if (isRoomAlreadySaved(channelId, allTsihOClockRooms)) {
             event.reply("This room is already subscribed to receive my awesome images nanora!").queue()
         } else {
-            PersistenceUtil.saveTsihOClockRoom(TOCRoom(roomId = channelId))
+            PersistenceUtil.saveTsihOClockRoom(TOCChannel(channelId = channelId))
             event.reply("Done nanora!").queue()
         }
     }
@@ -43,6 +43,6 @@ class TsihOClock(private val event: GenericCommandInteractionEvent) : SlashComma
         }
     }
 
-    private fun isRoomAlreadySaved(roomId: Long, savedIds: List<TOCRoom>): Boolean =
-        savedIds.any { it.roomId == roomId }
+    private fun isRoomAlreadySaved(roomId: Long, savedIds: List<TOCChannel>): Boolean =
+        savedIds.any { it.channelId == roomId }
 }

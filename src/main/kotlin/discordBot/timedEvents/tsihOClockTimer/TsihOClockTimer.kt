@@ -44,7 +44,7 @@ class TsihOClockTimer(private val jda: JDA) : TimedEvent() {
                     pog.info("Sending images to ${channelList.size} channels")
                     channelList.forEach { obj ->
                         jobList += async {
-                            val channel = jda.getTextChannelById(obj.roomId)
+                            val channel = jda.getTextChannelById(obj.channelId)
                             val file = files.random()
                             val fileUpload = listOf(FileUpload.fromData(file))
                             var fileUploadWithFooterImage = fileUpload

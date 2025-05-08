@@ -11,8 +11,11 @@ private val registry = StandardServiceRegistryBuilder().build()
 // A SessionFactory is set up once for an application!
 private val sessionFactory: SessionFactory =
     MetadataSources(registry)
-        .addAnnotatedClass(Playlist::class.java)
-        .addAnnotatedClass(TOCRoom::class.java)
+        .addAnnotatedClasses(
+            MarkovAllowedChannel::class.java,
+            Playlist::class.java,
+            TOCChannel::class.java,
+        )
         .buildMetadata()
         .buildSessionFactory()
 
@@ -60,18 +63,18 @@ object PersistenceUtil {
     }
 
 
-    fun saveTsihOClockRoom(tocRooms: TOCRoom) {
+    fun saveTsihOClockRoom(tocRooms: TOCChannel) {
         sessionFactory.inTransaction { session: Session ->
             session.persist(tocRooms)
         }
     }
 
-    fun getAllTsihOClockRooms(): List<TOCRoom> {
-        var ret: List<TOCRoom> = emptyList()
+    fun getAllTsihOClockRooms(): List<TOCChannel> {
+        var ret: List<TOCChannel> = emptyList()
         sessionFactory.inTransaction { session: Session ->
             ret = session.createSelectionQuery(
-                "from ${TOCRoom::class.java.name}",
-                TOCRoom::class.java
+                "from ${TOCChannel::class.java.name}",
+                TOCChannel::class.java
             ).resultList
         }
         return ret
@@ -80,8 +83,58 @@ object PersistenceUtil {
     fun deleteTsihOClockRoomById(id: Long) {
         sessionFactory.inTransaction { session: Session ->
             session.createMutationQuery(
-                "delete from ${TOCRoom::class.java.name} t where t.${TOCRoom::roomId.name} = $id"
+                "delete from ${TOCChannel::class.java.name} t where t.${TOCChannel::channelId.name} = $id"
             ).executeUpdate()
         }
+    }
+
+    fun saveMarkovReadingChannel(markovAllowedChannel: MarkovAllowedChannel) {
+        sessionFactory.inTransaction { session: Session ->
+            session.persist(markovAllowedChannel)
+        }
+    }
+
+    fun saveMarkovWritingChannel(markovAllowedChannel: MarkovAllowedChannel) {
+        sessionFactory.inTransaction { session: Session ->
+            session.persist(markovAllowedChannel)
+        }
+    }
+
+    fun deleteMarkovWritingChannelById(channelId: Long) {
+        sessionFactory.inTransaction { session: Session ->
+            session.createMutationQuery(
+                "delete from ${MarkovAllowedChannel::class.java.name} m where m.${MarkovAllowedChannel::writingChannelId.name} = $channelId"
+            ).executeUpdate()
+        }
+    }
+
+    fun deleteMarkovReadingChannelById(channelId: Long) {
+        sessionFactory.inTransaction { session: Session ->
+            session.createMutationQuery(
+                "delete from ${MarkovAllowedChannel::class.java.name} m where m.${MarkovAllowedChannel::readingChannelId.name} = $channelId"
+            ).executeUpdate()
+        }
+    }
+
+    fun getAllMarkovInfo(): List<MarkovAllowedChannel> { //unfuck
+        var ret: List<MarkovAllowedChannel> = emptyList()
+        sessionFactory.inTransaction { session: Session ->
+            ret = session.createSelectionQuery(
+                "from ${MarkovAllowedChannel::class.java.name}",
+                MarkovAllowedChannel::class.java
+            ).resultList
+        }
+        return ret
+    }
+
+    fun getMarkovInfoByGuildId(guildId: Long): List<MarkovAllowedChannel> {
+        var ret: List<MarkovAllowedChannel> = emptyList()
+        sessionFactory.inTransaction { session: Session ->
+            ret = session.createSelectionQuery(
+                "from ${MarkovAllowedChannel::class.java.name} m where m.${MarkovAllowedChannel::guildId.name} = $guildId",
+                MarkovAllowedChannel::class.java
+            ).resultList
+        }
+        return ret
     }
 }

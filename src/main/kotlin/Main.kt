@@ -1,5 +1,7 @@
 package org.matkija.bot
 
+import com.zaxxer.hikari.HikariConfig
+import com.zaxxer.hikari.HikariDataSource
 import dev.lavalink.youtube.YoutubeAudioSourceManager
 import dev.minn.jda.ktx.jdabuilder.default
 import dev.minn.jda.ktx.jdabuilder.intents
@@ -13,6 +15,7 @@ import org.matkija.bot.discordBot.commands.avatar.avatarInit
 import org.matkija.bot.discordBot.commands.music.musicInit
 import org.matkija.bot.discordBot.commands.question.questionInit
 import org.matkija.bot.discordBot.commands.tsihOClock.tsihOClockInit
+import org.matkija.bot.discordBot.hybridCommands.markov.markovPassiveInit
 import org.matkija.bot.discordBot.passiveCommands.randomReactInit
 import org.matkija.bot.discordBot.passiveCommands.sauceSender.sauceSenderInit
 import org.matkija.bot.discordBot.timedEvents.randomStatus.RandomStatus
@@ -21,6 +24,7 @@ import org.slf4j.LoggerFactory
 import java.io.File
 import java.util.concurrent.TimeUnit
 import kotlin.system.exitProcess
+import kotlin.time.Duration.Companion.seconds
 
 
 @Serializable
@@ -44,8 +48,25 @@ val LOG: Logger = LoggerFactory.getLogger("Tsih")
 
 fun main(args: Array<String>) {
 
+    val bots = getBotsConfig()
+    if (bots == null) {
+        LOG.error("Bot config not provided.")
+        exitProcess(1)
+    }
+
     // creates/migrates db if necessary
-    Flyway.configure().dataSource("jdbc:sqlite:tsih-robo.db", "", "").load().migrate()
+    Flyway.configure()
+        .dataSource(
+            HikariDataSource(HikariConfig().apply {
+                jdbcUrl = "jdbc:sqlite:tsih-robo.db"
+                maximumPoolSize = 2
+                leakDetectionThreshold = 10.seconds.inWholeMilliseconds
+            })
+        )
+        .validateMigrationNaming(true)
+        .loggers("slf4j")
+        .load()
+        .migrate()
 
     if (args.isNotEmpty()) {
         if (args[0] == "-t") {
@@ -55,8 +76,6 @@ fun main(args: Array<String>) {
             LOG.error("Unknown arguments.")
         }
     }
-
-    val bots = getBotsConfig() ?: exitProcess(2)
 
     val bot = bots[0]
 
@@ -69,6 +88,11 @@ fun main(args: Array<String>) {
         )
     }
     jda.awaitReady()
+
+    LOG.info("Currently in the following servers:")
+    jda.guilds.forEach {
+        LOG.info("${it.name} (${it.id})")
+    }
 
     /*
     load passive commands listeners
@@ -84,6 +108,7 @@ fun main(args: Array<String>) {
         questionInit(jda),
         avatarInit(jda),
         toolPosterInit(jda),
+        markovPassiveInit(jda)
     )
     if (tsihOClockExists()) {
         commandList.add(tsihOClockInit(jda)).also {
@@ -102,9 +127,4 @@ fun main(args: Array<String>) {
     timed functions
      */
     RandomStatus(jda).startScheduler(TimeUnit.MINUTES, 0, 5)
-
-    LOG.info("Currently in the following servers:")
-    jda.guilds.forEach {
-        LOG.info("${it.name} (${it.id})")
-    }
 }
