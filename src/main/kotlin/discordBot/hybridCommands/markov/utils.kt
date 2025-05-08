@@ -1,6 +1,6 @@
 package org.matkija.bot.discordBot.hybridCommands.markov
 
-private val linkPatters = Regex("<\\bhttps://[^\\s>]+(?=>)>|\\bhttps://\\S+")
+private val linkPatters = Regex("<\\bhttps://[^\\s>]+(?=>)>|\\bhttps://\\S+|<\\bhttp://[^\\s>]+(?=>)>|\\bhttp://\\S+")
 private val mentionPattern = Regex("<@[0-9]+>")
 private val doubleSpacePattern = Regex("\\s+")
 
