@@ -23,6 +23,7 @@ fun markovPassiveInit(jda: JDA): SlashCommandData {
     val logger: Logger = LoggerFactory.getLogger("MarkovInit")
     val markovsMap: MutableMap<Long, MarkovChain> = mutableMapOf() // key is the guild's id
     var savedMarkovChannels: List<MarkovAllowedChannel> = PersistenceUtil.getAllMarkovInfo()
+    val quotesPattern = Regex("\"(.+)\"")
 
     // delete saved messages if server is not using markov at all
     HistoryBuffer(null).workingDir.listFiles()?.forEach { file ->
@@ -105,8 +106,10 @@ fun markovPassiveInit(jda: JDA): SlashCommandData {
 
             if (contentRaw.contains(jda.selfUser.asMention)) {
                 isForced = true
-                val words = contentRaw.replace(jda.selfUser.asMention, "").trim()
-                if (words.isNotEmpty()) customMarkovWord = words
+                val word = quotesPattern.find(contentRaw)?.groupValues?.get(1) // 0 is the full match including "
+                if (word != null) {
+                    customMarkovWord = word
+                }
             }
 
             if (Math.random() <= 0.005 || isForced) {

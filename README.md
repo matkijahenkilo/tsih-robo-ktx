@@ -50,7 +50,8 @@ Runs every time a message is sent to a text channel where the bot has permission
 - `randomReact`
   - has a 0.2% to react to a message with a random custom emoji from a random server. Is guaranteed when saying "tsih" or "nora"
 - `markov`
-  - has a 0.05% chance to generate a random text based off a channel where `/markov read` were activated and send to a channel where `/markov talk` were activated. Is guaranteed when mentioning the bot
+  - has a 0.05% chance to generate a random text based off a channel where `/markov read` were activated and send to a channel where `/markov talk` were activated.
+    Is guaranteed when mentioning the bot, and can specify a word to begin with in between double quotes
 
 ### Scheduled events
 
