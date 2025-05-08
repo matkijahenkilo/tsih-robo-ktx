@@ -7,9 +7,11 @@ A private [JDA](https://github.com/discord-jda/JDA) bot with multiple functions,
 Tsih-robo's primary function is to fix Twitter's horrible embeds on Discord's text chats by sending the post's content,
 this can also work on other websites. It works as a music bot and markov chain bot as well.
 
-This repository is a complete remake of [tsih-robo](https://github.com/matkijahenkilo/tsih-robo) made with Discordia.
+Tsih is a character owned by Fruitbat Factory, they have nothing to do with this repository and I don't have anything to do with them. I just named the bot after Tsih!
 
 It uses Flyway, Hibernate, SQLite, JDA, JDA-ktx, Lavaplayer (and youtube-source), gallery-dl, yt-dlp and ffmpeg.
+
+This repository is a complete remake of [tsih-robo](https://github.com/matkijahenkilo/tsih-robo) made with Discordia.
 
 ## Commands
 
@@ -24,6 +26,9 @@ Runs when someone runs the command
 - `/music`
   - plays music from various websites
   - will also save the server's playlist to disk in case of sudden stop, can be resumed where it stopped
+
+![tsih disgusted](https://raw.githubusercontent.com/matkijahenkilo/matkijahenkilo/refs/heads/main/imgs/2025-05-08_09-34-54.png)
+
 - `/question`
   - answers a yes/no question
 - `/toolpost`
@@ -38,14 +43,14 @@ Runs when someone runs the command
 
 ### MessageReceived "passive" commands
 
-Runs every time a message is sent to a text channel where the bot has permission to see
+Runs every time a message is sent to a text channel where the bot has permission to see/talk
 
 - `sauceSender`
   - checks if it's a link that can have its embed "fixed"
 - `randomReact`
-  - has a 0.2% to react to a message with a random custom emoji from a random server
+  - has a 0.2% to react to a message with a random custom emoji from a random server. Is guaranteed when saying "tsih" or "nora"
 - `markov`
-  - has a 0.05% chance to generate a random text based off a channel where `/markov read` were activated and send to a channel where `/markov talk` were activated
+  - has a 0.05% chance to generate a random text based off a channel where `/markov read` were activated and send to a channel where `/markov talk` were activated. Is guaranteed when mentioning the bot
 
 ### Scheduled events
 
