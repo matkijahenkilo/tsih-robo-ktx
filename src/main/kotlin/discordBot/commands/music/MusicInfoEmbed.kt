@@ -23,7 +23,7 @@ import java.time.Instant
 object MusicInfoEmbed {
 
     private var pausedText = "Paused:"
-    private var shuffleText = "Shuffle:"
+    private var shuffleText = "Shuffling:"
     private var repeatText = "Repeating:"
 
     private val mocks = listOf(
