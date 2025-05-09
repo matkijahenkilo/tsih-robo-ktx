@@ -116,7 +116,7 @@ fun markovPassiveInit(jda: JDA): SlashCommandData {
                 }
             }
 
-            if (Math.random() <= 0.005 || isForced) {
+            if (Math.random() <= 0.01 || isForced) {
                 val sentenceSize = Random.nextInt(5, 30)
                 val sentence = markov?.generateSentence(customMarkovWord, sentenceSize)
 

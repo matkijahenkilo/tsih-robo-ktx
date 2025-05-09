@@ -9,7 +9,7 @@ fun randomReactInit(jda: JDA) {
         if (event.author.id == event.jda.selfUser.id || event.author.isBot) return@listener
         val c = event.message.contentRaw.lowercase()
 
-        if (Math.random() <= 0.02 || c.contains("tsih") || c.contains("nora")) {
+        if (Math.random() <= 0.01 || c.contains("tsih") || c.contains("nora")) {
             val customEmoji = jda.guilds.random().emojis.random()
             event.message.addReaction(customEmoji).queue()
         }
