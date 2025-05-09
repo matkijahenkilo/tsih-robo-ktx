@@ -29,12 +29,6 @@ fun markovPassiveInit(jda: JDA): SlashCommandData {
     var savedMarkovChannels: List<MarkovAllowedChannel> = PersistenceUtil.getAllMarkovInfo()
     val quotesPattern = Regex("\"(.+)\"")
 
-    // delete saved messages if server is not using markov at all
-    HistoryBuffer(null).workingDir.listFiles()?.forEach { file ->
-        if (savedMarkovChannels.any { it.guildId.toString() != file.nameWithoutExtension })
-            file.delete()
-    }
-
     fun updateMap(textChannelObj: TextChannel?, guild: Guild?, shouldGetFromDiscord: Boolean = false) {
         if (textChannelObj != null && guild != null) {
             val historyBuffer = HistoryBuffer(guild.idLong)
