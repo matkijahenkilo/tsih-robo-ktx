@@ -111,6 +111,10 @@ fun markovPassiveInit(jda: JDA): SlashCommandData {
             }
 
             if (Math.random() <= 0.01 || isForced) {
+                // check if it's a phrase, get a random word from it
+                if (customMarkovWord != null && customMarkovWord.contains(' '))
+                    customMarkovWord = customMarkovWord.split(' ').filter { !it.contains(' ') }.random()
+
                 val sentenceSize = Random.nextInt(5, 30)
                 val sentence = markov?.generateSentence(customMarkovWord, sentenceSize)
 
