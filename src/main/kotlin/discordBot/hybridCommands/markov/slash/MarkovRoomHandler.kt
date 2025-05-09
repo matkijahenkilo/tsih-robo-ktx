@@ -92,11 +92,7 @@ class MarkovRoomHandler(private val event: GenericCommandInteractionEvent) : Sla
             PersistenceUtil.deleteMarkovReadingChannelById(channelId)
             event.reply("Done nanora! I won't be reading this chat anymore~").queue()
 
-            // delete file if server is not in db anymore
-            val serverIsUsingMarkov =
-                PersistenceUtil.getAllMarkovInfo().contains(MarkovAllowedChannel(guildId = guildId))
-            if (!serverIsUsingMarkov)
-                HistoryBuffer(guildId).deleteFile()
+            HistoryBuffer(guildId, channelId).deleteFile()
         } else {
             event.reply("I'm not even reading it!!!").queue()
         }
