@@ -132,8 +132,21 @@ fun markovPassiveInit(jda: JDA): SlashCommandData {
     slash command listeners
      */
     jda.onCommand(MarkovRoomHandlerSlashCommands.MARKOV) { event ->
-        if (!event.isFromGuild) event.reply("This only work in servers nanora!").queue()
+        if (!event.isFromGuild) {
+            event.reply("This only work in servers nanora!").queue()
+            return@onCommand
+        }
+        if (event.channelType.isThread) {
+            event.reply("This doesn't work on threads nora.").queue()
+            return@onCommand
+        }
+        if (event.channelType.isAudio) {
+            event.reply("This doesn't work on voice channels nora.").queue()
+            return@onCommand
+        }
+
         MarkovRoomHandler(event).tryExecute()
+
         savedMarkovChannels = PersistenceUtil.getAllMarkovInfo()
         val option = event.getOption(TOCSlashCommands.OPTION_ACTION)!!.asInt
         if (event.subcommandName == MarkovRoomHandlerSlashCommands.OPTION_READ && option == 1) // 1 is for saving
