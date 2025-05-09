@@ -3,6 +3,7 @@ package org.matkija.bot.discordBot.hybridCommands.markov
 import dev.minn.jda.ktx.events.listener
 import dev.minn.jda.ktx.events.onCommand
 import dev.minn.jda.ktx.messages.send
+import discordBot.commands.tsihOClock.TOCSlashCommands
 import kotlinx.coroutines.Runnable
 import net.dv8tion.jda.api.JDA
 import net.dv8tion.jda.api.entities.Guild
@@ -34,11 +35,11 @@ fun markovPassiveInit(jda: JDA): SlashCommandData {
             file.delete()
     }
 
-    fun updateMap(textChannelObj: TextChannel?, guild: Guild?) {
+    fun updateMap(textChannelObj: TextChannel?, guild: Guild?, shouldGetFromDiscord: Boolean = false) {
         if (textChannelObj != null && guild != null) {
             val historyBuffer = HistoryBuffer(guild.idLong)
             val textFromFile = historyBuffer.readFile()
-            if (textFromFile == null) {
+            if (textFromFile == null || shouldGetFromDiscord) {
                 logger.info("Fetching messages from Discord")
 
                 val textFromChannel = mutableListOf<String>()
@@ -137,7 +138,9 @@ fun markovPassiveInit(jda: JDA): SlashCommandData {
         if (!event.isFromGuild) event.reply("This only work in servers nanora!").queue()
         MarkovRoomHandler(event).tryExecute()
         savedMarkovChannels = PersistenceUtil.getAllMarkovInfo()
-        updateEntireMap()
+        val option = event.getOption(TOCSlashCommands.OPTION_ACTION)!!.asInt
+        if (event.subcommandName == MarkovRoomHandlerSlashCommands.OPTION_READ && option == 1) // 1 is for saving
+            updateMap(jda.getTextChannelById(event.channelIdLong), event.guild, true)
     }
 
 
