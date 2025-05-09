@@ -3,6 +3,7 @@ package org.matkija.bot.discordBot.hybridCommands.markov
 import dev.minn.jda.ktx.events.listener
 import dev.minn.jda.ktx.events.onCommand
 import dev.minn.jda.ktx.messages.send
+import kotlinx.coroutines.Runnable
 import net.dv8tion.jda.api.JDA
 import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel
@@ -16,6 +17,8 @@ import org.matkija.bot.sql.jpa.MarkovAllowedChannel
 import org.matkija.bot.sql.jpa.PersistenceUtil
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 import kotlin.random.Random
 
 fun markovPassiveInit(jda: JDA): SlashCommandData {
@@ -136,6 +139,37 @@ fun markovPassiveInit(jda: JDA): SlashCommandData {
         savedMarkovChannels = PersistenceUtil.getAllMarkovInfo()
         updateEntireMap()
     }
+
+
+    /*
+    reload file every so and often
+
+    why? because of how MarkovChain class works.
+
+    imagine a sequence of 3 messages:
+    1. owo
+    2. very nice
+    3. ちんぽがすき
+
+    the bot will try to append these 3 messages to its corpus, but it won't work to add to its vocabulary because
+    the messages are too short
+
+    nothing comes after "owo", "nice" or "ちんぽがすき", the only word it'll append is "very" because
+    it will understand that the next possible outcome of "very" is "nice"
+
+    in the .txt file, these 3 messages will be appended and become "owo very nice ちんぽがすき",
+    thus only "ちんぽがすき" won't get appended to its corpus:
+    ["owo", "very", "nice"]
+    it simply cannot be used as a starting point
+
+    one day I'll think of some better solution for updating its corpus lol
+     */
+    val updateMarkovMapTask: Runnable = Runnable {
+        updateEntireMap()
+    }
+
+    // run every 6 hours
+    Executors.newScheduledThreadPool(1).scheduleAtFixedRate(updateMarkovMapTask, 0, 6, TimeUnit.HOURS)
 
 
     return MarkovRoomHandlerSlashCommands.getCommands()
