@@ -139,7 +139,7 @@ fun markovPassiveInit(jda: JDA): SlashCommandData {
 
 
     /*
-    reload file every so and often
+    reload map from file every so and often
 
     why? because of how MarkovChain class works.
 
@@ -162,11 +162,13 @@ fun markovPassiveInit(jda: JDA): SlashCommandData {
     one day I'll think of some better solution for updating its corpus lol
      */
     val updateMarkovMapTask: Runnable = Runnable {
+        logger.info("Scheduler: Updating Markov map")
         updateEntireMap()
+        logger.info("Scheduler: Done")
     }
 
     // run every 6 hours
-    Executors.newScheduledThreadPool(1).scheduleAtFixedRate(updateMarkovMapTask, 0, 6, TimeUnit.HOURS)
+    Executors.newScheduledThreadPool(1).scheduleAtFixedRate(updateMarkovMapTask, 6, 6, TimeUnit.HOURS)
 
 
     return MarkovRoomHandlerSlashCommands.getCommands()
