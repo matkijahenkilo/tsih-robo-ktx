@@ -12,7 +12,7 @@ class MarkovChain(corpus: List<String>) {
 
     // Build a map where each word maps to its possible next words
     fun appendCorpus(corpus: List<String>) {
-        for (i in 0..corpus.size - 2) {
+        for (i in corpus.indices) {
             val key = corpus[i]
             val value = corpus.getOrElse(i + 1) { "" }
 
