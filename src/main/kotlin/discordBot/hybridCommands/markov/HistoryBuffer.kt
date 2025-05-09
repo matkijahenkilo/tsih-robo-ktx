@@ -1,4 +1,4 @@
-package org.matkija.bot.discordBot.hybridCommands.markov.passive
+package org.matkija.bot.discordBot.hybridCommands.markov
 
 import java.io.File
 

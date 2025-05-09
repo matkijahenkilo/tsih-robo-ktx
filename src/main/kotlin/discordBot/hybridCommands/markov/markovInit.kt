@@ -10,8 +10,6 @@ import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData
-import org.matkija.bot.discordBot.hybridCommands.markov.passive.HistoryBuffer
-import org.matkija.bot.discordBot.hybridCommands.markov.passive.MarkovChain
 import org.matkija.bot.discordBot.hybridCommands.markov.slash.MarkovRoomHandler
 import org.matkija.bot.discordBot.hybridCommands.markov.slash.MarkovRoomHandlerSlashCommands
 import org.matkija.bot.sql.jpa.MarkovAllowedChannel

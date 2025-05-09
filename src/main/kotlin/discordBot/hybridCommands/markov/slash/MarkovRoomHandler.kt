@@ -3,7 +3,7 @@ package org.matkija.bot.discordBot.hybridCommands.markov.slash
 import discordBot.commands.tsihOClock.TOCSlashCommands
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent
 import org.matkija.bot.discordBot.abstracts.SlashCommand
-import org.matkija.bot.discordBot.hybridCommands.markov.passive.HistoryBuffer
+import org.matkija.bot.discordBot.hybridCommands.markov.HistoryBuffer
 import org.matkija.bot.sql.jpa.MarkovAllowedChannel
 import org.matkija.bot.sql.jpa.PersistenceUtil
 
