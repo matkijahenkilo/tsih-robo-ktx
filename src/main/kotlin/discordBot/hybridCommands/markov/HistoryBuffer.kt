@@ -2,9 +2,9 @@ package org.matkija.bot.discordBot.hybridCommands.markov
 
 import java.io.File
 
-class HistoryBuffer(private val guildId: Long, channelId: Long?) {
+class HistoryBuffer(private val guildId: Long?, channelId: Long?) {
     private val file: File = File("data/markov/${guildId}_${channelId}")
-    private val workingDir: File = File("data/markov")
+    val workingDir: File = File("data/markov")
 
     init {
         if (!workingDir.exists()) workingDir.mkdir()

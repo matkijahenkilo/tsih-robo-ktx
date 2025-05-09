@@ -68,11 +68,16 @@ fun main(args: Array<String>) {
         .load()
         .migrate()
 
+    var shouldDeleteMarkovFiles = false
+
     if (args.isNotEmpty()) {
         if (args[0] == "-t") {
             YoutubeAudioSourceManager().useOauth2(null, false)
             LOG.info("After you get the token, save it to data/oauth.txt and restart me")
-        } else {
+        } else if (args[0] == "-m") {
+            shouldDeleteMarkovFiles = true
+        }
+        else {
             LOG.error("Unknown arguments.")
         }
     }
@@ -108,7 +113,7 @@ fun main(args: Array<String>) {
         questionInit(jda),
         avatarInit(jda),
         toolPosterInit(jda),
-        markovPassiveInit(jda)
+        markovPassiveInit(jda, shouldDeleteMarkovFiles)
     )
     if (tsihOClockExists()) {
         commandList.add(tsihOClockInit(jda)).also {

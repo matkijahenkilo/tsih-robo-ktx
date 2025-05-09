@@ -16,16 +16,25 @@ import org.matkija.bot.sql.jpa.MarkovAllowedChannel
 import org.matkija.bot.sql.jpa.PersistenceUtil
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.io.File
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import kotlin.random.Random
 
-fun markovPassiveInit(jda: JDA): SlashCommandData {
+fun markovPassiveInit(jda: JDA, shouldResetMarkovFiles: Boolean): SlashCommandData {
 
     val logger: Logger = LoggerFactory.getLogger("MarkovInit")
     val markovsMap: MutableMap<Long, MarkovChain> = mutableMapOf() // key is the guild's id
     var savedMarkovChannels: List<MarkovAllowedChannel> = PersistenceUtil.getAllMarkovInfo()
     val quotesPattern = Regex("\"(.+)\"")
+
+    if (shouldResetMarkovFiles) {
+        logger.info("-m Argument used, deleting everything in data/markov/")
+        HistoryBuffer(null, null).workingDir.listFiles()?.forEach { file: File? ->
+            file?.delete()
+        }
+        logger.info("Deleted everything")
+    }
 
     fun reloadMapByGuildId(textChannelObj: TextChannel?, guild: Guild?) {
         if (textChannelObj != null && guild != null) {
