@@ -47,7 +47,8 @@ fun markovPassiveInit(jda: JDA, shouldResetMarkovFiles: Boolean): SlashCommandDa
 
                 textChannelObj.getHistoryBefore(textChannelObj.latestMessageIdLong, 100)
                     .complete().retrievedHistory.forEach {
-                        if (!it.author.isBot)
+                        // do not save messages created by bots or that mentions this jda instance
+                        if (!it.author.isBot || !it.contentRaw.contains(jda.selfUser.asMention))
                             textFromChannel.add(it.contentRaw)
                     }
 
@@ -98,9 +99,12 @@ fun markovPassiveInit(jda: JDA, shouldResetMarkovFiles: Boolean): SlashCommandDa
 
         // if bot is allowed to log messages
         if (savedMarkovChannels.any { it.readingChannelId == event.channel.idLong }) {
-            val textCleared = contentRaw.clearForMarkovCorpus()
-            HistoryBuffer(guildId, channelId).appendToFile(textCleared)
-            markov?.appendCorpus(textCleared.split(" "))
+            // log only if bot is not mentioned in message
+            if (!contentRaw.contains(jda.selfUser.asMention)) {
+                val textCleared = contentRaw.clearForMarkovCorpus()
+                HistoryBuffer(guildId, channelId).appendToFile(textCleared)
+                markov?.appendCorpus(textCleared.split(" "))
+            }
         }
 
         // if bot is allowed to compose markov shitpost
