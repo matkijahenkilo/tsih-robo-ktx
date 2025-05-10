@@ -3,11 +3,8 @@ package org.matkija.bot.discordBot.hybridCommands.markov
 import dev.minn.jda.ktx.events.listener
 import dev.minn.jda.ktx.events.onCommand
 import dev.minn.jda.ktx.messages.send
-import discordBot.commands.tsihOClock.TOCSlashCommands
 import kotlinx.coroutines.Runnable
 import net.dv8tion.jda.api.JDA
-import net.dv8tion.jda.api.entities.Guild
-import net.dv8tion.jda.api.entities.channel.concrete.TextChannel
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData
 import org.matkija.bot.discordBot.hybridCommands.markov.slash.MarkovRoomHandler
@@ -21,6 +18,9 @@ import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import kotlin.random.Random
 
+/*
+I hate this place lmao
+ */
 fun markovPassiveInit(jda: JDA, shouldResetMarkovFiles: Boolean): SlashCommandData {
 
     val logger: Logger = LoggerFactory.getLogger("MarkovInit")
@@ -36,51 +36,59 @@ fun markovPassiveInit(jda: JDA, shouldResetMarkovFiles: Boolean): SlashCommandDa
         logger.info("Deleted everything")
     }
 
-    fun reloadMapByGuildId(textChannelObj: TextChannel?, guild: Guild?) {
-        if (textChannelObj != null && guild != null) {
-            val historyBuffer = HistoryBuffer(guild.idLong, textChannelObj.idLong)
-            val textFromFile = historyBuffer.getChannelsTextsBelongingToGuild()
-            if (historyBuffer.fileDoesNotExist()) {
-                logger.info("Fetching messages of channel #${textChannelObj.name} from Discord")
+    fun saveUnsavedChannelsToDisk() {
+        savedMarkovChannels.forEach { markovChannel ->
+            if (markovChannel.readingChannelId != null) {
+                val textChannelObj = jda.getTextChannelById(markovChannel.readingChannelId)
+                if (textChannelObj != null) {
+                    val hb = HistoryBuffer(markovChannel.guildId, textChannelObj.idLong)
+                    if (hb.fileDoesNotExist()) {
+                        logger.info("Fetching messages of channel #${textChannelObj.name} from Discord")
 
-                val textFromChannel = mutableListOf<String>()
+                        val textFromChannel = mutableListOf<String>()
 
-                textChannelObj.getHistoryBefore(textChannelObj.latestMessageIdLong, 100)
-                    .complete().retrievedHistory.forEach {
-                        // do not save messages created by bots or that mentions this jda instance
-                        if (!it.author.isBot || !it.contentRaw.contains(jda.selfUser.asMention))
-                            textFromChannel.add(it.contentRaw)
+                        textChannelObj.getHistoryBefore(textChannelObj.latestMessageIdLong, 100)
+                            .complete().retrievedHistory.forEach {
+                                // do not save messages created by bots or that mentions this jda instance
+                                if (!it.author.isBot || !it.contentRaw.contains(jda.selfUser.asMention))
+                                    textFromChannel.add(it.contentRaw)
+                            }
+
+                        hb.appendToFile(textFromChannel.joinToString(" ").clearForMarkovCorpus())
+                    } else {
+                        logger.info("Channel #${textChannelObj.name} is already saved to disk")
                     }
-
-                val clearedText = textFromChannel.joinToString(" ").clearForMarkovCorpus()
-
-                historyBuffer.appendToFile(clearedText)
-                markovsMap[guild.idLong] = MarkovChain(clearedText.split(" "))
-            } else {
-                logger.info("Fetching messages of channel #${textChannelObj.name} from disk")
-                markovsMap[guild.idLong] = MarkovChain(textFromFile!!.split(" "))
+                }
             }
         }
     }
 
-    fun reloadEntireMap() {
-        savedMarkovChannels.forEach { markovChannel ->
-            if (markovChannel.readingChannelId != null) {
-                val textChannel = jda.getTextChannelById(markovChannel.readingChannelId)
-                reloadMapByGuildId(textChannel, textChannel?.guild)
-            }
+    fun saveCurrentGuildCorpusFromDiskToMap(guildId: Long) {
+        val textsBelongingToGuild = HistoryBuffer(guildId, null).getChannelsTextsBelongingToGuild()
+        if (textsBelongingToGuild != null) {
+            markovsMap[guildId] = MarkovChain(textsBelongingToGuild.clearForMarkovCorpus().split(" "))
+        } else {
+            markovsMap.remove(guildId) // remove if there's no file/nothing to read
+        }
+    }
+
+    fun replaceEntireMapWithCorpusFromDisk() {
+        savedMarkovChannels.map { it.guildId }.distinct().forEach {
+            saveCurrentGuildCorpusFromDiskToMap(it)
         }
     }
 
     logger.info("Saving texts from ${savedMarkovChannels.size} guilds to Markov Text generator")
 
-    reloadEntireMap()
+    saveUnsavedChannelsToDisk()
+    replaceEntireMapWithCorpusFromDisk()
 
     if (markovsMap.isEmpty()) {
         logger.warn("Markov Text generator wasn't loaded at all")
     } else {
         logger.info("Markov Text generator loaded for all servers!")
     }
+
 
     /*
     messageReceived listener
@@ -143,25 +151,33 @@ fun markovPassiveInit(jda: JDA, shouldResetMarkovFiles: Boolean): SlashCommandDa
     slash command listeners
      */
     jda.onCommand(MarkovRoomHandlerSlashCommands.MARKOV) { event ->
-        if (!event.isFromGuild) {
-            event.reply("This only work in servers nanora!").queue()
-            return@onCommand
-        }
-        if (event.channelType.isThread) {
-            event.reply("This doesn't work on threads nora.").queue()
-            return@onCommand
-        }
-        if (event.channelType.isAudio) {
-            event.reply("This doesn't work on voice channels nora.").queue()
-            return@onCommand
+        when {
+            !event.isFromGuild -> {
+                event.reply("This only work in servers nanora!").queue()
+                return@onCommand
+            }
+
+            event.channelType.isThread -> {
+                event.reply("This doesn't work on threads nora.").queue()
+                return@onCommand
+            }
+
+            event.channelType.isAudio -> {
+                event.reply("This doesn't work on voice channels nora.").queue()
+                return@onCommand
+            }
         }
 
         MarkovRoomHandler(event).tryExecute()
 
         savedMarkovChannels = PersistenceUtil.getAllMarkovInfo()
-        val option = event.getOption(TOCSlashCommands.OPTION_ACTION)!!.asInt
-        if (event.subcommandName == MarkovRoomHandlerSlashCommands.OPTION_READ && option == 1) // 1 is for saving
-            reloadMapByGuildId(jda.getTextChannelById(event.channelIdLong), event.guild)
+
+        if (event.subcommandName == MarkovRoomHandlerSlashCommands.OPTION_READ) {
+            // will save if a channel is added, or ignored if it was removed
+            saveUnsavedChannelsToDisk()
+            // content in disk is altered, so update it in memory as well
+            saveCurrentGuildCorpusFromDiskToMap(event.guild!!.idLong)
+        }
     }
 
 
@@ -190,7 +206,7 @@ fun markovPassiveInit(jda: JDA, shouldResetMarkovFiles: Boolean): SlashCommandDa
      */
     val updateMarkovMapTask: Runnable = Runnable {
         logger.info("Scheduler: Updating Markov map")
-        reloadEntireMap()
+        replaceEntireMapWithCorpusFromDisk()
         logger.info("Scheduler: Done")
     }
 
