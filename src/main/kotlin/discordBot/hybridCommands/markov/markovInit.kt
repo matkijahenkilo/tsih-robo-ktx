@@ -128,7 +128,8 @@ fun markovPassiveInit(jda: JDA, shouldResetMarkovFiles: Boolean): SlashCommandDa
                 }
             }
 
-            if (Math.random() <= 0.01 || isForced) {
+            // todo: a fucking command that configs a default chance for each server
+            if (Math.random() <= 0.05 || isForced) {
                 // check if it's a phrase, get a random word from it
                 if (customMarkovWord != null && customMarkovWord.contains(' '))
                     customMarkovWord = customMarkovWord.split(' ').filter { !it.contains(' ') }.random()
