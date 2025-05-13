@@ -205,6 +205,31 @@ fun markovPassiveInit(jda: JDA, shouldResetMarkovFiles: Boolean): SlashCommandDa
     one day I'll think of some better solution for updating its corpus lol
      */
     val updateMarkovMapTask = Runnable {
+        logger.info("Scheduler: Clearing deleted channels from database and corpus from disk")
+        var c = 0
+        PersistenceUtil.getAllMarkovInfo().forEach {
+            if (it.writingChannelId != null) {
+                val textChannelById = jda.getTextChannelById(it.writingChannelId)
+                if (textChannelById == null) {
+                    PersistenceUtil.deleteMarkovWritingChannelById(it.writingChannelId)
+                    HistoryBuffer(it.guildId, it.writingChannelId).deleteFile()
+                    c++
+                }
+            }
+            if (it.readingChannelId != null) {
+                val textChannelById = jda.getTextChannelById(it.readingChannelId)
+                if (textChannelById == null) {
+                    PersistenceUtil.deleteMarkovReadingChannelById(it.readingChannelId)
+                    HistoryBuffer(it.guildId, it.readingChannelId).deleteFile()
+                    c++
+                }
+            }
+        }
+        if (c > 0)
+            logger.info("Scheduler: Deleted $c entries from db and disk")
+        else
+            logger.info("Scheduler: Nothing to be cleared")
+
         logger.info("Scheduler: Updating Markov map")
         replaceEntireMapWithCorpusFromDisk()
         logger.info("Scheduler: Done")
