@@ -26,6 +26,13 @@ object MusicInfoEmbed {
     private var shuffleText = "Shuffling:"
     private var repeatText = "Repeating:"
 
+    private val stop = danger(MusicSlashCommands.STOP, emoji = Emoji.fromUnicode("🛑"))
+    private val pauseOrStart = primary(MusicSlashCommands.PLAY, emoji = Emoji.fromUnicode("⏯"))
+    private val skip = primary(MusicSlashCommands.SKIP, emoji = Emoji.fromUnicode("⏭"))
+    private val repeat = primary(MusicSlashCommands.REPEAT, emoji = Emoji.fromUnicode("🔂"))
+    private val shuffle = primary(MusicSlashCommands.SHUFFLE, emoji = Emoji.fromUnicode("🔀"))
+    private val componentsRow: List<LayoutComponent> = row(stop, pauseOrStart, skip, repeat, shuffle).into()
+
     private val mocks = listOf(
         "Listen to this banger!",
         "This one is is kinda meh but I'll play it anyway~",
@@ -55,7 +62,7 @@ object MusicInfoEmbed {
         trackScheduler: TrackScheduler,
         player: AudioPlayer
     ) = channel.send(
-        components = loadComponents(),
+        components = componentsRow,
         embeds = listOf(
             loadPlayingEmbed(
                 content.requester!!,
@@ -65,15 +72,6 @@ object MusicInfoEmbed {
             )
         )
     ).queue()
-
-    private fun loadComponents(): List<LayoutComponent> {
-        val stop = danger(MusicSlashCommands.STOP, emoji = Emoji.fromUnicode("🛑"))
-        val pauseOrStart = primary(MusicSlashCommands.PLAY, emoji = Emoji.fromUnicode("⏯"))
-        val skip = primary(MusicSlashCommands.SKIP, emoji = Emoji.fromUnicode("⏭"))
-        val repeat = primary(MusicSlashCommands.REPEAT, emoji = Emoji.fromUnicode("🔂"))
-        val shuffle = primary(MusicSlashCommands.SHUFFLE, emoji = Emoji.fromUnicode("🔀"))
-        return row(stop, pauseOrStart, skip, repeat, shuffle).into()
-    }
 
     private fun loadPlayingEmbed(
         user: User,
