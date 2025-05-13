@@ -3,7 +3,6 @@ package org.matkija.bot.discordBot.hybridCommands.markov
 import dev.minn.jda.ktx.events.listener
 import dev.minn.jda.ktx.events.onCommand
 import dev.minn.jda.ktx.messages.send
-import kotlinx.coroutines.Runnable
 import net.dv8tion.jda.api.JDA
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData
@@ -205,7 +204,7 @@ fun markovPassiveInit(jda: JDA, shouldResetMarkovFiles: Boolean): SlashCommandDa
 
     one day I'll think of some better solution for updating its corpus lol
      */
-    val updateMarkovMapTask: Runnable = Runnable {
+    val updateMarkovMapTask = Runnable {
         logger.info("Scheduler: Updating Markov map")
         replaceEntireMapWithCorpusFromDisk()
         logger.info("Scheduler: Done")
