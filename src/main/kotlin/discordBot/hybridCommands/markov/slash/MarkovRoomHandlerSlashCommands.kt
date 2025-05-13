@@ -10,6 +10,7 @@ object MarkovRoomHandlerSlashCommands {
     const val MARKOV = "markov"
     const val OPTION_READ = "read"
     const val OPTION_TALK = "talk"
+    const val OPTION_STATUS = "status"
     private const val OPTION_ACTION = "action"
 
     fun getCommands(): SlashCommandData =
@@ -36,6 +37,7 @@ object MarkovRoomHandlerSlashCommands {
                         )
                             .addChoice("yeah, talk gibberish!", 1)
                             .addChoice("SHUT THE FUCK UP!!!", 0)
-                    )
+                    ),
+                Subcommand(OPTION_STATUS, "Shows my current configuration in this server nora~")
             )
 }
