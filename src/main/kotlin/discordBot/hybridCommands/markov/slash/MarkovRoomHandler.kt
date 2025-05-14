@@ -22,11 +22,11 @@ class MarkovRoomHandler(private val event: GenericCommandInteractionEvent) : Sla
                 }
             }
 
-            MarkovRoomHandlerSlashCommands.OPTION_TALK -> {
+            MarkovRoomHandlerSlashCommands.OPTION_WRITE -> {
                 if (option == 1) {
-                    saveChannelIdToTalk()
+                    saveChannelIdToWrite()
                 } else if (option == 0) {
-                    deleteChannelIdToTalk()
+                    deleteChannelIdToWrite()
                 }
             }
 
@@ -75,7 +75,7 @@ class MarkovRoomHandler(private val event: GenericCommandInteractionEvent) : Sla
         }
     }
 
-    private fun saveChannelIdToTalk() {
+    private fun saveChannelIdToWrite() {
         val channelId = event.channelIdLong
         val guildId = event.guild!!.idLong
 
@@ -90,11 +90,11 @@ class MarkovRoomHandler(private val event: GenericCommandInteractionEvent) : Sla
                     writingChannelId = channelId
                 )
             )
-            event.reply("Done nanora! I'll be talking lots of nonsense here now nora~").queue()
+            event.reply("Done nanora! I'll be writing lots of nonsense here now nora~").queue()
         }
     }
 
-    private fun deleteChannelIdToTalk() {
+    private fun deleteChannelIdToWrite() {
         val channelId = event.channelIdLong
         val guildId = event.guild!!.idLong
 

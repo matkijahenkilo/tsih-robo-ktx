@@ -9,7 +9,7 @@ import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData
 object MarkovRoomHandlerSlashCommands {
     const val MARKOV = "markov"
     const val OPTION_READ = "read"
-    const val OPTION_TALK = "talk"
+    const val OPTION_WRITE = "write"
     const val OPTION_STATUS = "status"
     private const val OPTION_ACTION = "action"
 
@@ -27,15 +27,15 @@ object MarkovRoomHandlerSlashCommands {
                             .addChoice("yes, log this channel", 1)
                             .addChoice("no, stop logging this channel", 0)
                     ),
-                Subcommand(OPTION_TALK, "With my vocabulary formed, I will spit out words in this channel nora~")
+                Subcommand(OPTION_WRITE, "With my vocabulary formed, I will spit out words in this channel nora~")
                     .addOptions(
                         OptionData(
                             OptionType.INTEGER,
                             OPTION_ACTION,
-                            "Should I talk is this channel nora?",
+                            "Should I write is this channel nora?",
                             true
                         )
-                            .addChoice("yeah, talk gibberish!", 1)
+                            .addChoice("yeah, write gibberish!", 1)
                             .addChoice("SHUT THE FUCK UP!!!", 0)
                     ),
                 Subcommand(OPTION_STATUS, "Shows my current configuration in this server nora~")

@@ -37,20 +37,20 @@ Runs when someone runs the command
 - `/tsihoclock`
   - saves or removes the text channel to receive a random art of Tsih
 - `/markov`
-  - manages bot's permissions on where to read and talk [meaningless text](https://en.wikipedia.org/wiki/Markov_chain#Markov_text_generators)
+  - manages bot's permissions on where to read and write [meaningless text](https://en.wikipedia.org/wiki/Markov_chain#Markov_text_generators)
     - `read` ⚠️ **will log a channel's messages** to feed to its vocabulary
-    - `talk` will use the saved vocabulary to spit out meaningless text
+    - `write` will use the saved vocabulary to spit out meaningless text
 
 ### MessageReceived "passive" commands
 
-Runs every time a message is sent to a text channel where the bot has permission to see/talk
+Runs every time a message is sent to a text channel where the bot has permission to see/write
 
 - `sauceSender`
   - checks if it's a link that can have its embed "fixed"
 - `randomReact`
-  - has a 0.2% to react to a message with a random custom emoji from a random server. Is guaranteed when saying "tsih" or "nora"
+  - has a small chance to react to a message with a random custom emoji from a random server. Is guaranteed when saying "tsih" or "nora"
 - `markov`
-  - has a 0.05% chance to generate a random text based off a channel where `/markov read` were activated and send to a channel where `/markov talk` were activated.
+  - has a small chance to generate a random text based off a channel where `/markov read` were activated and send to a channel where `/markov write` were activated.
     Is guaranteed when mentioning the bot, and can specify a word to begin with in between double quotes
 
 ![tsih trying to english](https://raw.githubusercontent.com/matkijahenkilo/matkijahenkilo/refs/heads/main/imgs/2025-05-08_18-34-54.png)
