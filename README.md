@@ -72,8 +72,8 @@ and input the following model, replacing with your info:
 ```json
 [
   {
-    "name" : "your bot name here",
-    "token" : "your fancy token here"
+    "name": "your bot name here",
+    "token": "your fancy token here"
   }
 ]
 ```

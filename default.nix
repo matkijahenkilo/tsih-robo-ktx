@@ -19,12 +19,10 @@ maven.buildMavenPackage {
 
   src = lib.cleanSource ./.;
 
+  # Maven uses the internet for downloading deps, thus you need to manually
+  # update the mvnHash when they change. You can set it to `lib.fakeHash` and
+  # get the right one from the error message
   mvnHash = "sha256-FSneivfSXdQVlgtzQePParaRtujOFUF0qNxojmS4XNg=";
-
-  mvnParameters = lib.escapeShellArgs [
-    "-Dspotless.check.skip"
-    "-Dspotless.apply.skip"
-  ];
 
   nativeBuildInputs = [ makeWrapper ];
 
