@@ -22,12 +22,14 @@
 
         <!-- JDA -->
         <!-- https://github.com/discord-jda/JDA -->
-        <jda.version>5.5.0</jda.version>
+        <jda.version>5.5.1</jda.version>
+        <!-- https://github.com/MinnDevelopment/jda-ktx -->
         <jdaktx.version>0.12.0</jdaktx.version>
 
         <!-- lavaplayer -->
         <!-- https://central.sonatype.com/artifact/dev.arbjerg/lavaplayer -->
         <lavaplayer.version>2.2.3</lavaplayer.version>
+        <!-- https://github.com/lavalink-devs/youtube-source -->
         <lavalinkyoutube.version>1.13.2</lavalinkyoutube.version>
     </properties>
 

@@ -19,7 +19,12 @@ maven.buildMavenPackage {
 
   src = lib.cleanSource ./.;
 
-  mvnHash = "sha256-sk/kz2mZmi5RyL/918dfPxiPrgu6/IcfbfIsO8oEeOU=";
+  mvnHash = "sha256-FSneivfSXdQVlgtzQePParaRtujOFUF0qNxojmS4XNg=";
+
+  mvnParameters = lib.escapeShellArgs [
+    "-Dspotless.check.skip"
+    "-Dspotless.apply.skip"
+  ];
 
   nativeBuildInputs = [ makeWrapper ];
 
