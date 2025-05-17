@@ -1,9 +1,14 @@
 package org.matkija.bot.discordBot.passiveCommands.sauceSender
 
+fun shouldIFixIt(content: String): Boolean = whiteList.any { content.contains(it, ignoreCase = true) }
 
-fun canIFixIt(content: String): Boolean = list.any { content.contains(it, ignoreCase = true) }
+fun List<String>.filterOutBlacklistedItems(): List<String> = this.filter { word -> blackList.any { !it.matches(word) } }
 
-private val list = listOf(
+val blackList = listOf(
+    Regex("\\[.+]\\(.+\\)")
+)
+
+private val whiteList = listOf(
     "https://x.com/",
     "https://hitomi.la/",
     "https://kemono.su/",
@@ -20,7 +25,6 @@ private val list = listOf(
 
     "https://e621.net/",
     "https://booru.io/",
-//    "https://pawoo.net/",
     "https://misskey.io/",
     "https://nijie.info/",
     "https://nhentai.net/",

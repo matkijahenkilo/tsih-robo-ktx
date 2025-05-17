@@ -26,7 +26,7 @@ class SauceSender(
     private val footerImage = "sauce-footer.png"
     private var footerImagePath: MutableList<FileUpload>? = null
     private val discordSizeLimit = 10
-    private val links: List<String> = filterOutWords(content).distinct()
+    private val links: List<String> = filterOutWords(content).distinct().filterOutBlacklistedItems()
     private val logger: Logger = LoggerFactory.getLogger(SauceSender::class.java)
 
     init {
@@ -37,8 +37,11 @@ class SauceSender(
 
     fun sendSauce() = runBlocking {
 
+        if (links.isEmpty()) return@runBlocking
+
         val jobList = mutableListOf<Job>()
         var altTwitterFix = AltTwitterFix("", true)
+        var wasFixed = false
 
         links.forEach { link ->
             if (isTwitterLink(link)) {
@@ -48,92 +51,96 @@ class SauceSender(
         }
 
         links.forEach { link ->
-            jobList += async {
-                if (isTwitterLink(link) && !altTwitterFix.worksOrHasMedia) {
-                    logger.info("Sending alternative fix for $link")
-                    sendAlternativeFix(link, altTwitterFix.errorMsg)
-                } else {
-                    val payload = Payload()
-                    val command: List<String>
-                    var infoCommand: List<String> = emptyList()
-                    var website: String? = null
-
-                    // make command for each website, and get info for embed if possible
-                    when {
-                        isTwitterLink(link) -> {
-                            command = makeTwitterCommand(link)
-                            infoCommand = makeTwitterCommand(link, true)
-                            website = "Twitter.com"
-                        }
-
-                        isMisskeyLink(link) -> {
-                            command = makeMisskeyCommand(link)
-                            infoCommand = makeMisskeyCommand(link, true)
-                            website = "Misskey.io"
-                        }
-
-                        else -> {
-                            command = makeCommonCommand(link)
-                        }
-                    }
-
-                    // download and organize files to list
-                    val child = spawnGallerydlProcess(command)
-                    val exitedChild = readGallerydlProcess(child)
-                    val filesStdout = exitedChild.stdout
-                    val files = mutableListOf<File>()
-                    filesStdout.lines().forEach { filePath ->
-                        if (filePath.isNotEmpty()) {
-                            val clearFilePath = filePath
-                                .clearCRLF()
-                                .replace("\\", "/")
-                                .replace("# ", "")
-                                .replace("./", "/")
-                            val file = File("./data", clearFilePath)
-                            if (file.exists() && file.length() < discordSizeLimit * 1024 * 1024)
-                                files.add(file)
-                            else
-                                logger.error("File $file was bigger than ${discordSizeLimit}mb")
-                        }
-                    }
-
-                    // if failing to fetch anything
-                    if (files.isEmpty()) {
-                        child.destroy()
-                        var msg = "Failed to fetch anything from $link: ${exitedChild.stderr.clearCRLF()}"
-                        if (isTwitterLink(link)) {
-                            msg += ", sending alternative fix instead"
-                            sendAlternativeFix(link, null)
-                        }
-                        logger.error(msg)
-                        return@async
-                    }
-                    payload.files = files
-
-                    // deal with embed
-                    if (infoCommand.isNotEmpty()) {
-                        val infoChild = spawnGallerydlProcess(infoCommand)
-                        val infoStdout = readGallerydlProcess(infoChild).stdout
-                        payload.embedInfo = buildEmbed(infoStdout, link, payload.files!!, website)
-                    }
-
-                    logger.info("Sending content from $link")
-
-                    // send it, embed or not
-                    if (payload.files!!.size > 10) {
-                        sendFilesInParts(payload, link)
+            if (shouldIFixIt(link)) {
+                jobList += async {
+                    if (isTwitterLink(link) && !altTwitterFix.worksOrHasMedia) {
+                        logger.info("Sending alternative fix for $link")
+                        sendAlternativeFix(link, altTwitterFix.errorMsg)
                     } else {
-                        sendFiles(payload, link)
-                    }
+                        val payload = Payload()
+                        val command: List<String>
+                        var infoCommand: List<String> = emptyList()
+                        var website: String? = null
 
-                    child.destroy() // readProcess has child.exit(), this ensures le fokin process is dead
+                        // make command for each website, and get info for embed if possible
+                        when {
+                            isTwitterLink(link) -> {
+                                command = makeTwitterCommand(link)
+                                infoCommand = makeTwitterCommand(link, true)
+                                website = "Twitter.com"
+                            }
+
+                            isMisskeyLink(link) -> {
+                                command = makeMisskeyCommand(link)
+                                infoCommand = makeMisskeyCommand(link, true)
+                                website = "Misskey.io"
+                            }
+
+                            else -> {
+                                command = makeCommonCommand(link)
+                            }
+                        }
+
+                        // download and organize files to list
+                        val child = spawnGallerydlProcess(command)
+                        val exitedChild = readGallerydlProcess(child)
+                        val filesStdout = exitedChild.stdout
+                        val files = mutableListOf<File>()
+                        filesStdout.lines().forEach { filePath ->
+                            if (filePath.isNotEmpty()) {
+                                val clearFilePath = filePath
+                                    .clearCRLF()
+                                    .replace("\\", "/")
+                                    .replace("# ", "")
+                                    .replace("./", "/")
+                                val file = File("./data", clearFilePath)
+                                if (file.exists() && file.length() < discordSizeLimit * 1024 * 1024)
+                                    files.add(file)
+                                else
+                                    logger.error("File $file was bigger than ${discordSizeLimit}mb")
+                            }
+                        }
+
+                        // if failing to fetch anything
+                        if (files.isEmpty()) {
+                            child.destroy()
+                            var msg = "Failed to fetch anything from $link: ${exitedChild.stderr.clearCRLF()}"
+                            if (isTwitterLink(link)) {
+                                msg += ", sending alternative fix instead"
+                                sendAlternativeFix(link, null)
+                            }
+                            logger.error(msg)
+                            return@async
+                        }
+                        payload.files = files
+
+                        // deal with embed
+                        if (infoCommand.isNotEmpty()) {
+                            val infoChild = spawnGallerydlProcess(infoCommand)
+                            val infoStdout = readGallerydlProcess(infoChild).stdout
+                            payload.embedInfo = buildEmbed(infoStdout, link, payload.files!!, website)
+                        }
+
+                        logger.info("Sending content from $link")
+
+                        // send it, embed or not
+                        if (payload.files!!.size > 10) {
+                            sendFilesInParts(payload, link)
+                        } else {
+                            sendFiles(payload, link)
+                        }
+
+                        wasFixed = true
+
+                        child.destroy() // readProcess has child.exit(), this ensures le fokin process is dead
+                    }
                 }
             }
         }
         jobList.joinAll()
 
         //delete user's message embed
-        if (event.guild.selfMember.permissions.contains(Permission.MESSAGE_MANAGE) && !event.message.isSuppressedEmbeds)
+        if (event.guild.selfMember.permissions.contains(Permission.MESSAGE_MANAGE) && !event.message.isSuppressedEmbeds && wasFixed)
             event.message.suppressEmbeds(true).queue()
     }
 
