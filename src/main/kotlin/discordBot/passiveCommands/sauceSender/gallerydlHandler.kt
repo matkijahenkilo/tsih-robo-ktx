@@ -44,6 +44,8 @@ fun isTwitterLink(s: String): Boolean = "https://twitter.com" in s || "https://x
 
 fun isMisskeyLink(s: String): Boolean = "https://misskey.io" in s
 
+fun isPixivLink(s: String): Boolean = "https://www.pixiv.net" in s
+
 private const val twitterFilters =
     "print(user['name']) or print(user['nick']) or print(user['profile_image']) or print(retweet_count) or print(favorite_count) or print(date) or print(content) or abort()"
 

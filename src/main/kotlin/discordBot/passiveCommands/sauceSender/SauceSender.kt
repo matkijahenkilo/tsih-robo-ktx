@@ -55,7 +55,7 @@ class SauceSender(
                 jobList += async {
                     if (isTwitterLink(link) && !altTwitterFix.worksOrHasMedia) {
                         logger.info("Sending alternative fix for $link")
-                        sendAlternativeFix(link, altTwitterFix.errorMsg)
+                        sendTwitterAltFix(link, altTwitterFix.errorMsg).also { wasFixed = true }
                     } else {
                         val payload = Payload()
                         val command: List<String>
@@ -97,7 +97,7 @@ class SauceSender(
                                 if (file.exists() && file.length() < discordSizeLimit * 1024 * 1024)
                                     files.add(file)
                                 else
-                                    logger.error("File $file was bigger than ${discordSizeLimit}mb")
+                                    logger.warn("File $file was bigger than ${discordSizeLimit}mb")
                             }
                         }
 
@@ -106,10 +106,13 @@ class SauceSender(
                             child.destroy()
                             var msg = "Failed to fetch anything from $link: ${exitedChild.stderr.clearCRLF()}"
                             if (isTwitterLink(link)) {
-                                msg += ", sending alternative fix instead"
-                                sendAlternativeFix(link, null)
+                                msg += ", sending alternative fix instead (stupidpenisx)"
+                                sendTwitterAltFix(link, null).also { wasFixed = true }
+                            } else if (isPixivLink(link)) {
+                                msg += ", sending alternative fix instead (phixiv)"
+                                sendPixivAltFix(link).also { wasFixed = true }
                             }
-                            logger.error(msg)
+                            logger.warn(msg)
                             return@async
                         }
                         payload.files = files
@@ -210,7 +213,7 @@ class SauceSender(
         }
     }
 
-    private fun sendAlternativeFix(link: String, content: String?) {
+    private fun sendTwitterAltFix(link: String, content: String?) {
         val newLink = link.replace(
             if (link.contains("twitter.com")) {
                 "twitter.com"
@@ -220,6 +223,13 @@ class SauceSender(
         )
         val msg = if (content != null) "$content\n$newLink" else newLink
         event.message.reply_(content = msg)
+            .mentionRepliedUser(false)
+            .queue()
+    }
+
+    private fun sendPixivAltFix(link: String) {
+        val newLink = link.replace("pixiv.net", "phixiv.net")
+        event.message.reply_(content = newLink)
             .mentionRepliedUser(false)
             .queue()
     }
