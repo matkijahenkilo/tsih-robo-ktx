@@ -29,7 +29,7 @@ fun markovPassiveInit(jda: JDA, shouldResetMarkovFiles: Boolean): SlashCommandDa
 
     if (shouldResetMarkovFiles) {
         logger.info("-m Argument used, deleting everything in data/markov/")
-        HistoryBuffer(null, null).workingDir.listFiles()?.forEach { file: File? ->
+        CorpusSaverManager(null, null).workingDir.listFiles()?.forEach { file: File? ->
             file?.delete()
         }
         logger.info("Deleted everything")
@@ -40,7 +40,7 @@ fun markovPassiveInit(jda: JDA, shouldResetMarkovFiles: Boolean): SlashCommandDa
             if (markovChannel.readingChannelId != null) {
                 val textChannelObj = jda.getTextChannelById(markovChannel.readingChannelId)
                 if (textChannelObj != null) {
-                    val hb = HistoryBuffer(markovChannel.guildId, textChannelObj.idLong)
+                    val hb = CorpusSaverManager(markovChannel.guildId, textChannelObj.idLong)
                     if (hb.fileDoesNotExist()) {
                         logger.info("Fetching messages of channel #${textChannelObj.name} from Discord")
 
@@ -63,7 +63,7 @@ fun markovPassiveInit(jda: JDA, shouldResetMarkovFiles: Boolean): SlashCommandDa
     }
 
     fun saveCurrentGuildCorpusFromDiskToMap(guildId: Long) {
-        val textsBelongingToGuild = HistoryBuffer(guildId, null).getChannelsTextsBelongingToGuild()
+        val textsBelongingToGuild = CorpusSaverManager(guildId, null).getChannelsTextsBelongingToGuild()
         if (textsBelongingToGuild != null) {
             markovsMap[guildId] = MarkovChain(textsBelongingToGuild.clearForMarkovCorpus().split(" "))
         } else {
@@ -109,7 +109,7 @@ fun markovPassiveInit(jda: JDA, shouldResetMarkovFiles: Boolean): SlashCommandDa
             // log only if bot is not mentioned in message
             if (!contentRaw.contains(jda.selfUser.asMention)) {
                 val textCleared = contentRaw.clearForMarkovCorpus()
-                HistoryBuffer(guildId, channelId).appendToFile(textCleared)
+                CorpusSaverManager(guildId, channelId).appendToFile(textCleared)
                 markov?.appendCorpus(textCleared.split(" "))
             }
         }
@@ -212,7 +212,7 @@ fun markovPassiveInit(jda: JDA, shouldResetMarkovFiles: Boolean): SlashCommandDa
                 val textChannelById = jda.getTextChannelById(it.writingChannelId)
                 if (textChannelById == null) {
                     PersistenceUtil.deleteMarkovWritingChannelById(it.writingChannelId)
-                    HistoryBuffer(it.guildId, it.writingChannelId).deleteFile()
+                    CorpusSaverManager(it.guildId, it.writingChannelId).deleteFile()
                     c++
                 }
             }
@@ -220,7 +220,7 @@ fun markovPassiveInit(jda: JDA, shouldResetMarkovFiles: Boolean): SlashCommandDa
                 val textChannelById = jda.getTextChannelById(it.readingChannelId)
                 if (textChannelById == null) {
                     PersistenceUtil.deleteMarkovReadingChannelById(it.readingChannelId)
-                    HistoryBuffer(it.guildId, it.readingChannelId).deleteFile()
+                    CorpusSaverManager(it.guildId, it.readingChannelId).deleteFile()
                     c++
                 }
             }

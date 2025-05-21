@@ -4,7 +4,7 @@ import dev.minn.jda.ktx.messages.EmbedBuilder
 import discordBot.commands.tsihOClock.TOCSlashCommands
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent
 import org.matkija.bot.discordBot.abstracts.SlashCommand
-import org.matkija.bot.discordBot.hybridCommands.markov.HistoryBuffer
+import org.matkija.bot.discordBot.hybridCommands.markov.CorpusSaverManager
 import org.matkija.bot.sql.jpa.MarkovAllowedChannel
 import org.matkija.bot.sql.jpa.PersistenceUtil
 import org.matkija.bot.utils.getRandomColor
@@ -137,7 +137,7 @@ class MarkovRoomHandler(private val event: GenericCommandInteractionEvent) : Sla
             PersistenceUtil.deleteMarkovReadingChannelById(channelId)
             event.reply("Done nanora! I won't be reading this chat anymore~").queue()
 
-            HistoryBuffer(guildId, channelId).deleteFile()
+            CorpusSaverManager(guildId, channelId).deleteFile()
         } else {
             event.reply("I'm not even reading it!!!").queue()
         }

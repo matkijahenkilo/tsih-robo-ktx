@@ -2,7 +2,7 @@ package org.matkija.bot.discordBot.hybridCommands.markov
 
 import java.io.File
 
-class HistoryBuffer(private val guildId: Long?, channelId: Long?) {
+class CorpusSaverManager(private val guildId: Long?, channelId: Long?) {
     private val file: File = File("data/markov/${guildId}_${channelId}")
     val workingDir: File = File("data/markov")
 
