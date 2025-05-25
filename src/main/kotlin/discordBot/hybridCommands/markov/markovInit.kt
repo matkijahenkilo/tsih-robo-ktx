@@ -6,6 +6,7 @@ import dev.minn.jda.ktx.messages.send
 import net.dv8tion.jda.api.JDA
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData
+import org.matkija.bot.discordBot.CommandsEnum
 import org.matkija.bot.discordBot.hybridCommands.markov.slash.MarkovRoomHandler
 import org.matkija.bot.discordBot.hybridCommands.markov.slash.MarkovRoomHandlerSlashCommands
 import org.matkija.bot.sql.jpa.MarkovAllowedChannel
@@ -22,6 +23,7 @@ I hate this place lmao
  */
 fun markovPassiveInit(jda: JDA, shouldResetMarkovFiles: Boolean): SlashCommandData {
 
+    val defaultChance = 0.05F
     val logger: Logger = LoggerFactory.getLogger("MarkovInit")
     val markovsMap: MutableMap<Long, MarkovChain> = mutableMapOf() // key is the guild's id
     var savedMarkovChannels: List<MarkovAllowedChannel> = PersistenceUtil.getAllMarkovInfo()
@@ -127,8 +129,10 @@ fun markovPassiveInit(jda: JDA, shouldResetMarkovFiles: Boolean): SlashCommandDa
                 }
             }
 
-            // todo: a fucking command that configs a default chance for each server
-            if (Math.random() <= 0.05 || isForced) {
+            val chanceEntity =
+                PersistenceUtil.getCustomChanceEntity(event.guild.idLong)
+            val chance = chanceEntity?.eventMarkovTextChance ?: defaultChance
+            if (Random.nextFloat() * 100 <= chance || isForced) {
                 // check if it's a phrase, get a random word from it
                 if (customMarkovWord != null && customMarkovWord.contains(' '))
                     customMarkovWord = customMarkovWord.split(' ').filter { !it.contains(' ') }.random()
