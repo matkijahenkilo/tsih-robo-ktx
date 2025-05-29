@@ -114,6 +114,8 @@ inputs = {
 
 then import into your environment:
 
+**(Depending on your system's architecture, change `x86_64-linux` to something else like `aarch64-linux`)**
+
 ```nix
 home.packages = [
   inputs.tsih-robo-ktx.packages.x86_64-linux.default
@@ -130,11 +132,71 @@ environment.systemPackages = [
 
 Switch your current system, and you can execute Tsih with `tsih-robo-ktx` inside the dedicated folder.
 
+#### Systemd service
+
+You can start the bot on boot if you want, the following example was made to run on a Raspberry Pi 3 B (which is aarch64)
+
+Note that the bot's folder is in `/srv/tsih-robo-ktx`. Because another user is taking care of the process, use `chown -R tsih:tsih /srv/tsih-robo-ktx`
+after you prepared the folder to run the bot.
+
+Customise the configuration as you'd like
+
+```nix
+{
+  inputs,
+  lib,
+  pkgs,
+  config,
+  ...
+}:
+let
+  tsih-robo-path = "/srv/tsih-robo-ktx";
+in
+{
+  users.users.tsih = {
+    description = "Tsih-robo owner (very cute)";
+    home = tsih-robo-path;
+    createHome = true;
+    isSystemUser = true;
+    group = config.users.groups.tsih.name;
+    shell = "${pkgs.shadow}/bin/nologin";
+  };
+
+  users.groups.tsih.gid = config.users.users.tsih.uid;
+
+  systemd.services = {
+    tsih-robo-ktx = {
+      unitConfig = {
+        Description = "Discord bot mais fofa do mundo!";
+        Documentation = [
+          "https://github.com/matkijahenkilo/tsih-robo-ktx"
+        ];
+      };
+
+      serviceConfig = {
+        User = config.users.users.tsih.name;
+        Group = config.users.users.tsih.group;
+        WorkingDirectory = tsih-robo-path;
+        ExecStart = "${inputs.tsih-robo-ktx.packages.aarch64-linux.default}/bin/tsih-robo-ktx";
+        Restart = "on-failure";
+        RestartSec = "5s";
+      };
+
+      wantedBy = [
+        "multi-user.target"
+      ];
+    };
+  };
+}
+```
+
 ### Manually
 
 Install Java JDK at least on version 21.0.5 and Maven
 
-`git clone` this repository, then `cd` into it and run `mvn package`. The .jar file will be located at `target/tsih-robo-ktx-VERSION-jar-with-dependencies.jar` then execute it with `java -jar [.jar file with dependencies here]`
+`git clone` this repository, then `cd` into it and run `mvn package`.
+
+The .jar file will be located at `target/tsih-robo-ktx-VERSION-jar-with-dependencies.jar` then execute it with `java -jar [.jar file with dependencies here]`
 
 ## Huge thanks
 
