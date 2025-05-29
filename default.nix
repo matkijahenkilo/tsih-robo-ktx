@@ -26,12 +26,6 @@ maven.buildMavenPackage {
 
   nativeBuildInputs = [ makeWrapper ];
 
-  buildInputs = [
-    ffmpeg
-    yt-dlp
-    gallery-dl
-  ];
-
   installPhase = ''
     runHook preInstall
 
@@ -39,7 +33,14 @@ maven.buildMavenPackage {
     install -Dm644 target/${jar-file} $out/share/${project-name}
 
     makeWrapper ${jre}/bin/java $out/bin/${project-name} \
-      --add-flags "-jar $out/share/${project-name}/${jar-file}"
+      --add-flags "-jar $out/share/${project-name}/${jar-file}" \
+      --prefix PATH : ${
+        lib.makeBinPath [
+          ffmpeg
+          yt-dlp
+          gallery-dl
+        ]
+      }
 
     runHook postInstall
   '';
