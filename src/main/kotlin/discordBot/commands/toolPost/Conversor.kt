@@ -57,7 +57,7 @@ private fun makeYtDlpGetDurationCommand(link: String): List<String> =
     )
 
 const val PATH = "data/toolpost"
-val workingDir = File(PATH)
+val toolPostWorkingDir = File(PATH)
 
 private fun String.replaceInstantChars(): String = this
     .replace(":", "")
@@ -164,7 +164,7 @@ fun getFileDuration(link: String): Double {
 
 private fun spawnProcess(command: List<String>): Process =
     ProcessBuilder(command)
-        .directory(workingDir)
+        .directory(toolPostWorkingDir)
         .redirectOutput(ProcessBuilder.Redirect.PIPE)
         .redirectError(ProcessBuilder.Redirect.PIPE)
         .start()

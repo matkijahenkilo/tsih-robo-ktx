@@ -6,7 +6,7 @@ import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData
 
 fun toolPosterInit(jda: JDA): SlashCommandData {
     //clear up folder before doing stuff
-    workingDir.listFiles()?.forEach {
+    toolPostWorkingDir.listFiles()?.forEach {
         if (it.name != ORIGINAL_VIDEO)
             it.delete()
     }

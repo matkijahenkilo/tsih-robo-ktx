@@ -11,6 +11,9 @@ fun sauceSenderInit(jda: JDA) {
     if (!File("data/cookies.txt").exists())
         LOG.warn("cookies.txt doesn't exist in data/, many websites will break if you don't have your cookies exported!")
 
+    LOG.info("Clearing data/temp folder")
+    File("./data/temp").listFiles()?.forEach { it.delete() }
+
     jda.listener<MessageReceivedEvent> { event ->
         if (event.author.isBot) return@listener
         val c = event.message.contentRaw.replace("\n", " ").replace("||", "")
