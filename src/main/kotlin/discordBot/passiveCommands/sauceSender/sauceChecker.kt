@@ -2,10 +2,11 @@ package org.matkija.bot.discordBot.passiveCommands.sauceSender
 
 fun shouldIFixIt(content: String): Boolean = whiteList.any { content.contains(it, ignoreCase = true) }
 
-fun List<String>.filterOutBlacklistedItems(): List<String> = this.filter { word -> blackList.any { !it.matches(word) } }
+fun List<String>.filterOutBlacklistedItems(): List<String> = this.filter { word -> blackList.none { it.matches(word) } }
 
 val blackList = listOf(
-    Regex("\\[.+]\\(.+\\)")
+    Regex("\\[.+]\\(.+\\)"),
+    Regex("<.+>"),
 )
 
 private val whiteList = listOf(
