@@ -132,4 +132,6 @@ fun main(args: Array<String>) {
     timed functions
      */
     RandomStatus(jda).startScheduler(TimeUnit.MINUTES, 0, 5)
+
+    LOG.info("Ready!")
 }
