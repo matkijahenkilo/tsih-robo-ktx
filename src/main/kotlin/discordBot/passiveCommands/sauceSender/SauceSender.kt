@@ -3,10 +3,7 @@ package org.matkija.bot.discordBot.passiveCommands.sauceSender
 import dev.minn.jda.ktx.messages.EmbedBuilder
 import dev.minn.jda.ktx.messages.InlineEmbed
 import dev.minn.jda.ktx.messages.reply_
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.async
-import kotlinx.coroutines.joinAll
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 import net.dv8tion.jda.api.Permission
 import net.dv8tion.jda.api.entities.MessageEmbed
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
@@ -35,9 +32,9 @@ class SauceSender(
             footerImagePath = mutableListOf(FileUpload.fromData(footerImage))
     }
 
-    fun sendSauce() = runBlocking {
+    suspend fun sendSauce() {
 
-        if (links.isEmpty()) return@runBlocking
+        if (links.isEmpty()) return
 
         val jobList = mutableListOf<Job>()
         var altTwitterFix = AltTwitterFix("", true)
@@ -50,92 +47,94 @@ class SauceSender(
             }
         }
 
-        links.forEach { link ->
-            if (shouldIFixIt(link)) {
-                jobList += async {
-                    if (isTwitterLink(link) && !altTwitterFix.worksOrHasMedia) {
-                        logger.info("Sending alternative fix for $link")
-                        sendTwitterAltFix(link, altTwitterFix.errorMsg).also { wasFixed = true }
-                    } else {
-                        val payload = Payload()
-                        val command: List<String>
-                        var infoCommand: List<String> = emptyList()
-                        var website: String? = null
-
-                        // make command for each website, and get info for embed if possible
-                        when {
-                            isTwitterLink(link) -> {
-                                command = makeTwitterCommand(link)
-                                infoCommand = makeTwitterCommand(link, true)
-                                website = "Twitter.com"
-                            }
-
-                            isMisskeyLink(link) -> {
-                                command = makeMisskeyCommand(link)
-                                infoCommand = makeMisskeyCommand(link, true)
-                                website = "Misskey.io"
-                            }
-
-                            else -> {
-                                command = makeCommonCommand(link)
-                            }
-                        }
-
-                        // download and organize files to list
-                        val child = spawnGallerydlProcess(command)
-                        val exitedChild = readGallerydlProcess(child)
-                        val filesStdout = exitedChild.stdout
-                        val files = mutableListOf<File>()
-                        filesStdout.lines().forEach { filePath ->
-                            if (filePath.isNotEmpty()) {
-                                val clearFilePath = filePath
-                                    .clearCRLF()
-                                    .replace("\\", "/")
-                                    .replace("# ", "")
-                                    .replace("./", "/")
-                                val file = File("./data", clearFilePath)
-                                if (file.exists() && file.length() < discordSizeLimit * 1024 * 1024)
-                                    files.add(file)
-                                else
-                                    logger.warn("File $file was bigger than ${discordSizeLimit}mb")
-                            }
-                        }
-
-                        // if failing to fetch anything
-                        if (files.isEmpty()) {
-                            child.destroy()
-                            var msg = "Failed to fetch anything from $link: ${exitedChild.stderr.clearCRLF()}"
-                            if (isTwitterLink(link)) {
-                                msg += ", sending alternative fix instead (stupidpenisx)"
-                                sendTwitterAltFix(link, null).also { wasFixed = true }
-                            } else if (isPixivLink(link)) {
-                                msg += ", sending alternative fix instead (phixiv)"
-                                sendPixivAltFix(link).also { wasFixed = true }
-                            }
-                            logger.warn(msg)
-                            return@async
-                        }
-                        payload.files = files
-
-                        // deal with embed
-                        if (infoCommand.isNotEmpty()) {
-                            val infoChild = spawnGallerydlProcess(infoCommand)
-                            val infoStdout = readGallerydlProcess(infoChild).stdout
-                            payload.embedInfo = buildEmbed(infoStdout, link, payload.files!!, website)
-                        }
-
-                        logger.info("Sending content from $link")
-
-                        // send it, embed or not
-                        if (payload.files!!.size > 10) {
-                            sendFilesInParts(payload, link)
+        coroutineScope {
+            links.forEach { link ->
+                if (shouldIFixIt(link)) {
+                    jobList += launch {
+                        if (isTwitterLink(link) && !altTwitterFix.worksOrHasMedia) {
+                            logger.info("Sending alternative fix for $link")
+                            sendTwitterAltFix(link, altTwitterFix.errorMsg).also { wasFixed = true }
                         } else {
-                            sendFiles(payload, link)
+                            val payload = Payload()
+                            val command: List<String>
+                            var infoCommand: List<String> = emptyList()
+                            var website: String? = null
+
+                            // make command for each website, and get info for embed if possible
+                            when {
+                                isTwitterLink(link) -> {
+                                    command = makeTwitterCommand(link)
+                                    infoCommand = makeTwitterCommand(link, true)
+                                    website = "Twitter.com"
+                                }
+
+                                isMisskeyLink(link) -> {
+                                    command = makeMisskeyCommand(link)
+                                    infoCommand = makeMisskeyCommand(link, true)
+                                    website = "Misskey.io"
+                                }
+
+                                else -> {
+                                    command = makeCommonCommand(link)
+                                }
+                            }
+
+                            // download and organize files to list
+                            val child = spawnGallerydlProcess(command)
+                            val exitedChild = readGallerydlProcess(child)
+                            val filesStdout = exitedChild.stdout
+                            val files = mutableListOf<File>()
+                            filesStdout.lines().forEach { filePath ->
+                                if (filePath.isNotEmpty()) {
+                                    val clearFilePath = filePath
+                                        .clearCRLF()
+                                        .replace("\\", "/")
+                                        .replace("# ", "")
+                                        .replace("./", "/")
+                                    val file = File("./data", clearFilePath)
+                                    if (file.exists() && file.length() < discordSizeLimit * 1024 * 1024)
+                                        files.add(file)
+                                    else
+                                        logger.warn("File $file was bigger than ${discordSizeLimit}mb")
+                                }
+                            }
+
+                            // if failing to fetch anything
+                            if (files.isEmpty()) {
+                                child.destroy()
+                                var msg = "Failed to fetch anything from $link: ${exitedChild.stderr.clearCRLF()}"
+                                if (isTwitterLink(link)) {
+                                    msg += ", sending alternative fix instead (stupidpenisx)"
+                                    sendTwitterAltFix(link, null).also { wasFixed = true }
+                                } else if (isPixivLink(link)) {
+                                    msg += ", sending alternative fix instead (phixiv)"
+                                    sendPixivAltFix(link).also { wasFixed = true }
+                                }
+                                logger.warn(msg)
+                                return@launch
+                            }
+                            payload.files = files
+
+                            // deal with embed
+                            if (infoCommand.isNotEmpty()) {
+                                val infoChild = spawnGallerydlProcess(infoCommand)
+                                val infoStdout = readGallerydlProcess(infoChild).stdout
+                                payload.embedInfo = buildEmbed(infoStdout, link, payload.files!!, website)
+                            }
+
+                            logger.info("Sending content from $link")
+
+                            // send it, embed or not
+                            if (payload.files!!.size > 10) {
+                                sendFilesInParts(payload, link)
+                            } else {
+                                sendFiles(payload, link)
+                            }
+
+                            wasFixed = true
+
+                            child.destroy() // readProcess has child.exit(), this ensures le fokin process is dead
                         }
-
-                        wasFixed = true
-
-                        child.destroy() // readProcess has child.exit(), this ensures le fokin process is dead
                     }
                 }
             }
