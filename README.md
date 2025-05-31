@@ -55,6 +55,8 @@ Runs every time a message is sent to a text channel where the bot has permission
 
 ![tsih trying to english](https://raw.githubusercontent.com/matkijahenkilo/matkijahenkilo/refs/heads/main/imgs/2025-05-08_18-34-54.png)
 
+![you you you you](https://raw.githubusercontent.com/matkijahenkilo/matkijahenkilo/refs/heads/main/imgs/2025-05-31_16-49-26.png)
+
 ### Scheduled events
 
 Runs something periodically
