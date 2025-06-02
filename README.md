@@ -40,6 +40,7 @@ Runs when someone runs the command
   - manages bot's permissions on where to read and write [meaningless text](https://en.wikipedia.org/wiki/Markov_chain#Markov_text_generators)
     - `read` ⚠️ **will log a channel's messages** to feed to its vocabulary
     - `write` will use the saved vocabulary to spit out meaningless text
+    - `status` shows which channel she is using for what, is ephemeral
 
 ### MessageReceived "passive" commands
 
@@ -79,6 +80,17 @@ and input the following model, replacing with your info:
   }
 ]
 ```
+
+Folder structure should be the following:
+
+```
+bot-root-folder/
+├─ data/
+│  ├─ config.json
+├─ tsih-robo-ktx.jar
+```
+
+(.jar file is optional in case of Nix users)
 
 It also requires the following CLI programs:
 
@@ -198,7 +210,9 @@ Install Java JDK at least on version 21.0.5 and Maven
 
 `git clone` this repository, then `cd` into it and run `mvn package`.
 
-The .jar file will be located at `target/tsih-robo-ktx-VERSION-jar-with-dependencies.jar` then execute it with `java -jar [.jar file with dependencies here]`
+The .jar file will be located at `target/tsih-robo-ktx-VERSION-jar-with-dependencies.jar`.
+
+Preferably rename and move that .jar into your bot folder and run it with `java -jar tsih-robo-ktx.jar`
 
 ## Huge thanks
 
@@ -208,7 +222,8 @@ This project wouldn't be possible without:
 - JDA Discord server's brilliant minds for helping me deal with my stupidity
 - Asuran95 and rafaelrc7 for telling me the bot was based and that I should rewrite most of the scripts
 - Ikuse for making incentivising Tsih art to keep the darkness away
-- Riiya for not rebranding Tsih into Tewi on his server
+- Riiya for not rebranding Tsih into Tewi in his server
+- Lela for supporting this project
 - My teacher for presenting me Kotlin
 - People that use tsih-robo (and criticised her)
 - SaucyBot for being a worthy opponent
