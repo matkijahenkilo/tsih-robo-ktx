@@ -3,14 +3,14 @@ package org.matkija.bot.discordBot.commands.chanceManager
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent
 import org.matkija.bot.discordBot.CommandsEnum
 import org.matkija.bot.discordBot.abstracts.SlashCommand
-import org.matkija.bot.sql.jpa.CustomChance
-import org.matkija.bot.sql.jpa.PersistenceUtil
+import org.matkija.bot.sql.CustomChance
+import org.matkija.bot.sql.JPAUtil
 
 class ChanceManager(private val event: GenericCommandInteractionEvent) : SlashCommand(event) {
     override fun execute() {
         val commandEntryNumber = event.getOption(ChanceManagerSlashOptions.PERCENTAGE_OPTION_EVENT)!!.asInt
         var chance = event.getOption(ChanceManagerSlashOptions.PERCENTAGE_OPTION_FIELD)!!.asDouble.toFloat()
-        val customChanceEntity = PersistenceUtil.getCustomChanceEntity(event.guild!!.idLong)
+        val customChanceEntity = JPAUtil.getCustomChanceEntity(event.guild!!.idLong)
 
         if (chance < 0F)
             chance = 0F
@@ -21,7 +21,7 @@ class ChanceManager(private val event: GenericCommandInteractionEvent) : SlashCo
         when (commandEntryNumber) {
             CommandsEnum.RANDOM_REACT.ordinal -> {
                 if (customChanceEntity == null) {
-                    PersistenceUtil.saveOrUpdateCustomChance(
+                    JPAUtil.saveOrUpdateCustomChance(
                         CustomChance(
                             guildId = event.guild!!.idLong,
                             eventRandomReactChance = chance
@@ -29,13 +29,13 @@ class ChanceManager(private val event: GenericCommandInteractionEvent) : SlashCo
                     )
                 } else {
                     customChanceEntity.eventRandomReactChance = chance
-                    PersistenceUtil.saveOrUpdateCustomChance(customChanceEntity)
+                    JPAUtil.saveOrUpdateCustomChance(customChanceEntity)
                 }
             }
 
             CommandsEnum.MARKOV.ordinal -> {
                 if (customChanceEntity == null) {
-                    PersistenceUtil.saveOrUpdateCustomChance(
+                    JPAUtil.saveOrUpdateCustomChance(
                         CustomChance(
                             guildId = event.guild!!.idLong,
                             eventMarkovTextChance = chance
@@ -43,7 +43,7 @@ class ChanceManager(private val event: GenericCommandInteractionEvent) : SlashCo
                     )
                 } else {
                     customChanceEntity.eventMarkovTextChance = chance
-                    PersistenceUtil.saveOrUpdateCustomChance(customChanceEntity)
+                    JPAUtil.saveOrUpdateCustomChance(customChanceEntity)
                 }
             }
         }

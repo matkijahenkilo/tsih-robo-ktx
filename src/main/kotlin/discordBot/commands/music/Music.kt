@@ -15,7 +15,7 @@ import net.dv8tion.jda.api.managers.AudioManager
 import org.matkija.bot.LOG
 import org.matkija.bot.discordBot.abstracts.SlashCommand
 import org.matkija.bot.discordBot.commands.music.audio.GuildMusicManager
-import org.matkija.bot.sql.jpa.PersistenceUtil
+import org.matkija.bot.sql.JPAUtil
 import kotlin.time.Duration.Companion.minutes
 
 class Music(
@@ -83,7 +83,7 @@ class Music(
                 event.hook.editMessage(content = "Resuming a saved playlist nora...")
                     .queue()
 
-                val guildPlaylist = PersistenceUtil.getPlaylistsById(event.guild!!.id)
+                val guildPlaylist = JPAUtil.getPlaylistsById(event.guild!!.id)
 
                 if (guildPlaylist.isNotEmpty()) {
                     val requestedTrackInfoList = guildPlaylist.map {
@@ -269,7 +269,7 @@ class Music(
         // clear saved playlist since users can forget about it
         // this avoids the database from getting huge uwu
         if (musicManager.player.playingTrack == null)
-            PersistenceUtil.deletePlaylistById(event.guild!!.idLong)
+            JPAUtil.deletePlaylistById(event.guild!!.idLong)
     }
 
     private fun postSongLoad(option: String, originalOption: String?) {

@@ -1,4 +1,4 @@
-package org.matkija.bot.sql.jpa
+package org.matkija.bot.sql
 
 import org.hibernate.Session
 import org.hibernate.SessionFactory
@@ -21,7 +21,7 @@ private val sessionFactory: SessionFactory =
         .buildMetadata()
         .buildSessionFactory()
 
-object PersistenceUtil {
+object JPAUtil {
 
     fun savePlaylistEntries(requestedTrackInfos: List<RequestedTrackInfo>) {
         sessionFactory.inTransaction { session: Session ->

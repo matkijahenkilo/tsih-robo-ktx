@@ -3,8 +3,8 @@ package org.matkija.bot.discordBot.commands.tsihOClock
 import discordBot.commands.tsihOClock.TOCSlashCommands
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent
 import org.matkija.bot.discordBot.abstracts.SlashCommand
-import org.matkija.bot.sql.jpa.PersistenceUtil
-import org.matkija.bot.sql.jpa.TOCChannel
+import org.matkija.bot.sql.JPAUtil
+import org.matkija.bot.sql.TOCChannel
 
 class TsihOClock(private val event: GenericCommandInteractionEvent) : SlashCommand(event) {
 
@@ -20,12 +20,12 @@ class TsihOClock(private val event: GenericCommandInteractionEvent) : SlashComma
     private fun saveRoomId() {
         val channelId = event.channelIdLong
 
-        val allTsihOClockRooms = PersistenceUtil.getAllTsihOClockRooms()
+        val allTsihOClockRooms = JPAUtil.getAllTsihOClockRooms()
 
         if (isRoomAlreadySaved(channelId, allTsihOClockRooms)) {
             event.reply("This room is already subscribed to receive my awesome images nanora!").queue()
         } else {
-            PersistenceUtil.saveTsihOClockRoom(TOCChannel(channelId = channelId))
+            JPAUtil.saveTsihOClockRoom(TOCChannel(channelId = channelId))
             event.reply("Done nanora!").queue()
         }
     }
@@ -33,10 +33,10 @@ class TsihOClock(private val event: GenericCommandInteractionEvent) : SlashComma
     private fun deleteRoomId() {
         val channelId = event.channelIdLong
 
-        val allTsihOClockRooms = PersistenceUtil.getAllTsihOClockRooms()
+        val allTsihOClockRooms = JPAUtil.getAllTsihOClockRooms()
 
         if (isRoomAlreadySaved(channelId, allTsihOClockRooms)) {
-            PersistenceUtil.deleteTsihOClockRoomById(channelId)
+            JPAUtil.deleteTsihOClockRoomById(channelId)
             event.reply("Done nanora! You're free from my beauty..............").queue()
         } else {
             event.reply("You're not even subscribed!!! go away! go awayyy!!!!").queue()

@@ -1,4 +1,4 @@
-package org.matkija.bot.sql.jpa
+package org.matkija.bot.sql
 
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
