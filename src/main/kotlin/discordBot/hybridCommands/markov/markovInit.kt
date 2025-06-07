@@ -8,8 +8,8 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData
 import org.matkija.bot.discordBot.hybridCommands.markov.slash.MarkovRoomHandler
 import org.matkija.bot.discordBot.hybridCommands.markov.slash.MarkovRoomHandlerSlashCommands
-import org.matkija.bot.sql.jpa.MarkovAllowedChannel
-import org.matkija.bot.sql.jpa.PersistenceUtil
+import org.matkija.bot.sql.MarkovAllowedChannel
+import org.matkija.bot.sql.JPAUtil
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.File
@@ -22,9 +22,10 @@ I hate this place lmao
  */
 fun markovPassiveInit(jda: JDA, shouldResetMarkovFiles: Boolean): SlashCommandData {
 
+    val defaultChance = 0.05F
     val logger: Logger = LoggerFactory.getLogger("MarkovInit")
     val markovsMap: MutableMap<Long, MarkovChain> = mutableMapOf() // key is the guild's id
-    var savedMarkovChannels: List<MarkovAllowedChannel> = PersistenceUtil.getAllMarkovInfo()
+    var savedMarkovChannels: List<MarkovAllowedChannel> = JPAUtil.getAllMarkovInfo()
     val quotesPattern = Regex("\"(.+)\"")
 
     if (shouldResetMarkovFiles) {
@@ -127,8 +128,10 @@ fun markovPassiveInit(jda: JDA, shouldResetMarkovFiles: Boolean): SlashCommandDa
                 }
             }
 
-            // todo: a fucking command that configs a default chance for each server
-            if (Math.random() <= 0.05 || isForced) {
+            val chanceEntity =
+                JPAUtil.getCustomChanceEntity(event.guild.idLong)
+            val chance = chanceEntity?.eventMarkovTextChance ?: defaultChance
+            if (Random.nextFloat() * 100 <= chance || isForced) {
                 // check if it's a phrase, get a random word from it
                 if (customMarkovWord != null && customMarkovWord.contains(' '))
                     customMarkovWord = customMarkovWord.split(' ').filter { !it.contains(' ') }.random()
@@ -170,7 +173,7 @@ fun markovPassiveInit(jda: JDA, shouldResetMarkovFiles: Boolean): SlashCommandDa
 
         MarkovRoomHandler(event).tryExecute()
 
-        savedMarkovChannels = PersistenceUtil.getAllMarkovInfo()
+        savedMarkovChannels = JPAUtil.getAllMarkovInfo()
 
         if (event.subcommandName == MarkovRoomHandlerSlashCommands.OPTION_READ) {
             // will save if a channel is added, or ignored if it was removed
@@ -207,11 +210,11 @@ fun markovPassiveInit(jda: JDA, shouldResetMarkovFiles: Boolean): SlashCommandDa
     val updateMarkovMapTask = Runnable {
         logger.info("Scheduler: Clearing deleted channels from database and corpus from disk")
         var c = 0
-        PersistenceUtil.getAllMarkovInfo().forEach {
+        JPAUtil.getAllMarkovInfo().forEach {
             if (it.writingChannelId != null) {
                 val textChannelById = jda.getTextChannelById(it.writingChannelId)
                 if (textChannelById == null) {
-                    PersistenceUtil.deleteMarkovWritingChannelById(it.writingChannelId)
+                    JPAUtil.deleteMarkovWritingChannelById(it.writingChannelId)
                     CorpusSaverManager(it.guildId, it.writingChannelId).deleteFile()
                     c++
                 }
@@ -219,7 +222,7 @@ fun markovPassiveInit(jda: JDA, shouldResetMarkovFiles: Boolean): SlashCommandDa
             if (it.readingChannelId != null) {
                 val textChannelById = jda.getTextChannelById(it.readingChannelId)
                 if (textChannelById == null) {
-                    PersistenceUtil.deleteMarkovReadingChannelById(it.readingChannelId)
+                    JPAUtil.deleteMarkovReadingChannelById(it.readingChannelId)
                     CorpusSaverManager(it.guildId, it.readingChannelId).deleteFile()
                     c++
                 }

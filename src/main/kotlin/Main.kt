@@ -12,6 +12,7 @@ import kotlinx.serialization.json.Json
 import net.dv8tion.jda.api.requests.GatewayIntent
 import org.flywaydb.core.Flyway
 import org.matkija.bot.discordBot.commands.avatar.avatarInit
+import org.matkija.bot.discordBot.commands.chanceManager.chanceManagerInit
 import org.matkija.bot.discordBot.commands.messageDelete.messageDeleteInit
 import org.matkija.bot.discordBot.commands.music.musicInit
 import org.matkija.bot.discordBot.commands.question.questionInit
@@ -116,6 +117,7 @@ fun main(args: Array<String>) {
         toolPosterInit(jda),
         markovPassiveInit(jda, shouldDeleteMarkovFiles),
         messageDeleteInit(jda),
+        chanceManagerInit(jda)
     )
     if (tsihOClockExists()) {
         commandList.add(tsihOClockInit(jda)).also {

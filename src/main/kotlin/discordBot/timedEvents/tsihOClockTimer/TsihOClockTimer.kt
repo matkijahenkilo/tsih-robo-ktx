@@ -9,7 +9,7 @@ import org.matkija.bot.discordBot.abstracts.TimedEvent
 import org.matkija.bot.discordBot.timedEvents.tsihOClockTimer.randomName
 import org.matkija.bot.discordBot.timedEvents.tsihOClockTimer.randomTitle
 import org.matkija.bot.discordBot.timedEvents.tsihOClockTimer.randomValue
-import org.matkija.bot.sql.jpa.PersistenceUtil
+import org.matkija.bot.sql.JPAUtil
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.File
@@ -31,7 +31,7 @@ class TsihOClockTimer(private val jda: JDA) : TimedEvent() {
 
     override val task: Runnable = Runnable {
 
-        val channelList = PersistenceUtil.getAllTsihOClockRooms()
+        val channelList = JPAUtil.getAllTsihOClockRooms()
 
         if (channelList.isNotEmpty()) {
             // TODO: run this code exactly at 18:00

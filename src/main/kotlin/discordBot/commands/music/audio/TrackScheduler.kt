@@ -8,7 +8,7 @@ import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel
 import org.matkija.bot.discordBot.commands.music.MusicInfoEmbed
 import org.matkija.bot.discordBot.commands.music.RequestedTrackInfo
 import org.matkija.bot.discordBot.commands.music.TrackListEventInterface
-import org.matkija.bot.sql.jpa.PersistenceUtil
+import org.matkija.bot.sql.JPAUtil
 import java.util.concurrent.BlockingQueue
 import java.util.concurrent.LinkedBlockingQueue
 
@@ -115,10 +115,10 @@ class TrackScheduler(
     }
 
     override fun saveTracks(requestedTrackInfos: List<RequestedTrackInfo>) {
-        PersistenceUtil.savePlaylistEntries(requestedTrackInfos)
+        JPAUtil.savePlaylistEntries(requestedTrackInfos)
     }
 
     override fun deleteTrack(link: String, guildId: Long) {
-        PersistenceUtil.deletePlaylistByStringAndId(link, guildId)
+        JPAUtil.deletePlaylistByStringAndId(link, guildId)
     }
 }

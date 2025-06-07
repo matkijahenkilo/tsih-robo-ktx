@@ -1,4 +1,4 @@
-package org.matkija.bot.sql.jpa
+package org.matkija.bot.sql
 
 import org.hibernate.Session
 import org.hibernate.SessionFactory
@@ -6,12 +6,14 @@ import org.hibernate.boot.MetadataSources
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder
 import org.matkija.bot.discordBot.commands.music.RequestedTrackInfo
 
+
 private val registry = StandardServiceRegistryBuilder().build()
 
 // A SessionFactory is set up once for an application!
 private val sessionFactory: SessionFactory =
     MetadataSources(registry)
         .addAnnotatedClasses(
+            CustomChance::class.java,
             MarkovAllowedChannel::class.java,
             Playlist::class.java,
             TOCChannel::class.java,
@@ -19,7 +21,7 @@ private val sessionFactory: SessionFactory =
         .buildMetadata()
         .buildSessionFactory()
 
-object PersistenceUtil {
+object JPAUtil {
 
     fun savePlaylistEntries(requestedTrackInfos: List<RequestedTrackInfo>) {
         sessionFactory.inTransaction { session: Session ->
@@ -134,6 +136,40 @@ object PersistenceUtil {
                 "from ${MarkovAllowedChannel::class.java.name} m where m.${MarkovAllowedChannel::guildId.name} = $guildId",
                 MarkovAllowedChannel::class.java
             ).resultList
+        }
+        return ret
+    }
+
+    fun saveOrUpdateCustomChance(e: CustomChance) {
+        sessionFactory.inTransaction { session: Session ->
+            if (e.chanceId == null) {
+                session.persist(e)
+            } else {
+                val chanceId = session.createSelectionQuery(
+                    "from ${e::class.java.name} m where m.${e::guildId.name} = ${e.guildId}",
+                    e::class.java
+                ).resultList[0].chanceId
+                if (session.find(e::class.java, chanceId) == null) {
+                    session.persist(e)
+                } else {
+                    session.merge(e)
+                }
+            }
+        }
+    }
+
+    fun getCustomChanceEntity(guildId: Long): CustomChance? {
+        var ret: CustomChance? = null
+        sessionFactory.inTransaction { session: Session ->
+            val resultList = session.createSelectionQuery(
+                "from ${CustomChance::class.java.name} c where c.${CustomChance::guildId.name} = $guildId",
+                CustomChance::class.java
+            ).resultList
+            ret = if (resultList.isNotEmpty())
+                resultList[0]
+            else
+                null
+
         }
         return ret
     }
