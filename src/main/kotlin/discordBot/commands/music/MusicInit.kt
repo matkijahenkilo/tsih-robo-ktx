@@ -4,11 +4,15 @@ import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager
 import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers
 import dev.lavalink.youtube.clients.*
 import dev.lavalink.youtube.clients.Music
+import dev.minn.jda.ktx.events.listener
 import dev.minn.jda.ktx.events.onButton
 import dev.minn.jda.ktx.events.onCommand
 import net.dv8tion.jda.api.JDA
 import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel
+import net.dv8tion.jda.api.entities.channel.unions.AudioChannelUnion
+import net.dv8tion.jda.api.events.guild.GenericGuildEvent
+import net.dv8tion.jda.api.events.guild.voice.GuildVoiceUpdateEvent
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData
@@ -17,26 +21,11 @@ import org.matkija.bot.discordBot.commands.music.audio.GuildMusicManager
 import java.io.File
 
 
-private fun isSameVC(event: GenericCommandInteractionEvent): Boolean =
-    if (event.guild!!.audioManager.connectedChannel != null) {
-        event.member!!.voiceState!!.channel!!.id == event.guild!!.audioManager.connectedChannel!!.id
-    } else {
-        false
-    }
-
-private fun isSameVC(event: ButtonInteractionEvent): Boolean =
-    if (event.guild!!.audioManager.connectedChannel != null) {
-        event.member!!.voiceState!!.channel!!.id == event.guild!!.audioManager.connectedChannel!!.id
-    } else {
-        false
-    }
-
-private const val notInVC = "You're not in a vc, nora!"
-
 fun musicInit(jda: JDA): SlashCommandData {
 
     val musicManagers = mutableMapOf<Long, GuildMusicManager>()
     val playerManager = DefaultAudioPlayerManager()
+    val notInVC = "You're not in a vc, nora!"
     // creating new audio source manager from dev.lavalink.youtube.YoutubeAudioSourceManager
     val ytSourceManager = dev.lavalink.youtube.YoutubeAudioSourceManager(
         true,
@@ -70,18 +59,57 @@ fun musicInit(jda: JDA): SlashCommandData {
         LOG.warn("HOIST UP THE SAILS LOOK OUT YOU LANDLUBBERS, It is recommended to use oauth in order to use services such as YouTube. Restart the program with -t argument")
     }
 
-    fun getGuildAudioPlayer(guild: Guild, channel: MessageChannel): GuildMusicManager {
+    fun getGuildAudioPlayer(guild: Guild, channel: MessageChannel?): GuildMusicManager {
         val guildId = guild.idLong
         var musicManager = musicManagers[guildId]
 
         if (musicManager == null) {
-            musicManager = GuildMusicManager(playerManager, channel)
+            musicManager = GuildMusicManager(playerManager, channel!!)
             musicManagers[guildId] = musicManager
         }
 
         guild.audioManager.sendingHandler = musicManager.getSendHandler()
 
         return musicManager
+    }
+
+    fun isSameVC(event: GenericCommandInteractionEvent): Boolean =
+        if (event.guild!!.audioManager.connectedChannel != null) {
+            event.member!!.voiceState!!.channel!!.id == event.guild!!.audioManager.connectedChannel!!.id
+        } else {
+            false
+        }
+
+    fun isSameVC(event: ButtonInteractionEvent): Boolean =
+        if (event.guild!!.audioManager.connectedChannel != null) {
+            event.member!!.voiceState!!.channel!!.id == event.guild!!.audioManager.connectedChannel!!.id
+        } else {
+            false
+        }
+
+    fun stopAndCloseConnection(event: GenericGuildEvent) {
+        val guildAudioPlayer = getGuildAudioPlayer(event.guild, null)
+        guildAudioPlayer.player.stopTrack()
+        if (event.guild.audioManager.isConnected) event.guild.audioManager.closeAudioConnection()
+        musicManagers.remove(event.guild.idLong)
+    }
+
+    fun stopAndCloseConnection(event: ButtonInteractionEvent) {
+        val guildAudioPlayer = getGuildAudioPlayer(event.guild!!, null)
+        guildAudioPlayer.player.stopTrack()
+        if (event.guild!!.audioManager.isConnected) event.guild!!.audioManager.closeAudioConnection()
+        musicManagers.remove(event.guild!!.idLong)
+    }
+
+    jda.listener<GuildVoiceUpdateEvent> { event ->
+        val leftChannel: AudioChannelUnion? = event.channelLeft
+
+        // check if the event was a `channelLeft` and if there's only one member in voice channel
+        if (leftChannel != null && leftChannel.members.size == 1) {
+            // checks if last member in audio channel is this jda instance
+            val lastMemberInVc = leftChannel.members.find { it.user == jda.selfUser }
+            if (lastMemberInVc != null) stopAndCloseConnection(event)
+        }
     }
 
     jda.onCommand(MusicSlashCommands.MUSIC) { event ->
@@ -104,13 +132,11 @@ fun musicInit(jda: JDA): SlashCommandData {
             return@onButton
         }
 
-        val guildAudioPlayer = getGuildAudioPlayer(event.guild!!, event.messageChannel)
-        guildAudioPlayer.player.stopTrack()
-        if (event.guild!!.audioManager.isConnected) {
-            event.guild!!.audioManager.closeAudioConnection()
-        }
-        musicManagers.remove(event.guild!!.idLong)
-        event.reply(event.user.name + " told me to stop, nora~").queue()
+        stopAndCloseConnection(event)
+        event.reply(
+            event.user.name + " told me to stop~\n" +
+                    "-# if I was playing something, I can recover the playlist with `/${MusicSlashCommands.MUSIC} ${MusicSlashCommands.MUSIC_RESUME_QUEUE}` nanora!"
+        ).queue()
     }
 
     jda.onButton(MusicSlashCommands.PLAY) { event ->
