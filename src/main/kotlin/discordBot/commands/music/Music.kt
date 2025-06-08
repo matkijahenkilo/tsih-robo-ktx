@@ -10,6 +10,7 @@ import dev.minn.jda.ktx.messages.EmbedBuilder
 import dev.minn.jda.ktx.messages.editMessage
 import net.dv8tion.jda.api.entities.Member
 import net.dv8tion.jda.api.entities.MessageEmbed
+import net.dv8tion.jda.api.entities.channel.middleman.AudioChannel
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent
 import net.dv8tion.jda.api.managers.AudioManager
 import org.matkija.bot.LOG
@@ -258,7 +259,7 @@ class Music(
 
     private fun connectToMemberVC(audioManager: AudioManager, member: Member) {
         if (!audioManager.isConnected/* && !audioManager.isAttemptingToConnect()*/) {
-            audioManager.openAudioConnection(member.voiceState!!.channel)
+            audioManager.openAudioConnection(member.voiceState!!.channel as AudioChannel)
         }
     }
 

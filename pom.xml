@@ -12,17 +12,17 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <kotlin.code.style>official</kotlin.code.style>
         <kotlin.compiler.jvmTarget>21</kotlin.compiler.jvmTarget>
-        <kotlin.version>2.1.10</kotlin.version>
-        <serialization.version>1.8.0</serialization.version>
+        <kotlin.version>2.1.21</kotlin.version>
+        <serialization.version>1.8.1</serialization.version>
         <mavenfire.version>3.5.2</mavenfire.version>
         <jupiter.version>5.12.1</jupiter.version>
 
-        <hibernate.version>6.6.13.Final</hibernate.version>
-        <flyway.version>11.7.2</flyway.version>
+        <hibernate.version>7.0.0.Final</hibernate.version>
+        <flyway.version>11.9.0</flyway.version>
 
         <!-- JDA -->
         <!-- https://github.com/discord-jda/JDA -->
-        <jda.version>5.5.1</jda.version>
+        <jda.version>5.6.0</jda.version>
         <!-- https://github.com/MinnDevelopment/jda-ktx -->
         <jdaktx.version>0.12.0</jdaktx.version>
 
@@ -192,7 +192,7 @@
             <version>3.49.1.0</version>
         </dependency>
 
-        <!-- https://mvnrepository.com/artifact/org.hibernate/hibernate-core -->
+        <!-- https://mvnrepository.com/artifact/org.hibernate.orm/hibernate-core -->
         <dependency>
             <groupId>org.hibernate.orm</groupId>
             <artifactId>hibernate-core</artifactId>
@@ -203,6 +203,13 @@
         <dependency>
             <groupId>org.hibernate.orm</groupId>
             <artifactId>hibernate-community-dialects</artifactId>
+            <version>${hibernate.version}</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.hibernate/hibernate-hikaricp -->
+        <dependency>
+            <groupId>org.hibernate.orm</groupId>
+            <artifactId>hibernate-hikaricp</artifactId>
             <version>${hibernate.version}</version>
         </dependency>
 

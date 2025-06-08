@@ -22,7 +22,7 @@ maven.buildMavenPackage {
   # Maven uses the internet for downloading deps, thus you need to manually
   # update the mvnHash when they change. You can set it to `lib.fakeHash` and
   # get the right one from the error message
-  mvnHash = "sha256-FSneivfSXdQVlgtzQePParaRtujOFUF0qNxojmS4XNg=";
+  mvnHash = "sha256-cBh6ZUBzNsACaMF1TTD4mUKA4AlNXH0z/5x6ccUociM=";
 
   nativeBuildInputs = [ makeWrapper ];
 
