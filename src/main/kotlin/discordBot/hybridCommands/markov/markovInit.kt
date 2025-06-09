@@ -22,7 +22,7 @@ I hate this place lmao
  */
 fun markovPassiveInit(jda: JDA, shouldResetMarkovFiles: Boolean): SlashCommandData {
 
-    val defaultChance = 0.05F
+    val defaultChance = 5.0F // 5%
     val logger: Logger = LoggerFactory.getLogger("MarkovInit")
     val markovsMap: MutableMap<Long, MarkovChain> = mutableMapOf() // key is the guild's id
     var savedMarkovChannels: List<MarkovAllowedChannel> = JPAUtil.getAllMarkovInfo()

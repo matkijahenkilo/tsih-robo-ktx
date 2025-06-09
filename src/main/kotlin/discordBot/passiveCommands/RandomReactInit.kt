@@ -8,7 +8,7 @@ import kotlin.random.Random
 
 fun randomReactInit(jda: JDA) {
 
-    val defaultChance = 0.025F
+    val defaultChance = 0.25F // 0.25%
 
     jda.listener<MessageReceivedEvent> { event ->
         if (event.author.id == event.jda.selfUser.id || event.author.isBot) return@listener
