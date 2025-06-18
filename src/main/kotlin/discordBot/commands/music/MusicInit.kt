@@ -18,6 +18,7 @@ import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData
 import org.matkija.bot.LOG
 import org.matkija.bot.discordBot.commands.music.audio.GuildMusicManager
+import org.matkija.bot.utils.clearCRLF
 import java.io.File
 
 
@@ -53,10 +54,14 @@ fun musicInit(jda: JDA): SlashCommandData {
 
     val oauthFile = File("data/oauth.txt")
     if (oauthFile.exists()) {
-        val refreshToken = oauthFile.readText()
+        val refreshToken = oauthFile.readText().clearCRLF()
         ytSourceManager.useOauth2(refreshToken, true)
     } else {
-        LOG.warn("HOIST UP THE SAILS LOOK OUT YOU LANDLUBBERS, It is recommended to use oauth in order to use services such as YouTube. Restart the program with -t argument")
+        LOG.warn(
+            "HOIST UP THE SAILS LOOK OUT YOU LANDLUBBERS, " +
+                    "It is recommended to use oauth in order to use services such as YouTube. " +
+                    "Restart the program with -t argument"
+        )
     }
 
     fun getGuildAudioPlayer(guild: Guild, channel: MessageChannel?): GuildMusicManager {
