@@ -9,7 +9,8 @@ private val spacePattern = Regex("\\s+")
 
 private fun String.filterOutLinks(): String = this.replace(linkPatters, "")
 private fun String.filterOutMentionPatterns(): String =
-    this.replace(mentionPattern, "").replace(roleMentionPattern, "").replace(theMostAnnoyingPattern, theLesserAnnoyingPattern)
+    this.replace(mentionPattern, "").replace(roleMentionPattern, "")
+        .replace(theMostAnnoyingPattern, theLesserAnnoyingPattern)
 
 private fun String.replaceDoubleSpacesIntoSingularSpace(): String = this.replace(spacePattern, " ")
 

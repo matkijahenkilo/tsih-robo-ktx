@@ -5,8 +5,8 @@ import discordBot.commands.tsihOClock.TOCSlashCommands
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent
 import org.matkija.bot.discordBot.abstracts.SlashCommand
 import org.matkija.bot.discordBot.hybridCommands.markov.CorpusSaverManager
-import org.matkija.bot.sql.MarkovAllowedChannel
 import org.matkija.bot.sql.JPAUtil
+import org.matkija.bot.sql.MarkovAllowedChannel
 import org.matkija.bot.utils.getRandomColor
 
 class MarkovRoomHandler(private val event: GenericCommandInteractionEvent) : SlashCommand(event) {

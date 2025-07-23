@@ -3,7 +3,10 @@ package org.matkija.bot.discordBot.passiveCommands.sauceSender
 import dev.minn.jda.ktx.messages.EmbedBuilder
 import dev.minn.jda.ktx.messages.InlineEmbed
 import dev.minn.jda.ktx.messages.reply_
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.joinAll
+import kotlinx.coroutines.launch
 import net.dv8tion.jda.api.Permission
 import net.dv8tion.jda.api.entities.MessageEmbed
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent

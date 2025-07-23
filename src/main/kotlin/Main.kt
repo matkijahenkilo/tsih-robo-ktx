@@ -78,8 +78,7 @@ fun main(args: Array<String>) {
             LOG.info("After you get the token, save it to data/oauth.txt and restart me")
         } else if (args[0] == "-m") {
             shouldDeleteMarkovFiles = true
-        }
-        else {
+        } else {
             LOG.error("Unknown arguments.")
         }
     }

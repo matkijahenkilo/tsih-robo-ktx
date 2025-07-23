@@ -8,8 +8,8 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData
 import org.matkija.bot.discordBot.hybridCommands.markov.slash.MarkovRoomHandler
 import org.matkija.bot.discordBot.hybridCommands.markov.slash.MarkovRoomHandlerSlashCommands
-import org.matkija.bot.sql.MarkovAllowedChannel
 import org.matkija.bot.sql.JPAUtil
+import org.matkija.bot.sql.MarkovAllowedChannel
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.File
