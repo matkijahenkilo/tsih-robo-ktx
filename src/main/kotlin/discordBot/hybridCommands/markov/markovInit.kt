@@ -208,34 +208,39 @@ fun markovPassiveInit(jda: JDA, shouldResetMarkovFiles: Boolean): SlashCommandDa
     one day I'll think of some better solution for updating its corpus lol
      */
     val updateMarkovMapTask = Runnable {
-        logger.info("Scheduler: Clearing deleted channels from database and corpus from disk")
-        var c = 0
-        JPAUtil.getAllMarkovInfo().forEach {
-            if (it.writingChannelId != null) {
-                val textChannelById = jda.getTextChannelById(it.writingChannelId)
-                if (textChannelById == null) {
-                    JPAUtil.deleteMarkovWritingChannelById(it.writingChannelId)
-                    CorpusSaverManager(it.guildId, it.writingChannelId).deleteFile()
-                    c++
+        // if there's no internet and this function runs, everything will be null and everything will be deleted lmao (* ^ ω ^)
+        if (jda.status == JDA.Status.CONNECTED) {
+            logger.info("Scheduler: Clearing deleted channels from database and corpus from disk")
+            var c = 0
+            JPAUtil.getAllMarkovInfo().forEach {
+                if (it.writingChannelId != null) {
+                    val textChannelById = jda.getTextChannelById(it.writingChannelId)
+                    if (textChannelById == null && jda.status == JDA.Status.CONNECTED) {
+                        JPAUtil.deleteMarkovWritingChannelById(it.writingChannelId)
+                        CorpusSaverManager(it.guildId, it.writingChannelId).deleteFile()
+                        c++
+                    }
+                }
+                if (it.readingChannelId != null && jda.status == JDA.Status.CONNECTED) {
+                    val textChannelById = jda.getTextChannelById(it.readingChannelId)
+                    if (textChannelById == null) {
+                        JPAUtil.deleteMarkovReadingChannelById(it.readingChannelId)
+                        CorpusSaverManager(it.guildId, it.readingChannelId).deleteFile()
+                        c++
+                    }
                 }
             }
-            if (it.readingChannelId != null) {
-                val textChannelById = jda.getTextChannelById(it.readingChannelId)
-                if (textChannelById == null) {
-                    JPAUtil.deleteMarkovReadingChannelById(it.readingChannelId)
-                    CorpusSaverManager(it.guildId, it.readingChannelId).deleteFile()
-                    c++
-                }
-            }
-        }
-        if (c > 0)
-            logger.info("Scheduler: Deleted $c entries from db and disk")
-        else
-            logger.info("Scheduler: Nothing to be cleared")
+            if (c > 0)
+                logger.info("Scheduler: Deleted $c entries from db and disk")
+            else
+                logger.info("Scheduler: Nothing to be cleared")
 
-        logger.info("Scheduler: Updating Markov map")
-        replaceEntireMapWithCorpusFromDisk()
-        logger.info("Scheduler: Done")
+            logger.info("Scheduler: Updating Markov map")
+            replaceEntireMapWithCorpusFromDisk()
+            logger.info("Scheduler: Done")
+        } else {
+            logger.info("Scheduler: No internet, skipping cleanup")
+        }
     }
 
     // run every 6 hours
