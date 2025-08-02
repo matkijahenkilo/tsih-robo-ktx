@@ -7,6 +7,7 @@ enum class CommandsEnum {
     QUESTION,
     TOOLPOST,
     TSIHOCLOCK,
+    BIRTHDAY,
     MARKOV,
     SAUCESENDER,
     RANDOM_REACT,
