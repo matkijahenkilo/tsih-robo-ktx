@@ -1,5 +1,6 @@
 {
   pkgs ? import <nixpkgs> { },
+  pkgMvn ? import <nixpkgs> { },
   devTools ? true,
   ...
 }:
@@ -9,14 +10,13 @@ pkgs.mkShell {
   '';
 
   nativeBuildInputs =
-    with pkgs;
     [
-      jdk
-      maven
+      pkgs.jdk
+      pkgMvn.maven
     ]
     ++ pkgs.lib.optional devTools [
-      gradle # kotlin-language-server dependency
-      jdt-language-server
-      kotlin-language-server
+      pkgs.gradle # kotlin-language-server dependency
+      pkgs.jdt-language-server
+      pkgs.kotlin-language-server
     ];
 }

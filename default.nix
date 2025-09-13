@@ -1,6 +1,6 @@
 {
   lib,
-  maven,
+  maven ? import <nixpkgs> { },
   jre,
   makeWrapper,
 
