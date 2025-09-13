@@ -12,7 +12,7 @@ val blackList = listOf(
 private val whiteList = listOf(
     "https://x.com/",
     "https://hitomi.la/",
-    "https://kemono.su/",
+    "https://kemono.cr/",
     "https://twitter.com/",
     "https://sankaku.app/",
     "https://exhentai.org/",
