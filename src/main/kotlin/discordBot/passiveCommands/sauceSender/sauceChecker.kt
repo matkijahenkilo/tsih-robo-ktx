@@ -22,6 +22,7 @@ private val whiteList = listOf(
     "https://www.pixiv.net/",
     "https://www.tsumino.com/",
     "https://www.deviantart.com/",
+    "https://www.furaffinity.net/",
     "https://chan.sankakucomplex.com/",
 
     "https://e621.net/",
