@@ -107,7 +107,7 @@ class SauceSender(
                                 child.destroy()
                                 var msg = "Failed to fetch anything from $link: ${exitedChild.stderr.clearCRLF()}"
                                 if (isTwitterLink(link)) {
-                                    msg += ", sending alternative fix instead (stupidpenisx)"
+                                    msg += ", sending alternative fix instead (fixupx)"
                                     sendTwitterAltFix(link, null).also { wasFixed = true }
                                 } else if (isPixivLink(link)) {
                                     msg += ", sending alternative fix instead (phixiv)"
@@ -221,7 +221,7 @@ class SauceSender(
                 "twitter.com"
             } else {
                 "x.com"
-            }, "stupidpenisx.com"
+            }, "fixupx.com"
         )
         val msg = if (content != null) "$content\n$newLink" else newLink
         event.message.reply_(content = msg)
