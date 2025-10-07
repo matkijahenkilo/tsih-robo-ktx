@@ -27,7 +27,7 @@ private val whiteList = listOf(
 
     "https://e621.net/",
     "https://booru.io/",
-    "https://misskey.io/",
+    // "https://misskey.io/",
     "https://nijie.info/",
     "https://nhentai.net/",
     "https://e-hentai.org/",
