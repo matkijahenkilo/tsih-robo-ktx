@@ -16,7 +16,7 @@ fun randomReactInit(jda: JDA) {
 
         val chanceEntity = JPAUtil.getCustomChanceEntity(event.guild.idLong)
         val chance = chanceEntity?.eventRandomReactChance ?: defaultChance
-        if (Random.nextFloat() * 100 <= chance || c.contains("tsih") || c.contains("nora")) {
+        if (Random.nextFloat() * 100 <= chance || c.contains("tsih") || c.contains("nanora")) {
             val customEmoji = jda.guilds.random().emojis.random()
             event.message.addReaction(customEmoji).queue()
         }
