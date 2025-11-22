@@ -34,7 +34,7 @@
           packages = rec {
             default = tsih-robo-ktx;
             tsih-robo-ktx = pkgs.callPackage ./default.nix {
-              maven = inputs.nixpkgs-working-maven.legacyPackages.${pkgs.system}.maven;
+              maven = inputs.nixpkgs-working-maven.legacyPackages.${pkgs.stdenv.hostPlatform.system}.maven;
             };
           };
 
@@ -49,7 +49,7 @@
 
           devShells.default = import ./shell.nix {
             inherit pkgs;
-            pkgMvn = inputs.nixpkgs-working-maven.legacyPackages.${pkgs.system};
+            pkgMvn = inputs.nixpkgs-working-maven.legacyPackages.${pkgs.stdenv.hostPlatform.system};
             inputsFrom = lib.attrsets.attrValues config.packages;
           };
 
