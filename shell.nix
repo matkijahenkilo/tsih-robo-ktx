@@ -13,7 +13,7 @@ pkgs.mkShell {
     pkgs.jdk
     pkgMvn.maven
   ]
-  ++ pkgs.lib.optional devTools [
+  ++ pkgs.lib.optionals devTools [
     pkgs.gradle # kotlin-language-server dependency
     pkgs.jdt-language-server
     pkgs.kotlin-language-server
