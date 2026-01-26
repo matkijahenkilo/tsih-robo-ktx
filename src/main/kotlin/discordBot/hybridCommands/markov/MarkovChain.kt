@@ -1,10 +1,10 @@
 package org.matkija.bot.discordBot.hybridCommands.markov
 
-import java.util.*
-
 class MarkovChain(corpus: List<String>) {
 
-    private val markovChain: MutableMap<String, MutableList<String>> = mutableMapOf()
+    private val markovChain: MutableMap<String, ArrayDeque<String>> = linkedMapOf()
+    private val maxTotalWords = 1000
+    private var totalWordCount = 0
 
     init {
         appendCorpus(corpus)
@@ -16,35 +16,39 @@ class MarkovChain(corpus: List<String>) {
             val key = corpus[i]
             val value = corpus.getOrElse(i + 1) { "" }
 
-            if (!markovChain.containsKey(key)) {
-                markovChain[key] = mutableListOf(value)
-            } else {
-                markovChain[key]?.add(value)
+            val nextWords = markovChain.getOrPut(key) { ArrayDeque() }
+            nextWords.addLast(value)
+            totalWordCount++
+
+            while (totalWordCount > maxTotalWords) {
+                removeOldestEntry()
             }
         }
     }
 
-    // Generate a new sentence based on the Markov Chain
-    fun generateSentence(word: String? = null, length: Int): String {
-        if (markovChain.isEmpty()) return ""
+    private fun removeOldestEntry() {
+        val oldestKey = markovChain.keys.firstOrNull() ?: return
+        val oldestList = markovChain[oldestKey]!!
 
-        val random = Random()
-        var sentence = ""
+        oldestList.removeFirst()
+        totalWordCount--
 
-        // Start with a word from the corpus (or any seed you like)
-        var currentWord = word ?: markovChain.keys.random()  // Choose a random starting word
-        currentWord = currentWord.trim()
-
-        for (i in 0 until length) {
-            if (!markovChain.containsKey(currentWord)) break
-
-            val nextWords = markovChain[currentWord]!!
-
-            // Randomly pick one of the possible next words
-            sentence += "$currentWord "
-            currentWord = nextWords[random.nextInt(nextWords.size)]
+        // if that key now has no words left, remove the key from the map
+        if (oldestList.isEmpty()) {
+            markovChain.remove(oldestKey)
         }
+    }
 
-        return sentence.trim()
+    fun generateSentence(word: String? = null, length: Int): String {
+        var currentWord = (word ?: markovChain.keys.randomOrNull()) ?: return ""
+
+        return buildString {
+            repeat(length) {
+                append(currentWord).append(" ")
+                val nextWords = markovChain[currentWord]
+                if (nextWords.isNullOrEmpty()) return@buildString
+                currentWord = nextWords.random()
+            }
+        }.trim()
     }
 }
