@@ -40,7 +40,7 @@ class MarkovChain(corpus: List<String>) {
     }
 
     fun generateSentence(word: String? = null, length: Int): String {
-        var currentWord = (word ?: markovChain.keys.randomOrNull()) ?: return ""
+        var currentWord = (word ?: markovChain.keys.randomOrNull())?.takeIf { it in markovChain } ?: return ""
 
         return buildString {
             repeat(length) {
