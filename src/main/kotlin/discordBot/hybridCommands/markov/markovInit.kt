@@ -136,7 +136,7 @@ fun markovPassiveInit(jda: JDA, shouldResetMarkovFiles: Boolean): SlashCommandDa
                 if (customMarkovWord != null && customMarkovWord.contains(' '))
                     customMarkovWord = customMarkovWord.split(' ').filter { !it.contains(' ') }.random()
 
-                val sentenceSize = Random.nextInt(5, 30)
+                val sentenceSize = Random.nextInt(1, 30)
                 val sentence = markov?.generateSentence(customMarkovWord, sentenceSize)
 
                 if (!sentence.isNullOrEmpty())
