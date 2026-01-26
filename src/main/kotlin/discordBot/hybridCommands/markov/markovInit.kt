@@ -4,6 +4,7 @@ import dev.minn.jda.ktx.events.listener
 import dev.minn.jda.ktx.events.onCommand
 import dev.minn.jda.ktx.messages.send
 import net.dv8tion.jda.api.JDA
+import net.dv8tion.jda.api.Permission
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData
 import org.matkija.bot.discordBot.hybridCommands.markov.slash.MarkovRoomHandler
@@ -46,15 +47,17 @@ fun markovPassiveInit(jda: JDA, shouldResetMarkovFiles: Boolean): SlashCommandDa
                         logger.info("Fetching messages of channel #${textChannelObj.name} from Discord")
 
                         val textFromChannel = mutableListOf<String>()
-
-                        textChannelObj.getHistoryBefore(textChannelObj.latestMessageIdLong, 100)
-                            .complete().retrievedHistory.forEach {
-                                // do not save messages created by bots or that mentions this jda instance
-                                if (!it.author.isBot || !it.contentRaw.contains(jda.selfUser.asMention))
-                                    textFromChannel.add(it.contentRaw)
-                            }
-
-                        hb.appendToFile(textFromChannel.joinToString(" ").clearForMarkovCorpus())
+                        if (textChannelObj.guild.selfMember.hasPermission(textChannelObj, Permission.VIEW_CHANNEL)) {
+                            textChannelObj.getHistoryBefore(textChannelObj.latestMessageIdLong, 100)
+                                .complete().retrievedHistory.forEach {
+                                    // do not save messages created by bots or that mentions this jda instance
+                                    if (!it.author.isBot || !it.contentRaw.contains(jda.selfUser.asMention))
+                                        textFromChannel.add(it.contentRaw)
+                                }
+                            hb.appendToFile(textFromChannel.joinToString(" ").clearForMarkovCorpus())
+                        } else {
+                            logger.warn("Can't read channel from ${textChannelObj.guild.name} - #${textChannelObj.name}")
+                        }
                     } else {
                         logger.info("Channel #${textChannelObj.name} is already saved to disk")
                     }
