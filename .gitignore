@@ -54,3 +54,4 @@ src/test/kotlin/GalleryDl.kt
 # fuck off inc.
 data/*
 *.db
+*.versionsBackup

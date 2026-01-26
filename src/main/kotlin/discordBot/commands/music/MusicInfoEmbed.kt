@@ -9,12 +9,12 @@ import dev.minn.jda.ktx.messages.EmbedBuilder
 import dev.minn.jda.ktx.messages.InlineEmbed
 import dev.minn.jda.ktx.messages.into
 import dev.minn.jda.ktx.messages.send
+import net.dv8tion.jda.api.components.MessageTopLevelComponent
 import net.dv8tion.jda.api.entities.MessageEmbed
 import net.dv8tion.jda.api.entities.User
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel
 import net.dv8tion.jda.api.entities.emoji.Emoji
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
-import net.dv8tion.jda.api.interactions.components.LayoutComponent
 import org.matkija.bot.discordBot.commands.music.audio.GuildMusicManager
 import org.matkija.bot.discordBot.commands.music.audio.TrackScheduler
 import org.matkija.bot.utils.getRandomColor
@@ -31,7 +31,7 @@ object MusicInfoEmbed {
     private val skip = primary(MusicSlashCommands.SKIP, emoji = Emoji.fromUnicode("⏭"))
     private val repeat = primary(MusicSlashCommands.REPEAT, emoji = Emoji.fromUnicode("🔂"))
     private val shuffle = primary(MusicSlashCommands.SHUFFLE, emoji = Emoji.fromUnicode("🔀"))
-    private val componentsRow: List<LayoutComponent> = row(stop, pauseOrStart, skip, repeat, shuffle).into()
+    private val componentsRow: List<MessageTopLevelComponent> = row(stop, pauseOrStart, skip, repeat, shuffle).into()
 
     private val mocks = listOf(
         "Listen to this banger!",
