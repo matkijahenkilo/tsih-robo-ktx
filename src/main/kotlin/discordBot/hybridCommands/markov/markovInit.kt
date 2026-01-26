@@ -143,7 +143,7 @@ fun markovPassiveInit(jda: JDA, shouldResetMarkovFiles: Boolean): SlashCommandDa
                     event.channel.send(content = sentence).queue()
                 else
                     event.channel.send(
-                        content = "-# I don't have this word in my model. Did you also run `/${MarkovRoomHandlerSlashCommands.MARKOV}` ?"
+                        content = "-# I don't know this word. Did you also run `/${MarkovRoomHandlerSlashCommands.MARKOV}` ?"
                     ).queue()
             }
         }
