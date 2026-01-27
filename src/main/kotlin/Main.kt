@@ -24,8 +24,11 @@ import org.matkija.bot.discordBot.timedEvents.randomStatus.RandomStatus
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.File
+import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
 import java.util.concurrent.TimeUnit
 import kotlin.system.exitProcess
+import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
 
@@ -119,9 +122,21 @@ fun main(args: Array<String>) {
         chanceManagerInit(jda)
     )
     if (tsihOClockExists()) {
-        commandList.add(tsihOClockInit(jda)).also {
-            TsihOClockTimer(jda).startScheduler(TimeUnit.HOURS, 0, 1)
+        commandList.add(tsihOClockInit(jda))
+        val now = LocalDateTime.now()
+        val oneDaySeconds = 24L * 60L * 60L
+        var nextRun = now.withHour(18).withMinute(0).withSecond(0).withNano(0)
+
+        // if it's past 18:00
+        if (now.isAfter(nextRun)) {
+            nextRun = nextRun.plusDays(1)
         }
+
+        val initialDelaySeconds = ChronoUnit.SECONDS.between(now, nextRun)
+
+        LOG.info("Scheduling Tsih O'Clock. Initial delay: $initialDelaySeconds seconds.")
+
+        TsihOClockTimer(jda).startScheduler(TimeUnit.SECONDS, initialDelaySeconds, oneDaySeconds)
     } else {
         LOG.warn("images in data/images/tsihoclock/ are missing, avoiding creation of command. If you want to use it just insert images into that folder.")
     }

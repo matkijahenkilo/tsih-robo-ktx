@@ -30,54 +30,49 @@ class TsihOClockTimer(private val jda: JDA) : TimedEvent() {
     }
 
     override val task: Runnable = Runnable {
+        CoroutineScope(Dispatchers.IO).launch {
+            val channelList = JPAUtil.getAllTsihOClockRooms()
 
-        val channelList = JPAUtil.getAllTsihOClockRooms()
+            if (channelList.isNotEmpty()) {
+                // TODO: TOC counter
+                val files = File("data/images/tsihoclock").listFiles()!!
+                val jobList = mutableListOf<Job>()
+                pog.info("Sending images to ${channelList.size} channels")
+                channelList.forEach { obj ->
+                    jobList += async {
+                        val channel = jda.getTextChannelById(obj.channelId)
+                        val file = files.random()
+                        val fileUpload = listOf(FileUpload.fromData(file))
+                        var fileUploadWithFooterImage = fileUpload
+                        if (footerImagePath != null)
+                            fileUploadWithFooterImage = footerImagePath!! + fileUpload
 
-        if (channelList.isNotEmpty()) {
-            // TODO: run this code exactly at 18:00
-            if (LocalTime.now().hour == 18) {
-
-                runBlocking {
-                    // TODO: TOC counter
-                    val files = File("data/images/tsihoclock").listFiles()!!
-                    val jobList = mutableListOf<Job>()
-                    pog.info("Sending images to ${channelList.size} channels")
-                    channelList.forEach { obj ->
-                        jobList += async {
-                            val channel = jda.getTextChannelById(obj.channelId)
-                            val file = files.random()
-                            val fileUpload = listOf(FileUpload.fromData(file))
-                            var fileUploadWithFooterImage = fileUpload
-                            if (footerImagePath != null)
-                                fileUploadWithFooterImage = footerImagePath!! + fileUpload
-
-                            if (channel != null) {
-                                channel.send(
-                                    files = fileUploadWithFooterImage,
-                                    embeds = listOf(
-                                        EmbedBuilder {
-                                            title = randomTitle()
-                                            color = 0xff80fd
-                                            field {
-                                                name = randomName()
-                                                value = randomValue()
-                                            }
-                                            image = "attachment://${file.name}"
-                                            footer {
-                                                name = "owo"
-                                                iconUrl = "attachment://$footerImage"
-                                            }
-                                            timestamp = Instant.now()
-                                        }.build()
-                                    )
-                                ).queue()
-                            } else {
-                                pog.warn("Id $obj doesn't exist")
-                            }
+                        if (channel != null) {
+                            channel.send(
+                                files = fileUploadWithFooterImage,
+                                embeds = listOf(
+                                    EmbedBuilder {
+                                        title = randomTitle()
+                                        color = 0xff80fd
+                                        field {
+                                            name = randomName()
+                                            value = randomValue()
+                                        }
+                                        image = "attachment://${file.name}"
+                                        footer {
+                                            name = "owo"
+                                            iconUrl = "attachment://$footerImage"
+                                        }
+                                        timestamp = Instant.now()
+                                    }.build()
+                                )
+                            ).queue()
+                        } else {
+                            pog.warn("Id $obj doesn't exist")
                         }
                     }
-                    jobList.joinAll()
                 }
+                jobList.joinAll()
             }
         }
     }
