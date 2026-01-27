@@ -15,7 +15,7 @@ class ToolPost(private val event: GenericCommandInteractionEvent) : SlashCommand
 
     companion object {
         val log: Logger = LoggerFactory.getLogger(ToolPost::class.java)
-        private const val TOOLPOST_DROP = 8 // climax of the video is at 8 seconds mark
+        private const val TOOLPOST_DROP = 8.633 // climax of the video is at 8 seconds and 633 milliseconds mark
     }
 
     override fun execute() {
@@ -40,25 +40,26 @@ class ToolPost(private val event: GenericCommandInteractionEvent) : SlashCommand
                 return
             }
 
-            // it's hard for the user to input the length in seconds
-            // what if the song's climax is at 3:46? it's annoying to calculate this time into seconds
-            // maybe something good todo is to use the opposite of org.matkija.bot.discordBot.commands.music.AudioLengthUtil
-            var timeToTrim = event.getOption(ToolPostOptions.TOOLPOST_OPTION_TRIM)?.asDouble
+            var timeToTrim = getAbsoluteTime(event.getOption(ToolPostOptions.TOOLPOST_OPTION_TRIM)?.asString)
+
             if (timeToTrim != null && timeToTrim >= TOOLPOST_DROP) {
-                if (timeToTrim >= fileDuration)
+                if (timeToTrim >= fileDuration) {
+                    // Null the option if time requested is higher than the actual song
                     timeToTrim = null
-                else
+                } else {
+                    // Minus 8.633 to sync the climax with the video's
                     timeToTrim -= TOOLPOST_DROP
+                }
             }
 
             val output = createToolPost(link, timeToTrim = timeToTrim ?: Random.nextDouble(0.0, fileDuration))
 
             if (output != null) {
                 val video = FileUpload.fromData(output)
-                event.hook.editMessage(content = "Created toolpost from <$link>").queue()
+                event.hook.editMessage(content = "Created toolpost from <$link>, sending soon nora.").queue()
                 event.messageChannel.send(files = listOf(video)).queue()
             } else {
-                event.hook.editMessage(content = "Failed to fetch song from link, maybe I'm not old enough to what this video nanora~")
+                event.hook.editMessage(content = "Failed to fetch song from link, maybe I'm not old enough to see this video nanora~")
                     .queue()
             }
         } else {
@@ -80,6 +81,26 @@ class ToolPost(private val event: GenericCommandInteractionEvent) : SlashCommand
             log.error("Audio file returned null from $link")
             return null
         }
+    }
+
+    private fun getAbsoluteTime(time: String?): Double? {
+        if (time == null) return null
+
+        val parts = time.split(':')
+        var totalSeconds = 0.0
+        var multiplier = 1.0
+
+        // Iterate backwards: Seconds (with decimals) -> Minutes -> Hours
+        for (i in parts.size - 1 downTo 0) {
+            val numberStr = parts[i].filter { it.isDigit() || it == '.' }
+            val value = numberStr.toDoubleOrNull() ?: 0.0 // can handle 30 and 30.500
+
+            totalSeconds += value * multiplier
+
+            multiplier *= 60.0
+        }
+
+        return totalSeconds
     }
 
     private fun toolPostBaseVideoExists(): Boolean = File(PATH, ORIGINAL_VIDEO).exists()

@@ -8,7 +8,7 @@ import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData
 object ToolPostOptions {
     const val TOOLPOST = "toolpost"
     const val TOOLPOST_OPTION_LINK = "link"
-    const val TOOLPOST_OPTION_TRIM = "climax"
+    const val TOOLPOST_OPTION_TRIM = "climax_time"
 
     fun getCommands(): SlashCommandData =
         Commands.slash(TOOLPOST, "I'll make a toolpost out of an audio nanora!")
@@ -20,9 +20,9 @@ object ToolPostOptions {
                     true
                 ),
                 OptionData(
-                    OptionType.NUMBER,
+                    OptionType.STRING,
                     TOOLPOST_OPTION_TRIM,
-                    "The timestamp in seconds where the climax of the song occurs!",
+                    "The timestamp where the climax of the song occurs! (e.g. 1:27 or with milliseconds: 1:30.633)",
                     false
                 )
             )
