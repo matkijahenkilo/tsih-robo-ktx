@@ -1,6 +1,7 @@
 package org.matkija.bot.discordBot.hybridCommands.markov
 
 import java.io.File
+import java.util.*
 
 class CorpusSaverManager(private val guildId: Long?, channelId: Long?) {
     private val file: File = File("data/markov/${guildId}_${channelId}")
@@ -12,32 +13,43 @@ class CorpusSaverManager(private val guildId: Long?, channelId: Long?) {
     }
 
     fun appendToFile(content: String) {
-        // Get existing words + new content
-        val currentText = if (file.exists()) file.readText() else ""
-        val allWords = ("$currentText $content")
-            .split(Regex("\\s+"))
-            .filter { it.isNotBlank() }
+        file.appendText("$content ")
+        // Only trim the file if it grows double the limit to reduce IO frequency
+        if (getFileWordCount() > maxTotalWords * 2)
+            trimFile()
+    }
 
-        // Trim to the last $maxTotalWords words
-        val limitedWords = if (allWords.size > maxTotalWords) {
-            allWords.takeLast(maxTotalWords)
-        } else {
-            allWords
+    private fun getFileWordCount(): Int {
+        if (!file.exists()) return 0
+        return file.bufferedReader().use { reader ->
+            var wordCount = 0
+            val scanner = Scanner(reader)
+            while (scanner.hasNext()) {
+                scanner.next()
+                wordCount++
+            }
+            wordCount
         }
+    }
 
-        // Overwrite the file with the limited set
-        file.writeText(limitedWords.joinToString(" "))
+    private fun trimFile() {
+        if (!file.exists()) return
+        val words = file.readText().split(Regex("\\s+")).filter { it.isNotBlank() }
+        file.writeText(
+            words.takeLast(maxTotalWords).joinToString(
+                separator = " ",
+                postfix = " "
+            )
+        )
     }
 
     fun getChannelsTextsBelongingToGuild(): String? {
-        val files = workingDir.listFiles() ?: return null
-        val guildTexts = files
-            .filter { it.name.contains(guildId.toString()) }
-            .map { it.readText().trim() }
-
-        return if (guildTexts.isNotEmpty()) guildTexts.joinToString(" ") else null
+        return workingDir.listFiles()
+            ?.filter { it.name.startsWith("${guildId}_") }
+            ?.joinToString(" ") { it.readText().trim() }
+            ?.takeIf { it.isNotBlank() }
     }
 
-    fun fileDoesNotExist(): Boolean = !this.file.exists()
+    fun fileDoesNotExist(): Boolean = !file.exists()
     fun deleteFile() = file.delete()
 }

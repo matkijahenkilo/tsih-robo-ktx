@@ -28,15 +28,14 @@ class Music(
     override fun execute() {
         event.deferReply().queue()
 
-        var option = event.getOption(MusicSlashCommands.MUSIC_OPTION_LINK)?.asString
-        val originalOption = option
-        val website = event.getOption(MusicSlashCommands.MUSIC_OPTION_SEARCH)?.asString
+        val originalOption = event.getOption(MusicSlashCommands.MUSIC_OPTION_LINK)?.asString
+        val searchPrefix = event.getOption(MusicSlashCommands.MUSIC_OPTION_SEARCH)?.asString
 
-        if (option != null) {
-            if (website != null) {
-                option = website + option
-            } else if (!option.contains("https://")) {
-                option = "${MusicSlashCommands.YTMSEARCH_PREFIX}$option"
+        val option = originalOption?.let { linkOrSearch ->
+            when {
+                searchPrefix != null -> "$searchPrefix$linkOrSearch"
+                !linkOrSearch.contains("https://") -> "${MusicSlashCommands.YTMSEARCH_PREFIX}$linkOrSearch"
+                else -> linkOrSearch
             }
         }
 

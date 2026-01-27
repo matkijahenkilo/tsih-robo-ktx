@@ -20,9 +20,8 @@ class MarkovChain(corpus: List<String>) {
             nextWords.addLast(value)
             totalWordCount++
 
-            while (totalWordCount > maxTotalWords) {
+            if (totalWordCount > maxTotalWords)
                 removeOldestEntry()
-            }
         }
     }
 
