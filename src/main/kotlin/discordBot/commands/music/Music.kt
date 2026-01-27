@@ -36,7 +36,7 @@ class Music(
             if (website != null) {
                 option = website + option
             } else if (!option.contains("https://")) {
-                option = "$YT_SEARCH$option"
+                option = "${MusicSlashCommands.YTMSEARCH_PREFIX}$option"
             }
         }
 
@@ -185,7 +185,7 @@ class Music(
             }
 
             override fun noMatches() {
-                channel.sendMessage("Nothing found in $search nora.").queue()
+                channel.sendMessage("No match for \"$search\" nora.").queue()
             }
 
             override fun loadFailed(exception: FriendlyException) {
@@ -229,7 +229,7 @@ class Music(
                 }
 
                 override fun noMatches() {
-                    channel.sendMessage("Nothing found in $trackUrl nora.").queue()
+                    channel.sendMessage("Nothing found in <$trackUrl> nora.").queue()
                 }
 
                 override fun loadFailed(exception: FriendlyException) {
@@ -274,7 +274,7 @@ class Music(
     }
 
     private fun postSongLoad(option: String, originalOption: String?) {
-        if (option.contains(YT_SEARCH)) {
+        if (SEARCH_PREFIXES_ARRAY.any { option.startsWith(it) }) {
             event.hook.editMessage(content = "Loaded the first song of result `$originalOption` nanora!")
                 .queue()
         } else {
@@ -286,7 +286,7 @@ class Music(
     private fun getSongsDependingOfOption(
         option: String
     ): List<RequestedTrackInfo> =
-        if (option.contains(YT_SEARCH))
+        if (SEARCH_PREFIXES_ARRAY.any { option.startsWith(it) })
             loadAudioTrackFromSearch(option).map {
                 RequestedTrackInfo(
                     it,
@@ -307,6 +307,10 @@ class Music(
     companion object {
         private const val SEARCH_INDICATOR = "Search results for:"
         private const val ENTRY_LIMIT = 10
-        private const val YT_SEARCH = "ytsearch:"
+        private val SEARCH_PREFIXES_ARRAY = arrayOf(
+            MusicSlashCommands.YTSEARCH_PREFIX,
+            MusicSlashCommands.YTMSEARCH_PREFIX,
+            MusicSlashCommands.SCSEARCH_PREFIX
+        )
     }
 }

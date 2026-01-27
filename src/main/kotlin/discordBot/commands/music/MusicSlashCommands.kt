@@ -26,14 +26,19 @@ object MusicSlashCommands {
     const val REPEAT = "$ID_MUSIC:repeat"
     const val SHUFFLE = "$ID_MUSIC:shuffle"
 
+    const val YTSEARCH_PREFIX = "ytsearch:"
+    const val YTMSEARCH_PREFIX = "ytmsearch:"
+    const val SCSEARCH_PREFIX = "scsearch:"
+
     private fun linkInputOptionData(): OptionData = OptionData(
         OptionType.STRING,
         MUSIC_OPTION_SEARCH,
         "Forces a search in a specific website for the option $MUSIC_PLAY.",
         false
     ).addChoices(
-        Command.Choice("YouTube", "ytsearch:"),
-        // Command.Choice("Spotify", "spsearch:") // needs auth in yaml
+        Command.Choice("YouTube", YTSEARCH_PREFIX),
+        Command.Choice("YouTube Music", YTMSEARCH_PREFIX),
+        Command.Choice("SoundCloud", SCSEARCH_PREFIX)
     )
 
     fun getCommands(): SlashCommandData =
