@@ -18,7 +18,6 @@ import org.slf4j.LoggerFactory
 import java.io.File
 
 // TODO: each server and room should have their own custom limit
-// TODO: if >10mb just link it
 class SauceSender(
     private val event: MessageReceivedEvent,
     content: String,
@@ -112,6 +111,9 @@ class SauceSender(
                                 } else if (isPixivLink(link)) {
                                     msg += ", sending alternative fix instead (phixiv)"
                                     sendPixivAltFix(link).also { wasFixed = true }
+                                } else {
+                                    msg += ", send direct links instead (gallery-dl -g)"
+                                    sendDirectCommonLinks(link).also { wasFixed = true }
                                 }
                                 logger.warn(msg)
                                 return@launch
@@ -232,6 +234,24 @@ class SauceSender(
     private fun sendPixivAltFix(link: String) {
         val newLink = link.replace("pixiv.net", "phixiv.net")
         event.message.reply_(content = newLink)
+            .mentionRepliedUser(false)
+            .queue()
+    }
+
+    /*
+    better fit for websites like kemono
+     */
+    private suspend fun sendDirectCommonLinks(link: String) {
+        val child = spawnGallerydlProcess(makeCommonCommandForFetchingUrls(link))
+        val exitedChild = readGallerydlProcess(child)
+        val linksStdout = exitedChild.stdout
+        val links = mutableListOf<String>()
+        linksStdout.lines().filter { it.startsWith("https://") && !it.startsWith("| ") }.forEach { linkFromGL ->
+            if (linkFromGL.isNotEmpty()) {
+                links.add(linkFromGL)
+            }
+        }
+        event.message.reply_(content = "<$link>\n${links.joinToString("\n")}")
             .mentionRepliedUser(false)
             .queue()
     }

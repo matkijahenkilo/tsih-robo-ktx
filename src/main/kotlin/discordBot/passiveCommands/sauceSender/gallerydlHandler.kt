@@ -33,11 +33,16 @@ fun makeMisskeyCommand(link: String, shouldGetInfoOnly: Boolean = false, limit: 
 
 fun makeCommonCommand(link: String, limit: Int = defaultLimit) = baseArgs + downloadArgs(link, limit)
 
+fun makeCommonCommandForFetchingUrls(link: String, limit: Int = 5) = baseArgs + fetchUrlOnlyArgs(link, limit)
+
 fun downloadArgs(link: String, limit: Int): List<String> =
     listOf("--range", "1-$limit", "--ugoira-conv", "-D", "./temp/", link)
 
 fun infoArgs(link: String, filter: String): List<String> =
     listOf("--filter", filter, "-s", link)
+
+fun fetchUrlOnlyArgs(link: String, limit: Int): List<String> =
+    listOf("-g", "1-$limit", link)
 
 fun makeMediaCheckCommand(link: String): List<String> =
     baseArgs + listOf("-g", "-s", link)
