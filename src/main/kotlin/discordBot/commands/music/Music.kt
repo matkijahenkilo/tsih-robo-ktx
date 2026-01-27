@@ -147,7 +147,7 @@ class Music(
                     index++
                 }
 
-                if (pages.size != 0) {
+                if (pages.isNotEmpty()) {
                     event.hook.sendPaginator(pages = pages.toTypedArray(), expireAfter = 5.minutes).queue()
                 } else {
                     event.hook.editMessage(content = "Nothing in playlist nanora!").queue()
@@ -294,7 +294,7 @@ class Music(
                     event.guild!!
                 )
             }
-        else {
+        else
             loadAudioTracks(option.split(" ")).map {
                 RequestedTrackInfo(
                     it,
@@ -302,7 +302,6 @@ class Music(
                     event.guild!!
                 )
             }
-        }
 
     companion object {
         private const val SEARCH_INDICATOR = "Search results for:"
