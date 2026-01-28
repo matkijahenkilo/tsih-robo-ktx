@@ -1,9 +1,11 @@
 package org.matkija.bot.discordBot.hybridCommands.markov
 
+import org.matkija.bot.utils.ConfigReader
+
 class MarkovChain(corpus: List<String>) {
 
     private val markovChain: MutableMap<String, ArrayDeque<String>> = linkedMapOf()
-    private val maxTotalWords = 1000
+    private val maxTotalWords = ConfigReader.configs.markovWordLimit
     private var totalWordCount = 0
 
     init {

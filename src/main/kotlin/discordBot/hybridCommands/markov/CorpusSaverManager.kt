@@ -1,12 +1,13 @@
 package org.matkija.bot.discordBot.hybridCommands.markov
 
+import org.matkija.bot.utils.ConfigReader
 import java.io.File
 import java.util.*
 
 class CorpusSaverManager(private val guildId: Long?, channelId: Long?) {
     private val file: File = File("data/markov/${guildId}_${channelId}")
     val workingDir: File = File("data/markov")
-    private val maxTotalWords = 1000
+    private val maxTotalWords = ConfigReader.configs.markovWordLimit
 
     init {
         if (!workingDir.exists()) workingDir.mkdirs()
