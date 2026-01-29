@@ -168,19 +168,7 @@ class Music(
             }
 
             override fun playlistLoaded(playlist: AudioPlaylist) {
-                var firstTrack = playlist.selectedTrack
-
-                if (firstTrack == null) {
-                    firstTrack = playlist.tracks[0]
-                }
-
-                if (playlist.name.contains(SEARCH_INDICATOR)) {
-                    trackList.add(firstTrack)
-                } else {
-                    playlist.tracks.forEach { track ->
-                        trackList.add(track)
-                    }
-                }
+                trackList.add(playlist.tracks[0])
             }
 
             override fun noMatches() {
@@ -212,18 +200,9 @@ class Music(
                 }
 
                 override fun playlistLoaded(playlist: AudioPlaylist) {
-                    var firstTrack = playlist.selectedTrack
-
-                    if (firstTrack == null) {
-                        firstTrack = playlist.tracks[0]
-                    }
-
-                    if (playlist.name.contains(SEARCH_INDICATOR)) {
-                        trackList.add(firstTrack)
-                    } else {
-                        playlist.tracks.forEach { track ->
+                    playlist.tracks.forEach { track ->
+                        if (track != null)
                             trackList.add(track)
-                        }
                     }
                 }
 
@@ -303,7 +282,6 @@ class Music(
             }
 
     companion object {
-        private const val SEARCH_INDICATOR = "Search results for:"
         private const val ENTRY_LIMIT = 10
         private val SEARCH_PREFIXES_ARRAY = arrayOf(
             MusicSlashCommands.YTSEARCH_PREFIX,
