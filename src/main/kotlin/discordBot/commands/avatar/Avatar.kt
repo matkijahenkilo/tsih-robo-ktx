@@ -11,7 +11,8 @@ class Avatar(private val event: GenericCommandInteractionEvent) : SlashCommand(e
         val member = event.getOption(AvatarSlashOptions.AVATAR_OPTION_MEMBER)?.asMember
         val asUser = event.getOption(AvatarSlashOptions.AVATAR_OPTION_AS_USER)?.asBoolean ?: false
         val avatarUrl =
-            (if (asUser) member?.user?.effectiveAvatarUrl else member?.effectiveAvatarUrl ?: event.user.effectiveAvatarUrl) + "?size=2048"
+            (if (asUser) member?.user?.effectiveAvatarUrl else member?.effectiveAvatarUrl
+                ?: event.user.effectiveAvatarUrl) + "?size=2048"
         event.reply_(
             embeds = listOf(
                 EmbedBuilder {

@@ -13,7 +13,17 @@ object AvatarSlashOptions {
     fun getCommands(): SlashCommandData =
         Commands.slash(AVATAR, "I'll fetch your or someone else's avatar nanora!")
             .addOptions(
-                OptionData(OptionType.USER, AVATAR_OPTION_MEMBER, "The member's avatar as seen in this server nanora!", false),
-                OptionData(OptionType.BOOLEAN, AVATAR_OPTION_AS_USER, "If I should fetch the avatar of the user outside of this server nanora!", false)
+                OptionData(
+                    OptionType.USER,
+                    AVATAR_OPTION_MEMBER,
+                    "The member's avatar as seen in this server nanora!",
+                    false
+                ),
+                OptionData(
+                    OptionType.BOOLEAN,
+                    AVATAR_OPTION_AS_USER,
+                    "If I should fetch the avatar of the user outside of this server nanora!",
+                    false
+                )
             )
 }
