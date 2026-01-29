@@ -10,7 +10,7 @@ pkgs.mkShell {
   '';
 
   nativeBuildInputs = [
-    pkgs.jdk
+    pkgs.jdk25
     pkgMvn.maven
   ]
   ++ pkgs.lib.optionals devTools [

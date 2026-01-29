@@ -11,7 +11,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <kotlin.code.style>official</kotlin.code.style>
-        <kotlin.compiler.jvmTarget>21</kotlin.compiler.jvmTarget>
+        <kotlin.compiler.jvmTarget>25</kotlin.compiler.jvmTarget>
         <kotlin.version>2.3.0</kotlin.version>
         <serialization.version>1.10.0</serialization.version>
         <mavenfire.version>3.5.4</mavenfire.version>

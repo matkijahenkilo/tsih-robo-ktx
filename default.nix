@@ -1,7 +1,7 @@
 {
   lib,
   maven ? import <nixpkgs> { },
-  jre,
+  jdk25, # jre25_minimal can't run the project
   makeWrapper,
 
   ffmpeg,
@@ -32,7 +32,7 @@ maven.buildMavenPackage {
     mkdir -p $out/bin $out/share/${project-name}
     install -Dm644 target/${jar-file} $out/share/${project-name}
 
-    makeWrapper ${jre}/bin/java $out/bin/${project-name} \
+    makeWrapper ${jdk25}/bin/java $out/bin/${project-name} \
       --add-flags "-jar $out/share/${project-name}/${jar-file}" \
       --prefix PATH : ${
         lib.makeBinPath [
