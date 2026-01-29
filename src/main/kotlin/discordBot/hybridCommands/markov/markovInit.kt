@@ -246,8 +246,8 @@ fun markovPassiveInit(jda: JDA, shouldResetMarkovFiles: Boolean): SlashCommandDa
         }
     }
 
-    // run every 6 hours
-    Executors.newScheduledThreadPool(1).scheduleAtFixedRate(updateMarkovMapTask, 6, 6, TimeUnit.HOURS)
+    // starts in 2 hours, then runs every 2 hours
+    Executors.newScheduledThreadPool(1).scheduleAtFixedRate(updateMarkovMapTask, 2, 2, TimeUnit.HOURS)
 
 
     return MarkovRoomHandlerSlashCommands.getCommands()
