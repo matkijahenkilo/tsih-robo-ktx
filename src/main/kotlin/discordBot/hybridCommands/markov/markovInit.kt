@@ -21,21 +21,13 @@ import kotlin.random.Random
 /*
 I hate this place lmao
  */
-fun markovPassiveInit(jda: JDA, shouldResetMarkovFiles: Boolean): SlashCommandData {
+fun markovPassiveInit(jda: JDA): SlashCommandData {
 
     val defaultChance = 5.0F // 5%
     val logger: Logger = LoggerFactory.getLogger("MarkovInit")
     val markovsMap: MutableMap<Long, MarkovChain> = mutableMapOf() // key is the guild's id
     var savedMarkovChannels: List<MarkovAllowedChannel> = JPAUtil.getAllMarkovInfo()
     val quotesPattern = Regex("\"(.+)\"")
-
-    if (shouldResetMarkovFiles) {
-        logger.info("-m Argument used, deleting everything in data/markov/")
-        CorpusSaverManager(null, null).workingDir.listFiles()?.forEach { file: File? ->
-            file?.delete()
-        }
-        logger.info("Deleted everything")
-    }
 
     fun saveUnsavedChannelsToDisk() {
         savedMarkovChannels.forEach { markovChannel ->
