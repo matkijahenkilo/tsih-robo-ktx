@@ -170,13 +170,27 @@
             <version>0.14.1</version>
         </dependency>
 
-        <!-- Source: https://mvnrepository.com/artifact/club.minnced/jdave-api -->
-<!--        <dependency>-->
-<!--            <groupId>club.minnced</groupId>-->
-<!--            <artifactId>jdave-api</artifactId>-->
-<!--            <version>0.1.5</version>-->
-<!--            <scope>compile</scope>-->
-<!--        </dependency>-->
+        <!-- https://mvnrepository.com/artifact/club.minnced/jdave-api -->
+        <dependency>
+            <groupId>club.minnced</groupId>
+            <artifactId>jdave-api</artifactId>
+            <version>0.1.5</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <!-- https://central.sonatype.com/artifact/club.minnced/jdave-native-linux-aarch64 -->
+        <dependency>
+            <groupId>club.minnced</groupId>
+            <artifactId>jdave-native-linux-aarch64</artifactId>
+            <version>0.1.5</version>
+        </dependency>
+
+        <!-- https://central.sonatype.com/artifact/club.minnced/jdave-native-linux-x86-64 -->
+        <dependency>
+            <groupId>club.minnced</groupId>
+            <artifactId>jdave-native-linux-x86-64</artifactId>
+            <version>0.1.5</version>
+        </dependency>
 
         <!--
             database and orm

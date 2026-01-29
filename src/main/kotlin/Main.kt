@@ -1,5 +1,6 @@
 package org.matkija.bot
 
+import club.minnced.discord.jdave.interop.JDaveSessionFactory
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import dev.lavalink.youtube.YoutubeAudioSourceManager
@@ -9,6 +10,7 @@ import discordBot.commands.toolPost.toolPosterInit
 import discordBot.timedEvents.tsihOClockTimer.TsihOClockTimer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import net.dv8tion.jda.api.audio.AudioModuleConfig
 import net.dv8tion.jda.api.requests.GatewayIntent
 import org.flywaydb.core.Flyway
 import org.matkija.bot.discordBot.commands.avatar.avatarInit
@@ -94,6 +96,9 @@ fun main(args: Array<String>) {
         intents += listOf(
             GatewayIntent.MESSAGE_CONTENT,
             GatewayIntent.GUILD_MESSAGES
+        )
+        setAudioModuleConfig(
+            AudioModuleConfig().withDaveSessionFactory(JDaveSessionFactory())
         )
     }
     jda.awaitReady()
