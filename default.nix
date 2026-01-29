@@ -10,7 +10,7 @@
 }:
 let
   project-name = "tsih-robo-ktx";
-  vers = "0.0.1";
+  vers = "1.0.0";
   jar-file = "${project-name}-${vers}-jar-with-dependencies.jar";
 in
 maven.buildMavenPackage {
