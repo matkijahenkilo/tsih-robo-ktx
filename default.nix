@@ -33,7 +33,7 @@ maven.buildMavenPackage {
     install -Dm644 target/${jar-file} $out/share/${project-name}
 
     makeWrapper ${jdk25}/bin/java $out/bin/${project-name} \
-      --add-flags "--enable-native-access=ALL-UNNAMED -jar $out/share/${project-name}/${jar-file}" \
+      --add-flags "-Xms128m -Xmx512m -XX:+UseSerialGC -XX:+UseCompactObjectHeaders -XX:+ExitOnOutOfMemoryError -Xss256k --enable-native-access=ALL-UNNAMED -jar $out/share/${project-name}/${jar-file}" \
       --prefix PATH : ${
         lib.makeBinPath [
           ffmpeg
