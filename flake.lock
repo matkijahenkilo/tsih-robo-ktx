@@ -49,27 +49,10 @@
         "type": "github"
       }
     },
-    "nixpkgs-working-maven": {
-      "locked": {
-        "lastModified": 1729099449,
-        "narHash": "sha256-In36J+DRHHNg5wcqDq9LcId9EtHqdRIiq/Bv9nvgm34=",
-        "owner": "nixos",
-        "repo": "nixpkgs",
-        "rev": "8c5a555e338b5a30704c45de55e016eabf9c55c7",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nixos",
-        "repo": "nixpkgs",
-        "rev": "8c5a555e338b5a30704c45de55e016eabf9c55c7",
-        "type": "github"
-      }
-    },
     "root": {
       "inputs": {
         "flake-parts": "flake-parts",
         "nixpkgs": "nixpkgs",
-        "nixpkgs-working-maven": "nixpkgs-working-maven",
         "systems": "systems",
         "treefmt-nix": "treefmt-nix"
       }

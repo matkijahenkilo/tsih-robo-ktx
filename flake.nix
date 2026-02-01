@@ -3,9 +3,6 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-    # starting from Maven 3.9.10, it stopped working correctly on Aarch64 systems.
-    # So I am using 3.9.9 for this flake.
-    nixpkgs-working-maven.url = "github:nixos/nixpkgs/8c5a555e338b5a30704c45de55e016eabf9c55c7";
     systems.url = "github:nix-systems/default";
     flake-parts.url = "github:hercules-ci/flake-parts";
     treefmt-nix = {
@@ -33,14 +30,12 @@
         {
           packages = rec {
             default = tsih-robo-ktx;
-            tsih-robo-ktx = pkgs.callPackage ./default.nix {
-              maven = inputs.nixpkgs-working-maven.legacyPackages.${pkgs.stdenv.hostPlatform.system}.maven;
-            };
+            tsih-robo-ktx = pkgs.callPackage ./default.nix { };
           };
 
           apps.default = {
             type = "app";
-            program = "${config.packages.default}/bin/tsih-robo-ktx";
+            program = "${lib.getExe config.packages.default}";
           };
 
           overlayAttrs = {

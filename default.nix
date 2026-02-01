@@ -1,6 +1,6 @@
 {
   lib,
-  maven ? import <nixpkgs> { },
+  maven,
   jdk25, # jre25_minimal can't run the project
   makeWrapper,
 
