@@ -24,9 +24,13 @@ class SauceSender(
 ) {
     private val footerImage = "sauce-footer.png"
     private var footerImagePath: MutableList<FileUpload>? = null
-    private val discordSizeLimit = 10
     private val links: List<String> = filterOutWords(content).distinct().filterOutBlacklistedItems()
     private val logger: Logger = LoggerFactory.getLogger(SauceSender::class.java)
+
+    companion object {
+        private const val DISCORD_FILE_SIZE_LIMIT_IN_MB = 10
+        private const val DISCORD_FILE_UPLOAD_LIMIT_PER_MSG = 10
+    }
 
     init {
         val footerImage = File("data/images/$footerImage")
@@ -94,10 +98,10 @@ class SauceSender(
                                         .replace("# ", "")
                                         .replace("./", "/")
                                     val file = File("./data", clearFilePath)
-                                    if (file.exists() && file.length() < discordSizeLimit * 1024 * 1024)
+                                    if (file.exists() && file.length() < DISCORD_FILE_SIZE_LIMIT_IN_MB * 1024 * 1024)
                                         files.add(file)
                                     else
-                                        logger.warn("File $file was bigger than ${discordSizeLimit}mb")
+                                        logger.warn("File $file was bigger than ${DISCORD_FILE_SIZE_LIMIT_IN_MB}mb")
                                 }
                             }
 
@@ -130,7 +134,7 @@ class SauceSender(
                             logger.info("Sending content from $link")
 
                             // send it, embed or not
-                            if (payload.files!!.size > 10) {
+                            if (payload.files!!.size > DISCORD_FILE_UPLOAD_LIMIT_PER_MSG) {
                                 sendFilesInParts(payload, link)
                             } else {
                                 sendFiles(payload, link)
@@ -159,7 +163,7 @@ class SauceSender(
         val uploads = mutableListOf<FileUpload>()
         payload.files!!.forEach { file ->
             uploads.add(FileUpload.fromData(file))
-            if (uploads.size == 10) {
+            if (uploads.size == DISCORD_FILE_UPLOAD_LIMIT_PER_MSG) {
                 event.message.reply_(
                     content = if (links.size > 1) "<$link>" else "",
                     files = uploads
