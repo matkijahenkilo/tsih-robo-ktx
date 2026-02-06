@@ -96,7 +96,7 @@ class Music(
 
                     play(
                         entries = requestedTrackInfoList,
-                        isPriority = true,
+                        isPriority = false,
                         shouldSaveToDb = false
                     )
 
