@@ -53,12 +53,13 @@ class ToolPost(private val event: GenericCommandInteractionEvent) : SlashCommand
                 }
             }
 
-            val output = createToolPost(link, timeToTrim = timeToTrim ?: Random.nextDouble(0.0, fileDuration))
+            val customToolPost = createToolPost(link, timeToTrim = timeToTrim ?: Random.nextDouble(0.0, fileDuration))
 
-            if (output != null) {
-                val video = FileUpload.fromData(output)
+            if (customToolPost != null) {
+                val video = FileUpload.fromData(customToolPost)
                 event.hook.editMessage(content = "Created toolpost from <$link>, sending soon nora.").queue()
                 event.messageChannel.send(files = listOf(video)).queue()
+                customToolPost.delete()
             } else {
                 event.hook.editMessage(content = "Failed to fetch song from link, maybe I'm not old enough to see this video nanora~")
                     .queue()
