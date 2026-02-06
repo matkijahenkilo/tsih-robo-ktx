@@ -17,6 +17,7 @@ import org.matkija.bot.LOG
 import org.matkija.bot.discordBot.abstracts.SlashCommand
 import org.matkija.bot.discordBot.commands.music.audio.GuildMusicManager
 import org.matkija.bot.sql.JPAUtil
+import org.matkija.bot.utils.formatMillis
 import kotlin.time.Duration.Companion.minutes
 
 class Music(
@@ -115,10 +116,10 @@ class Music(
                 var content = mutableListOf<String>()
                 var index = 1
 
-                val totalTime = getTimestamp(queueContents.sumOf { it.track!!.info.length })
+                val totalTime = formatMillis(queueContents.sumOf { it.track!!.info.length })
 
                 queueContents.forEach { audioContent ->
-                    val time = getTimestamp(audioContent.track!!.info.length)
+                    val time = formatMillis(audioContent.track!!.info.length)
                     content.add(
                         String.format(
                             "%s. [%s](%s) (%s) by %s",

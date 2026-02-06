@@ -17,6 +17,7 @@ import net.dv8tion.jda.api.entities.emoji.Emoji
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
 import org.matkija.bot.discordBot.commands.music.audio.GuildMusicManager
 import org.matkija.bot.discordBot.commands.music.audio.TrackScheduler
+import org.matkija.bot.utils.formatMillis
 import org.matkija.bot.utils.getRandomColor
 import java.time.Instant
 
@@ -81,7 +82,7 @@ object MusicInfoEmbed {
     ): MessageEmbed {
         var embed = EmbedBuilder {
             thumbnail = info.artworkUrl
-            title = info.title + "\n(${getTimestamp(info.length)})"
+            title = info.title + "\n(${formatMillis(info.length)})"
             url = info.uri
             color = getRandomColor()
             timestamp = Instant.now()

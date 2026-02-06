@@ -5,6 +5,7 @@ import dev.minn.jda.ktx.messages.send
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent
 import net.dv8tion.jda.api.utils.FileUpload
 import org.matkija.bot.discordBot.abstracts.SlashCommand
+import org.matkija.bot.utils.parseDurationToSeconds
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.File
@@ -40,7 +41,7 @@ class ToolPost(private val event: GenericCommandInteractionEvent) : SlashCommand
                 return
             }
 
-            var timeToTrim = getAbsoluteTime(event.getOption(ToolPostOptions.TOOLPOST_OPTION_TRIM)?.asString)
+            var timeToTrim = parseDurationToSeconds(event.getOption(ToolPostOptions.TOOLPOST_OPTION_TRIM)?.asString)
 
             if (timeToTrim != null && timeToTrim >= TOOLPOST_DROP) {
                 if (timeToTrim >= fileDuration) {
@@ -81,26 +82,6 @@ class ToolPost(private val event: GenericCommandInteractionEvent) : SlashCommand
             log.error("Audio file returned null from $link")
             return null
         }
-    }
-
-    private fun getAbsoluteTime(time: String?): Double? {
-        if (time == null) return null
-
-        val parts = time.split(':')
-        var totalSeconds = 0.0
-        var multiplier = 1.0
-
-        // Iterate backwards: Seconds (with decimals) -> Minutes -> Hours
-        for (i in parts.size - 1 downTo 0) {
-            val numberStr = parts[i].filter { it.isDigit() || it == '.' }
-            val value = numberStr.toDoubleOrNull() ?: 0.0 // can handle 30 and 30.500
-
-            totalSeconds += value * multiplier
-
-            multiplier *= 60.0
-        }
-
-        return totalSeconds
     }
 
     private fun toolPostBaseVideoExists(): Boolean = File(PATH, ORIGINAL_VIDEO).exists()
