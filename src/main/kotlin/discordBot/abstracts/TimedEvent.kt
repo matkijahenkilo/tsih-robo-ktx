@@ -26,6 +26,14 @@ abstract class TimedEvent {
     fun startScheduler(every: TimeUnit, initialDelay: Long, period: Long): Any = try {
         scheduler.scheduleAtFixedRate(task, initialDelay, period, every)
     } catch (e: Exception) {
-        LOG.error(e.toString())
+        LOG.error("startScheduler: ${e.message}")
+    }
+
+    fun runOnce() {
+        try {
+            scheduler.execute(task)
+        } catch (e: Exception) {
+            LOG.error("runOnce: ${e.message}")
+        }
     }
 }

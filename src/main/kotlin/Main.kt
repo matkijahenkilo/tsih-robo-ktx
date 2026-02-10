@@ -7,6 +7,8 @@ import dev.lavalink.youtube.YoutubeAudioSourceManager
 import dev.minn.jda.ktx.jdabuilder.default
 import dev.minn.jda.ktx.jdabuilder.intents
 import discordBot.commands.toolPost.toolPosterInit
+import discordBot.hybridCommands.birthday.BirthdayMessageSenderTimedEvent
+import discordBot.hybridCommands.birthday.birthdayInit
 import discordBot.timedEvents.tsihOClockTimer.TsihOClockTimer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -119,7 +121,24 @@ fun main(args: Array<String>) {
         toolPosterInit(jda),
         markovPassiveInit(jda),
         messageDeleteInit(jda),
-        chanceManagerInit(jda)
+        chanceManagerInit(jda),
+        birthdayInit(jda).also {
+            val now = LocalDateTime.now()
+            val oneDaySeconds = 24L * 60L * 60L
+            // target: 05:00
+            var nextRun = now.withHour(5).withMinute(0).withSecond(0).withNano(0)
+
+            if (now.isAfter(nextRun)) {
+                nextRun = nextRun.plusDays(1)
+            }
+
+            val initialDelaySeconds = ChronoUnit.SECONDS.between(now, nextRun)
+
+            LOG.info("Scheduling birthdayMessageSender. Initial delay: $initialDelaySeconds seconds.")
+            val birthdayEvent = BirthdayMessageSenderTimedEvent(jda)
+            birthdayEvent.runOnce() // in case of bot being started after 05:00
+            birthdayEvent.startScheduler(TimeUnit.SECONDS, initialDelaySeconds, oneDaySeconds)
+        },
     )
     if (tsihOClockExists()) {
         commandList.add(tsihOClockInit(jda))

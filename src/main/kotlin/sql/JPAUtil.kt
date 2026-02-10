@@ -6,6 +6,7 @@ import org.hibernate.boot.MetadataSources
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder
 import org.matkija.bot.discordBot.commands.music.RequestedTrackInfo
 
+//TODO(switch to Exposed https://www.jetbrains.com/exposed/ ( ; ω ; ))
 
 private val registry = StandardServiceRegistryBuilder().build()
 
@@ -13,6 +14,9 @@ private val registry = StandardServiceRegistryBuilder().build()
 private val sessionFactory: SessionFactory =
     MetadataSources(registry)
         .addAnnotatedClasses(
+            BirthdayChannel::class.java,
+            BirthdayUser::class.java,
+            BirthdayUserChannelSubscription::class.java,
             CustomChance::class.java,
             MarkovAllowedChannel::class.java,
             Playlist::class.java,
@@ -172,5 +176,141 @@ object JPAUtil {
 
         }
         return ret
+    }
+
+    fun getTodayBirthdays(currentDay: Long, currentMonth: Long): List<BirthdayUserChannelSubscription>? {
+        var birthdays: List<BirthdayUserChannelSubscription>? = null
+        sessionFactory.inTransaction { session ->
+            birthdays = session.createSelectionQuery(
+                "from BirthdayUserChannelSubscription sub where sub.birthdayUserId.day = $currentDay and sub.birthdayUserId.month = $currentMonth",
+                BirthdayUserChannelSubscription::class.java
+            ).resultList
+        }
+        return birthdays
+    }
+
+    fun getBirthdayUserSubscriptionFromGuildIdAndUserId(userId: Long, guildId: Long): BirthdayUserChannelSubscription? {
+        var sub: BirthdayUserChannelSubscription? = null
+        sessionFactory.inTransaction { session ->
+            val count = session.createNativeQuery(
+                "SELECT count(*) FROM birthdayUserChannelSubscriptions",
+                Long::class.javaObjectType
+            )
+                .singleResult ?: 0L
+
+            if (count == 0L) {
+                sub = null
+                return@inTransaction
+            }
+
+            sub = session.createSelectionQuery(
+                """
+                from ${BirthdayUserChannelSubscription::class.java.name} sub
+                where
+                sub.birthdayChannelId.guildId = $guildId
+                and
+                sub.birthdayUserId.userId = $userId
+            """,
+                BirthdayUserChannelSubscription::class.java
+            ).singleResultOrNull
+        }
+        return sub
+    }
+
+    fun getBirthdayUserSubscriptionsFromGuildId(guildId: Long): List<BirthdayUserChannelSubscription>? {
+        var result: List<BirthdayUserChannelSubscription>? = null
+        sessionFactory.inTransaction { session ->
+            result = session.createSelectionQuery(
+                """
+                    from ${BirthdayUserChannelSubscription::class.java.name} sub
+                    where
+                    sub.birthdayChannelId.guildId = $guildId
+                    order by sub.birthdayUserId.month asc, sub.birthdayUserId.day asc
+                """,
+                BirthdayUserChannelSubscription::class.java
+            ).resultList
+        }
+        return result
+    }
+
+
+    fun getBirthdayNotificationChannelFromGuildId(guildId: Long): BirthdayChannel? {
+        var result: BirthdayChannel? = null
+        sessionFactory.inTransaction { session ->
+            result = session.createSelectionQuery(
+                "from ${BirthdayChannel::class.java.name} bc where bc.${BirthdayChannel::guildId.name} = $guildId",
+                BirthdayChannel::class.java
+            ).singleResultOrNull
+        }
+        return result
+    }
+
+    fun setOrReplaceBirthdayNotificationChannel(birthdayChannel: BirthdayChannel) {
+        sessionFactory.inTransaction { session ->
+            val birthdayChannelObjFromExistingGuild = session.createSelectionQuery(
+                """
+                    from ${BirthdayChannel::class.java.name} m
+                    where m.${BirthdayChannel::guildId.name} = ${birthdayChannel.guildId}
+                """,
+                BirthdayChannel::class.java
+            ).singleResultOrNull
+
+            if (birthdayChannelObjFromExistingGuild == null) {
+                session.persist(birthdayChannel)
+            } else {
+                println(
+                    session.merge(
+                        BirthdayChannel(
+                            birthdayChannelId = birthdayChannelObjFromExistingGuild.birthdayChannelId,
+                            channelId = birthdayChannel.channelId,
+                            guildId = birthdayChannelObjFromExistingGuild.guildId
+                        )
+                    )
+                )
+            }
+        }
+    }
+
+    fun saveBirthdayUser(birthdayUser: BirthdayUser, guildId: Long) {
+        sessionFactory.inTransaction { session ->
+            // fetch the birthdayChannel object to associate the user with the server
+            val birthdayChannelFromDB = session.createSelectionQuery(
+                "from ${BirthdayChannel::class.java.name} bc where bc.${BirthdayChannel::guildId.name} = $guildId",
+                BirthdayChannel::class.java
+            ).singleResult
+
+            println(birthdayChannelFromDB)
+            val managedUser = session.merge(birthdayUser)
+            println(managedUser)
+
+            val sub = BirthdayUserChannelSubscription(
+                birthdayChannelId = birthdayChannelFromDB,
+                birthdayUserId = managedUser
+            )
+            println(sub)
+            session.persist(sub)
+        }
+    }
+
+    fun deleteBirthdayUser(userId: Long, guildId: Long) {
+        sessionFactory.inTransaction { session ->
+            session.createMutationQuery(
+                "delete from ${BirthdayUserChannelSubscription::class.java.name} sub where sub.birthdayUserId.userId = $userId and sub.birthdayChannelId.guildId = $guildId"
+            ).executeUpdate()
+
+            // clear the user from db only if they have 0 subscriptions left
+            session.createMutationQuery(
+                """
+                    delete from ${BirthdayUser::class.java.name} u
+                    where u.userId = :userId 
+                    and not exists (
+                        select 1 from BirthdayUserChannelSubscription sub 
+                        where sub.birthdayUserId = u
+                    )
+                """
+            )
+                .setParameter("userId", userId)
+                .executeUpdate()
+        }
     }
 }
