@@ -44,4 +44,11 @@ maven.buildMavenPackage {
 
     runHook postInstall
   '';
+
+  meta = {
+    mainProgram = "tsih-robo-ktx";
+    homepage = "https://github.com/matkijahenkilo/tsih-robo-ktx";
+    platforms = lib.platforms.x86_64 ++ lib.platforms.aarch64;
+    maintainers = with lib.maintainers; [ matkijahenkilo ];
+  };
 }
