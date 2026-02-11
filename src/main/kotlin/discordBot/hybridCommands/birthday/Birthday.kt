@@ -37,16 +37,16 @@ class Birthday(private val event: GenericCommandInteractionEvent) : SlashCommand
             }
 
             BirthdaySlashCommands.BIRTHDAY_REMOVE -> {
-                if (!isAdmin()) return else if (channelIsNotSet()) return
+                if (!isAdmin()) return
                 removeUser()
             }
 
-            BirthdaySlashCommands.BIRTHDAY_LIST -> {
-                if (!isAdmin()) return else if (channelIsNotSet()) return
-                listUsersByGuild()
-            }
+            BirthdaySlashCommands.BIRTHDAY_LIST -> listUsersByGuild()
 
-            BirthdaySlashCommands.BIRTHDAY_SET -> setChat()
+            BirthdaySlashCommands.BIRTHDAY_SET -> {
+                if (!isAdmin()) return
+                setChat()
+            }
         }
     }
 
