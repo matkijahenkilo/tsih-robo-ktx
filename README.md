@@ -13,50 +13,69 @@ It uses Flyway, Hibernate, SQLite, JDA, JDA-ktx, Lavaplayer (and youtube-source)
 
 This repository is a complete remake of [tsih-robo](https://github.com/matkijahenkilo/tsih-robo) made with Discordia.
 
+![tsih disgusted](https://raw.githubusercontent.com/matkijahenkilo/matkijahenkilo/refs/heads/main/imgs/2025-05-08_09-34-54.png)
+
+![tsih trying to english](https://raw.githubusercontent.com/matkijahenkilo/matkijahenkilo/refs/heads/main/imgs/2025-05-08_18-34-54.png)
+
+![you you you you](https://raw.githubusercontent.com/matkijahenkilo/matkijahenkilo/refs/heads/main/imgs/2025-05-31_16-49-26.png)
+
+![post unfucker](https://raw.githubusercontent.com/matkijahenkilo/matkijahenkilo/4640a3b0d7f86633e11997298dce4de114f63765/imgs/image.png)
+
+![post unfucker for video too](https://raw.githubusercontent.com/matkijahenkilo/matkijahenkilo/af88179caff520a430bc5b05c371ab348a28fc77/imgs/2026-02-11_06-05-08.png)
+
 ## Commands
 
 The list of commands is as it follows:
 
 ### SlashInteraction commands
 
-Runs when someone runs the command
+Runs when someone runs the slash command
 
 - `/avatar`
   - returns the avatar of the user
 - `/music`
-  - plays music from various websites
-  - will also save the server's playlist to disk in case of sudden stop, can be resumed where it stopped
-
-![tsih disgusted](https://raw.githubusercontent.com/matkijahenkilo/matkijahenkilo/refs/heads/main/imgs/2025-05-08_09-34-54.png)
-
+  - plays music from various websites. Will also save the server's playlist to disk in case of sudden stop, can be resumed where it stopped
+    - `play` adds a single song or a playlist to queue
+    - `play_next` prioritizes a single song or playlist to be played next, regardless if the queue is being shuffled
+    - `show_queue` shows the current queue. If the queue is shuffled the list will not show up shuffled
+    - `resume_queue` can be used to resume a playlist that was being played before the bot got disconnected from voice chat. If `/music play` is used to reconnect the bot to voice chat while a playlist is saved on disk, it will erase the entire saved playlist and start a new one
+    - when `play` or `play_next` are used, Tsih will start sending messages to the channel where the command was used. These messages are general information about the song and will have five buttons underneath it: `stop`, `resume/pause`, `skip`, `toggle repeat` and `toggle shuffle`
 - `/question`
   - answers a yes/no question
 - `/toolpost`
   - sends a [they think im tom cruise](https://knowyourmeme.com/memes/they-think-that-im-tom-cruise) meme
     in a similar way of [Toolposting 1019](https://www.facebook.com/profile.php?id=100057113183628) page
 - `/tsihoclock`
-  - saves or removes the text channel to receive a random art of Tsih
+  - saves or removes the text channel to receive a random art of Tsih. If there's images provided for the bot, it will run every day at 18:00 to send Tsih's fan arts to saved text channels
 - `/markov`
-  - manages bot's permissions on where to read and write [meaningless text](https://en.wikipedia.org/wiki/Markov_chain#Markov_text_generators)
-    - `read` ⚠️ **will log a channel's messages** to feed to its vocabulary
+  - manages bot's permissions on where to read and write [meaningless text](https://en.wikipedia.org/wiki/Markov_chain#Markov_text_generators). Will run everytime a message is sent to a channel saved with `write` permission, after a chance check or the bot is mentioned it will send generated text learnt from the server's chats
+    - `read` ⚠️ **will log a channel's messages** to feed to its vocabulary. By default, Tsih will save up to 10k words. This value can be customized in `data/commandConfigs.json`
     - `write` will use the saved vocabulary to spit out meaningless text
     - `status` shows which channel she is using for what, it's ephemeral
+- `/chance_manager`
+  - manages some commands that requires a chance to be executed. Currently, works only for Markov Text generator and for random reactions
+- `/birthday`
+  - manages birthday reminder, will be run when starting the bot then every day at 2AM GMT+0 (or 8AM for PST)
+    - `add` (admin only) saves a user and their birthday date
+    - `remove` (admin only) deletes a user and their birthday date
+    - `set_chat` (admin only) chooses which chat will be used to send the message. If used in another chat from the same server it will replace the already existing chat
+    - `list_birthdays` lists the users and their birthdays from that server
 
-### MessageReceived "passive" commands
+### MessageReceived commands
 
 Runs every time a message is sent to a text channel where the bot has permission to see/write
 
 - `sauceSender`
-  - checks if it's a link that can have its embed "fixed"
+  - checks if it's a link that can have its embed "fixed", if it can (e.g. in case of Twitter or Pixiv), the bot will download its contents using gallery-dl and upload it on discord as if it's the original post. Upload is limited to 10 files
 - `randomReact`
   - has a small chance to react to a message with a random custom emoji from a random server. It's guaranteed when saying "tsih" or "nora"
-- `markov`
-  - has a small chance to generate a random text based off a channel where `/markov read` were activated and send to a channel where `/markov write` were activated.
-    It's guaranteed when mentioning the bot, and can specify a word to begin with in between double quotes
 
-![tsih trying to english](https://raw.githubusercontent.com/matkijahenkilo/matkijahenkilo/refs/heads/main/imgs/2025-05-08_18-34-54.png)
+### Message commands
 
-![you you you you](https://raw.githubusercontent.com/matkijahenkilo/matkijahenkilo/refs/heads/main/imgs/2025-05-31_16-49-26.png)
+Can be run only when right-clicking the message and going to Apps
+
+- `delete tsih's message`
+  - deletes only the message created by the bot
 
 ### Scheduled events
 
@@ -64,8 +83,6 @@ Runs something periodically
 
 - `Random Status`
   - runs every 5 minutes to change the custom status' text
-- `Tsih O'Clock`
-  - runs every day at 18:00 to send fan arts to saved text channels
 
 ## Installation
 
