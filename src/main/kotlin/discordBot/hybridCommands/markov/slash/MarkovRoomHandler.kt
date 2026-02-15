@@ -137,7 +137,7 @@ class MarkovRoomHandler(private val event: GenericCommandInteractionEvent) : Sla
             JPAUtil.deleteMarkovReadingChannelById(channelId)
             event.reply("Done nanora! I won't be reading this chat anymore~").queue()
 
-            CorpusSaverManager(guildId, channelId).deleteFile()
+            CorpusSaverManager(guildId).deleteFile()
         } else {
             event.reply("I'm not even reading it!!!").queue()
         }

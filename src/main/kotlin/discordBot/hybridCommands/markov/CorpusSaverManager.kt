@@ -4,8 +4,8 @@ import org.matkija.bot.utils.ConfigReader
 import java.io.File
 import java.util.*
 
-class CorpusSaverManager(private val guildId: Long?, channelId: Long?) {
-    private val file: File = File("data/markov/${guildId}_${channelId}")
+class CorpusSaverManager(private val guildId: Long?) {
+    private val file: File = File("data/markov/${guildId}")
     val workingDir: File = File("data/markov")
     private val maxTotalWords = ConfigReader.configs.markovWordLimit
 
@@ -21,7 +21,7 @@ class CorpusSaverManager(private val guildId: Long?, channelId: Long?) {
     }
 
     private fun getFileWordCount(): Int {
-        if (!file.exists()) return 0
+        if (fileDoesNotExist()) return 0
         return file.bufferedReader().use { reader ->
             var wordCount = 0
             val scanner = Scanner(reader)
@@ -34,7 +34,7 @@ class CorpusSaverManager(private val guildId: Long?, channelId: Long?) {
     }
 
     private fun trimFile() {
-        if (!file.exists()) return
+        if (fileDoesNotExist()) return
         val words = file.readText().split(Regex("\\s+")).filter { it.isNotBlank() }
         file.writeText(
             words.takeLast(maxTotalWords).joinToString(
@@ -44,12 +44,7 @@ class CorpusSaverManager(private val guildId: Long?, channelId: Long?) {
         )
     }
 
-    fun getChannelsTextsBelongingToGuild(): String? {
-        return workingDir.listFiles()
-            ?.filter { it.name.startsWith("${guildId}_") }
-            ?.joinToString(" ") { it.readText().trim() }
-            ?.takeIf { it.isNotBlank() }
-    }
+    fun getChannelsTextsBelongingToGuild(): String? = file.readText().trim().takeIf { it.isNotBlank() }
 
     fun fileDoesNotExist(): Boolean = !file.exists()
     fun deleteFile() = file.delete()

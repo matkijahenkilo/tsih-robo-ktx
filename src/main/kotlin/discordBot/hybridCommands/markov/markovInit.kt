@@ -33,7 +33,7 @@ fun markovPassiveInit(jda: JDA): SlashCommandData {
             if (markovChannel.readingChannelId != null) {
                 val textChannelObj = jda.getTextChannelById(markovChannel.readingChannelId)
                 if (textChannelObj != null) {
-                    val hb = CorpusSaverManager(markovChannel.guildId, textChannelObj.idLong)
+                    val hb = CorpusSaverManager(markovChannel.guildId)
                     if (hb.fileDoesNotExist()) {
                         logger.info("Fetching messages of channel #${textChannelObj.name} from Discord")
 
@@ -58,7 +58,7 @@ fun markovPassiveInit(jda: JDA): SlashCommandData {
     }
 
     fun saveCurrentGuildCorpusFromDiskToMap(guildId: Long) {
-        val textsBelongingToGuild = CorpusSaverManager(guildId, null).getChannelsTextsBelongingToGuild()
+        val textsBelongingToGuild = CorpusSaverManager(guildId).getChannelsTextsBelongingToGuild()
         if (textsBelongingToGuild != null) {
             markovsMap[guildId] = MarkovChain(textsBelongingToGuild.clearForMarkovCorpus().split(" "))
         } else {
@@ -95,7 +95,6 @@ fun markovPassiveInit(jda: JDA): SlashCommandData {
             return@listener
 
         val guildId = event.guild.idLong
-        val channelId = event.message.channelIdLong
         val contentRaw = event.message.contentRaw
         val markov = markovsMap[guildId]
 
@@ -104,7 +103,7 @@ fun markovPassiveInit(jda: JDA): SlashCommandData {
             // log only if bot is not mentioned in message
             if (!contentRaw.contains(jda.selfUser.asMention)) {
                 val textCleared = contentRaw.clearForMarkovCorpus()
-                CorpusSaverManager(guildId, channelId).appendToFile(textCleared)
+                CorpusSaverManager(guildId).appendToFile(textCleared)
                 markov?.appendCorpus(textCleared.split(" "))
             }
         }
@@ -211,7 +210,7 @@ fun markovPassiveInit(jda: JDA): SlashCommandData {
                     val textChannelById = jda.getTextChannelById(it.writingChannelId)
                     if (textChannelById == null && jda.status == JDA.Status.CONNECTED) {
                         JPAUtil.deleteMarkovWritingChannelById(it.writingChannelId)
-                        CorpusSaverManager(it.guildId, it.writingChannelId).deleteFile()
+                        CorpusSaverManager(it.guildId).deleteFile()
                         c++
                     }
                 }
@@ -219,7 +218,7 @@ fun markovPassiveInit(jda: JDA): SlashCommandData {
                     val textChannelById = jda.getTextChannelById(it.readingChannelId)
                     if (textChannelById == null) {
                         JPAUtil.deleteMarkovReadingChannelById(it.readingChannelId)
-                        CorpusSaverManager(it.guildId, it.readingChannelId).deleteFile()
+                        CorpusSaverManager(it.guildId).deleteFile()
                         c++
                     }
                 }
