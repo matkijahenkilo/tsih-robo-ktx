@@ -7,6 +7,8 @@ import net.dv8tion.jda.api.utils.FileUpload
 import org.matkija.bot.discordBot.abstracts.SlashCommand
 import org.matkija.bot.utils.clearCRLF
 import org.matkija.bot.utils.parseDurationToSeconds
+import org.matkija.bot.utils.replaceInstantChars
+import org.matkija.bot.utils.replaceLast
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.File
@@ -141,17 +143,6 @@ class ToolPost(private val event: GenericCommandInteractionEvent) : SlashCommand
             "--no-playlist",
             link
         )
-
-    private fun String.replaceInstantChars(): String = this
-        .replace(":", "")
-        .replace("-", "")
-        .replace("T", "-")
-
-    private fun String.replaceLast(toReplace: String, newChar: String): String =
-        if (last() in toReplace)
-            dropLast(1) + newChar
-        else
-            this
 
     /**
      * Merges a file's audio with original.mp4's video and outputs it
