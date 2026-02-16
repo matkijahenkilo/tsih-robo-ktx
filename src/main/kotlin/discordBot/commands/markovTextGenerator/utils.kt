@@ -1,4 +1,4 @@
-package org.matkija.bot.discordBot.hybridCommands.markov
+package org.matkija.bot.discordBot.commands.markovTextGenerator
 
 private val linkPatters = Regex("<\\bhttps://[^\\s>]+(?=>)>|\\bhttps://\\S+|<\\bhttp://[^\\s>]+(?=>)>|\\bhttp://\\S+")
 private val mentionPattern = Regex("<@[0-9]+>")

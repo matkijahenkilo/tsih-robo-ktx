@@ -7,24 +7,24 @@ import dev.lavalink.youtube.YoutubeAudioSourceManager
 import dev.minn.jda.ktx.jdabuilder.default
 import dev.minn.jda.ktx.jdabuilder.intents
 import discordBot.commands.toolPost.toolPosterInit
-import discordBot.hybridCommands.birthday.BirthdayMessageSenderTimedEvent
-import discordBot.hybridCommands.birthday.birthdayInit
-import discordBot.timedEvents.tsihOClockTimer.TsihOClockTimer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import net.dv8tion.jda.api.audio.AudioModuleConfig
 import net.dv8tion.jda.api.requests.GatewayIntent
 import org.flywaydb.core.Flyway
 import org.matkija.bot.discordBot.commands.avatar.avatarInit
+import org.matkija.bot.discordBot.commands.birthday.BirthdayMessageSenderTimedEvent
+import org.matkija.bot.discordBot.commands.birthday.birthdayInit
 import org.matkija.bot.discordBot.commands.chanceManager.chanceManagerInit
+import org.matkija.bot.discordBot.commands.markovTextGenerator.markovTextGenInit
 import org.matkija.bot.discordBot.commands.messageDelete.messageDeleteInit
 import org.matkija.bot.discordBot.commands.music.musicInit
 import org.matkija.bot.discordBot.commands.question.questionInit
+import org.matkija.bot.discordBot.commands.randomReact.randomReactInit
+import org.matkija.bot.discordBot.commands.randomStatus.RandomStatus
+import org.matkija.bot.discordBot.commands.sauceSender.sauceSenderInit
 import org.matkija.bot.discordBot.commands.tsihOClock.tsihOClockInit
-import org.matkija.bot.discordBot.hybridCommands.markov.markovPassiveInit
-import org.matkija.bot.discordBot.passiveCommands.randomReactInit
-import org.matkija.bot.discordBot.passiveCommands.sauceSender.sauceSenderInit
-import org.matkija.bot.discordBot.timedEvents.randomStatus.RandomStatus
+import org.matkija.bot.discordBot.commands.tsihOClockTimer.TsihOClockTimer
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.File
@@ -119,7 +119,7 @@ fun main(args: Array<String>) {
         questionInit(jda),
         avatarInit(jda),
         toolPosterInit(jda),
-        markovPassiveInit(jda),
+        markovTextGenInit(jda),
         messageDeleteInit(jda),
         chanceManagerInit(jda),
         birthdayInit(jda).also {

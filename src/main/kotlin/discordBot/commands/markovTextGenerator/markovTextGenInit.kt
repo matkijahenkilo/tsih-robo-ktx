@@ -1,4 +1,4 @@
-package org.matkija.bot.discordBot.hybridCommands.markov
+package org.matkija.bot.discordBot.commands.markovTextGenerator
 
 import dev.minn.jda.ktx.events.listener
 import dev.minn.jda.ktx.events.onCommand
@@ -7,8 +7,8 @@ import net.dv8tion.jda.api.JDA
 import net.dv8tion.jda.api.Permission
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData
-import org.matkija.bot.discordBot.hybridCommands.markov.slash.MarkovRoomHandler
-import org.matkija.bot.discordBot.hybridCommands.markov.slash.MarkovRoomHandlerSlashCommands
+import org.matkija.bot.discordBot.commands.markovTextGenerator.slash.MarkovRoomHandler
+import org.matkija.bot.discordBot.commands.markovTextGenerator.slash.MarkovRoomHandlerSlashCommands
 import org.matkija.bot.sql.JPAUtil
 import org.matkija.bot.sql.MarkovAllowedChannel
 import org.slf4j.Logger
@@ -20,7 +20,7 @@ import kotlin.random.Random
 /*
 I hate this place lmao
  */
-fun markovPassiveInit(jda: JDA): SlashCommandData {
+fun markovTextGenInit(jda: JDA): SlashCommandData {
 
     val defaultChance = 5.0F // 5%
     val logger: Logger = LoggerFactory.getLogger("MarkovInit")

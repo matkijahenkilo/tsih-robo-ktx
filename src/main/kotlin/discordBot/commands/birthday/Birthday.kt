@@ -1,4 +1,4 @@
-package discordBot.hybridCommands.birthday
+package org.matkija.bot.discordBot.commands.birthday
 
 import dev.minn.jda.ktx.interactions.components.sendPaginator
 import dev.minn.jda.ktx.messages.EmbedBuilder
@@ -7,8 +7,6 @@ import net.dv8tion.jda.api.Permission
 import net.dv8tion.jda.api.entities.MessageEmbed
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent
 import org.matkija.bot.discordBot.abstracts.SlashCommand
-import org.matkija.bot.discordBot.commands.birthday.Months
-import org.matkija.bot.discordBot.hybridCommands.birthday.BirthdaySlashCommands
 import org.matkija.bot.sql.BirthdayChannel
 import org.matkija.bot.sql.BirthdayUser
 import org.matkija.bot.sql.JPAUtil

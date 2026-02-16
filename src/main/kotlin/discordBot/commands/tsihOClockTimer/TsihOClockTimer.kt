@@ -1,4 +1,4 @@
-package discordBot.timedEvents.tsihOClockTimer
+package org.matkija.bot.discordBot.commands.tsihOClockTimer
 
 import dev.minn.jda.ktx.messages.EmbedBuilder
 import dev.minn.jda.ktx.messages.send
@@ -6,9 +6,6 @@ import kotlinx.coroutines.*
 import net.dv8tion.jda.api.JDA
 import net.dv8tion.jda.api.utils.FileUpload
 import org.matkija.bot.discordBot.abstracts.TimedEvent
-import org.matkija.bot.discordBot.timedEvents.tsihOClockTimer.randomName
-import org.matkija.bot.discordBot.timedEvents.tsihOClockTimer.randomTitle
-import org.matkija.bot.discordBot.timedEvents.tsihOClockTimer.randomValue
 import org.matkija.bot.sql.JPAUtil
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

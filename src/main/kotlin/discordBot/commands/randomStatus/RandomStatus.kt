@@ -1,4 +1,4 @@
-package org.matkija.bot.discordBot.timedEvents.randomStatus
+package org.matkija.bot.discordBot.commands.randomStatus
 
 import net.dv8tion.jda.api.JDA
 import net.dv8tion.jda.api.entities.Activity

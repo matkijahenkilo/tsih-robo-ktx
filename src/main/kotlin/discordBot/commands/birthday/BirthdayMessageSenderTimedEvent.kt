@@ -1,4 +1,4 @@
-package discordBot.hybridCommands.birthday
+package org.matkija.bot.discordBot.commands.birthday
 
 import dev.minn.jda.ktx.messages.send
 import net.dv8tion.jda.api.JDA

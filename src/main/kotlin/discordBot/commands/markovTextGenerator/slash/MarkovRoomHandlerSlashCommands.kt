@@ -1,4 +1,4 @@
-package org.matkija.bot.discordBot.hybridCommands.markov.slash
+package org.matkija.bot.discordBot.commands.markovTextGenerator.slash
 
 import dev.minn.jda.ktx.interactions.commands.Subcommand
 import net.dv8tion.jda.api.interactions.commands.OptionType

@@ -1,4 +1,4 @@
-package org.matkija.bot.discordBot.passiveCommands.sauceSender
+package org.matkija.bot.discordBot.commands.sauceSender
 
 import dev.minn.jda.ktx.events.listener
 import net.dv8tion.jda.api.JDA

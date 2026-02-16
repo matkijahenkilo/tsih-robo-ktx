@@ -1,4 +1,4 @@
-package org.matkija.bot.discordBot.timedEvents.tsihOClockTimer
+package org.matkija.bot.discordBot.commands.tsihOClockTimer
 
 fun randomTitle(): String = title.random()
 fun randomName(): String = name.random()

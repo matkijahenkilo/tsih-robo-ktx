@@ -1,4 +1,4 @@
-package org.matkija.bot.discordBot.hybridCommands.markov
+package org.matkija.bot.discordBot.commands.markovTextGenerator
 
 import org.matkija.bot.utils.ConfigReader
 import java.io.File

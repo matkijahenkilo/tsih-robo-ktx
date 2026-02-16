@@ -1,4 +1,4 @@
-package org.matkija.bot.discordBot.passiveCommands.sauceSender
+package org.matkija.bot.discordBot.commands.sauceSender
 
 fun shouldIFixIt(content: String): Boolean = whiteList.any { content.contains(it, ignoreCase = true) }
 

@@ -1,4 +1,4 @@
-package org.matkija.bot.discordBot.hybridCommands.birthday
+package org.matkija.bot.discordBot.commands.birthday
 
 import dev.minn.jda.ktx.interactions.commands.Subcommand
 import net.dv8tion.jda.api.interactions.commands.Command
@@ -6,7 +6,6 @@ import net.dv8tion.jda.api.interactions.commands.OptionType
 import net.dv8tion.jda.api.interactions.commands.build.Commands
 import net.dv8tion.jda.api.interactions.commands.build.OptionData
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData
-import org.matkija.bot.discordBot.commands.birthday.Months
 
 object BirthdaySlashCommands {
 

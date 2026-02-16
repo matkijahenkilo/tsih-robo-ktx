@@ -1,9 +1,8 @@
-package discordBot.hybridCommands.birthday
+package org.matkija.bot.discordBot.commands.birthday
 
 import dev.minn.jda.ktx.events.onCommand
 import net.dv8tion.jda.api.JDA
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData
-import org.matkija.bot.discordBot.hybridCommands.birthday.BirthdaySlashCommands
 
 fun birthdayInit(jda: JDA): SlashCommandData {
     jda.onCommand(BirthdaySlashCommands.BIRTHDAY) { event ->

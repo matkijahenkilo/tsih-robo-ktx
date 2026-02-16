@@ -1,4 +1,4 @@
-package org.matkija.bot.discordBot.passiveCommands.sauceSender
+package org.matkija.bot.discordBot.commands.sauceSender
 
 import dev.minn.jda.ktx.messages.EmbedBuilder
 import dev.minn.jda.ktx.messages.InlineEmbed
