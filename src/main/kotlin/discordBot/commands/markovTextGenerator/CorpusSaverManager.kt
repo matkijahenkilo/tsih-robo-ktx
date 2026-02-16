@@ -4,7 +4,7 @@ import org.matkija.bot.utils.ConfigReader
 import java.io.File
 import java.util.*
 
-class CorpusSaverManager(private val guildId: Long?) {
+class CorpusSaverManager(guildId: Long?) {
     private val file: File = File("data/markov/${guildId}")
     val workingDir: File = File("data/markov")
     private val maxTotalWords = ConfigReader.configs.markovWordLimit
