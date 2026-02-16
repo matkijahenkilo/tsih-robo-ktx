@@ -30,6 +30,9 @@ class ToolPost(private val event: GenericCommandInteractionEvent) : SlashCommand
         if (toolPostBaseVideoExists()) {
 
             val link = event.getOption(ToolPostOptions.TOOLPOST_OPTION_LINK)!!.asString
+            val climaxTime = event.getOption(ToolPostOptions.TOOLPOST_OPTION_TRIM)?.asString
+
+            log.info("Analyzing $link and parsing from $climaxTime")
 
             if (!link.contains("https://")) {
                 event.reply("This is not a valid link nanora!").setEphemeral(true).queue()
@@ -41,14 +44,15 @@ class ToolPost(private val event: GenericCommandInteractionEvent) : SlashCommand
             val fileDuration = getFileDuration(link)
 
             if (fileDuration < 16) {
+                log.info("Too short: $link")
                 event.hook.editMessage(content = "This song is too short nanora!").queue()
                 return
             } else if (fileDuration >= 900) {
+                log.info("Too long: $link")
                 event.hook.editMessage(content = "This song is too long nanora! max length is 15 minutes nora.").queue()
                 return
             }
 
-            val climaxTime = event.getOption(ToolPostOptions.TOOLPOST_OPTION_TRIM)?.asString
             var timeToTrim = parseDurationToSeconds(climaxTime)
 
             if (timeToTrim != null && timeToTrim >= TOOLPOST_DROP) {
@@ -71,6 +75,7 @@ class ToolPost(private val event: GenericCommandInteractionEvent) : SlashCommand
                 event.messageChannel.send(files = listOf(video)).queue()
                 customToolPost.delete()
             } else {
+                log.error("Failed to fetch song from $link")
                 event.hook.editMessage(content = "Failed to fetch song from link, maybe I'm not old enough to see this video nanora~")
                     .queue()
             }
