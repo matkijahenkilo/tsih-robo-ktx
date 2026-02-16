@@ -4,7 +4,10 @@ import dev.minn.jda.ktx.messages.editMessage
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent
 import org.matkija.bot.LOG
 
-
+/*
+TODO(slash options could be the class' companion object)
+    instead of separating slash options into a separate file, every slash command class could use a companion object instead
+ */
 abstract class SlashCommand(private val event: GenericCommandInteractionEvent) {
 
     protected abstract fun execute()

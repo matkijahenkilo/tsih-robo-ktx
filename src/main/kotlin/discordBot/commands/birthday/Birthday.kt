@@ -118,6 +118,10 @@ class Birthday(private val event: GenericCommandInteractionEvent) : SlashCommand
         }
 
         birthdays.forEach { birthdaySubscription ->
+            /*
+            TODO(make user retrieval faster)
+                event.jda.retrieveUserById().complete() takes a long while to load all users, maybe put them in a cache?
+             */
             val user = event.jda.retrieveUserById(birthdaySubscription.birthdayUserId.userId).complete()
             if (user != null) {
                 val monthName = Months.entries[(birthdaySubscription.birthdayUserId.month - 1).toInt()].monthName

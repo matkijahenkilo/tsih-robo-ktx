@@ -28,6 +28,13 @@ fun markovTextGenInit(jda: JDA): SlashCommandData {
     var savedMarkovChannels: List<MarkovAllowedChannel> = JPAUtil.getAllMarkovInfo()
     val quotesPattern = Regex("\"(.+)\"")
 
+    /*
+    TODO(append text or delete function)
+        there will be only one file per guild, this function only works if it's reading one channel per guild.
+        If there two or more channels being read in a guild, only the first channel will have its content saved.
+        appending text would be a hard task to do since it needs a verification to if the channel was already read to avoid duplicates and general overrides.
+        alternatively, deleting this function completely also works, since every text sent to channel will be saved to disk.
+     */
     fun saveUnsavedChannelsToDisk() {
         savedMarkovChannels.forEach { markovChannel ->
             if (markovChannel.readingChannelId != null) {
