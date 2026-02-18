@@ -117,7 +117,7 @@
                             <archive>
                                 <manifest>
                                     <mainClass>
-                                        org.matkija.bot.MainKt
+                                        org.matkijahenkilo.tsihRoboKtx.MainKt
                                     </mainClass>
                                 </manifest>
                             </archive>

@@ -1,0 +1,19 @@
+package org.matkijahenkilo.tsihRoboKtx.discordBot.commands.toolPost
+
+import dev.minn.jda.ktx.events.onCommand
+import net.dv8tion.jda.api.JDA
+import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData
+
+fun toolPosterInit(jda: JDA): SlashCommandData {
+    //clear up folder before doing stuff
+    ToolPost.toolPostWorkingDir.listFiles()?.forEach {
+        if (it.name != ToolPost.ORIGINAL_VIDEO)
+            it.delete()
+    }
+
+    jda.onCommand(ToolPost.TOOLPOST) { event ->
+        ToolPost(event).tryExecute()
+    }
+
+    return ToolPost.getCommands()
+}
