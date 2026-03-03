@@ -1,6 +1,7 @@
 package org.matkijahenkilo.tsihRoboKtx.discordBot.commands.markovTextGenerator
 
 import org.matkijahenkilo.tsihRoboKtx.utils.ConfigReader
+import kotlin.random.Random
 
 class MarkovChain(corpus: List<String>) {
 
@@ -50,6 +51,19 @@ class MarkovChain(corpus: List<String>) {
                 if (nextWords.isNullOrEmpty()) return@buildString
                 currentWord = nextWords.random()
             }
+            append(gambleForNanora())
         }.trim()
+    }
+
+    private fun gambleForNanora(): String {
+        if (Random.nextFloat() * 100 > 1) return ""
+        return listOf(
+            "nanora",
+            "nanora!",
+            "nanora.",
+            "nora",
+            "nora!",
+            "nora.",
+        ).random()
     }
 }
