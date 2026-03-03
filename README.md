@@ -25,8 +25,6 @@ This repository is a complete remake of [tsih-robo](https://github.com/matkijahe
 
 ## Commands
 
-The list of commands is as it follows:
-
 ### SlashInteraction commands
 
 Runs when someone runs the slash command
@@ -49,7 +47,7 @@ Runs when someone runs the slash command
   - saves or removes the text channel to receive a random art of Tsih. If there's images provided for the bot, it will run every day at 18:00 to send Tsih's fan arts to saved text channels
 - `/markov`
   - manages bot's permissions on where to read and write [meaningless text](https://en.wikipedia.org/wiki/Markov_chain#Markov_text_generators). Will run everytime a message is sent to a channel saved with `write` permission, after a chance check or the bot is mentioned it will send generated text learnt from the server's chats
-    - `read` ⚠️ **will log a channel's messages** to feed to its vocabulary. By default, Tsih will save up to 10k words. This value can be customized in `data/commandConfigs.json`
+    - `read` ⚠️ **will log a channel's messages** to feed to its vocabulary. By default, Tsih will save up to 10k words. This value can be customized in `data/settings.properties`
     - `write` will use the saved vocabulary to spit out meaningless text
     - `status` shows which channel she is using for what, it's ephemeral
 - `/chance_manager`
@@ -86,16 +84,11 @@ Runs something periodically
 
 ## Installation
 
-Before anything, **dedicate a folder to run the bot**, in that folder create the file `data/config.json`
-and input the following model, replacing with your info:
+Before anything, **dedicate a folder to run the bot**, in that folder create the folder `data` and inside of it create the file `bot.properties`,
+then write this in the file, replacing `null` with your bot's token:
 
-```json
-[
-  {
-    "name": "your bot name here",
-    "token": "your fancy token here"
-  }
-]
+```
+token=null
 ```
 
 Folder structure should be the following:
@@ -103,7 +96,7 @@ Folder structure should be the following:
 ```
 bot-root-folder/
 ├─ data/
-│  ├─ config.json
+│  ├─ bot.properties
 ├─ tsih-robo-ktx.jar
 ```
 

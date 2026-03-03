@@ -6,8 +6,6 @@ import com.zaxxer.hikari.HikariDataSource
 import dev.lavalink.youtube.YoutubeAudioSourceManager
 import dev.minn.jda.ktx.jdabuilder.default
 import dev.minn.jda.ktx.jdabuilder.intents
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
 import net.dv8tion.jda.api.audio.AudioModuleConfig
 import net.dv8tion.jda.api.requests.GatewayIntent
 import org.flywaydb.core.Flyway
@@ -30,17 +28,17 @@ import org.slf4j.LoggerFactory
 import java.io.File
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
+import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.system.exitProcess
 import kotlin.time.Duration.Companion.seconds
 
 
-@Serializable
-data class Bot(val name: String, val token: String)
-
-private fun getBotsConfig(): List<Bot>? {
+private fun getBotToken(): String? {
     try {
-        return Json.decodeFromString<List<Bot>>(File("data/config.json").readText())
+        val prop = Properties()
+        File("data/bot.properties").inputStream().use { prop.load(it) }
+        return prop.getProperty("token")
     } catch (e: Exception) {
         LOG.error(e.toString())
         return null
@@ -56,9 +54,17 @@ val LOG: Logger = LoggerFactory.getLogger("Tsih")
 
 fun main(args: Array<String>) {
 
-    val bots = getBotsConfig()
-    if (bots == null) {
-        LOG.error("Bot config not provided.")
+    val token = getBotToken()
+    if (token == null) {
+        LOG.error("Bot token not provided. Put the bot token inside bot.properties")
+        File("data/bot.properties").outputStream().use {
+            val p = Properties()
+            p.setProperty("token", "null")
+            p.store(
+                it,
+                "Discord bot token, replace \"null\" with your token"
+            )
+        }
         exitProcess(1)
     }
 
@@ -85,11 +91,7 @@ fun main(args: Array<String>) {
         }
     }
 
-    val bot = bots[0]
-
-    LOG.info("Logging in as ${bot.name}")
-
-    val jda = default(bot.token) {
+    val jda = default(token) {
         intents += listOf(
             GatewayIntent.MESSAGE_CONTENT,
             GatewayIntent.GUILD_MESSAGES
