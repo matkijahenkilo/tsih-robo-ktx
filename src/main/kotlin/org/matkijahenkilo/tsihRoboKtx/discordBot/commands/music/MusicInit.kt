@@ -39,7 +39,7 @@ fun musicInit(jda: JDA): SlashCommandData {
         AndroidVr(),
         Ios(),
         Tv(),
-        TvHtml5Embedded()
+        TvHtml5Simply()
     )
     // registering it into playerManager
     playerManager.registerSourceManager(ytSourceManager)

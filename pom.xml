@@ -184,7 +184,7 @@
         <dependency>
             <groupId>dev.lavalink.youtube</groupId>
             <artifactId>common</artifactId>
-            <version>1.17.0</version>
+            <version>1.18.0</version>
         </dependency>
 
         <!--
@@ -194,7 +194,7 @@
         <dependency>
             <groupId>club.minnced</groupId>
             <artifactId>jdave-api</artifactId>
-            <version>0.1.6</version>
+            <version>0.1.7</version>
             <scope>compile</scope>
         </dependency>
 
@@ -202,21 +202,14 @@
         <dependency>
             <groupId>club.minnced</groupId>
             <artifactId>jdave-native-linux-aarch64</artifactId>
-            <version>0.1.6</version>
+            <version>0.1.7</version>
         </dependency>
 
         <!-- https://central.sonatype.com/artifact/club.minnced/jdave-native-linux-x86-64 -->
         <dependency>
             <groupId>club.minnced</groupId>
             <artifactId>jdave-native-linux-x86-64</artifactId>
-            <version>0.1.6</version>
-        </dependency>
-
-        <!-- https://central.sonatype.com/artifact/club.minnced/jdave-native-win-x86-64 -->
-        <dependency>
-            <groupId>club.minnced</groupId>
-            <artifactId>jdave-native-win-x86-64</artifactId>
-            <version>0.1.6</version>
+            <version>0.1.7</version>
         </dependency>
 
         <!--
