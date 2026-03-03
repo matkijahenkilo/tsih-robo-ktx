@@ -1,12 +1,12 @@
 package org.matkijahenkilo.tsihRoboKtx.discordBot.commands.markovTextGenerator
 
-import org.matkijahenkilo.tsihRoboKtx.utils.ConfigReader
+import org.matkijahenkilo.tsihRoboKtx.utils.BotSettings
 import kotlin.random.Random
 
 class MarkovChain(corpus: List<String>) {
 
     private val markovChain: MutableMap<String, ArrayDeque<String>> = linkedMapOf()
-    private val maxTotalWords = ConfigReader.configs.markovWordLimit
+    private val maxTotalWords = BotSettings.getMarkovWordLimit()
     private var totalWordCount = 0
 
     init {

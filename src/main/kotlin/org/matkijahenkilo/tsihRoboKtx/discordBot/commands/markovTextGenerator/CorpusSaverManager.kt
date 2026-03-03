@@ -1,13 +1,13 @@
 package org.matkijahenkilo.tsihRoboKtx.discordBot.commands.markovTextGenerator
 
-import org.matkijahenkilo.tsihRoboKtx.utils.ConfigReader
+import org.matkijahenkilo.tsihRoboKtx.utils.BotSettings
 import java.io.File
 import java.util.*
 
 class CorpusSaverManager(guildId: Long?) {
     private val file: File = File("data/markov/${guildId}")
     val workingDir: File = File("data/markov")
-    private val maxTotalWords = ConfigReader.configs.markovWordLimit
+    private val maxTotalWords = BotSettings.getMarkovWordLimit()
 
     init {
         if (!workingDir.exists()) workingDir.mkdirs()
