@@ -56,7 +56,7 @@ class MarkovChain(corpus: List<String>) {
     }
 
     private fun gambleForNanora(): String {
-        if (Random.nextFloat() * 100 > 1) return ""
+        if (Random.nextFloat() * 100 > 20) return ""
         return listOf(
             "nanora",
             "nanora!",
