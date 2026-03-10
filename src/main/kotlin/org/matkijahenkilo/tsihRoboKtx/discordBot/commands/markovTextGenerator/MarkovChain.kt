@@ -48,7 +48,10 @@ class MarkovChain(corpus: List<String>) {
             repeat(length) {
                 append(currentWord).append(" ")
                 val nextWords = markovChain[currentWord]
-                if (nextWords.isNullOrEmpty()) return@buildString
+                if (nextWords.isNullOrEmpty()) {
+                    append(gambleForNanora())
+                    return@buildString
+                }
                 currentWord = nextWords.random()
             }
             append(gambleForNanora())
