@@ -214,7 +214,7 @@ in
 
 ### Manually
 
-Install Java JDK at least on version 21.0.5 and Maven
+Install Java JDK at least on version 25 and Maven
 
 `git clone` this repository, then `cd` into it and run `mvn package`.
 
@@ -222,17 +222,15 @@ The .jar file will be located at `target/tsih-robo-ktx-VERSION-jar-with-dependen
 
 Preferably rename and move that .jar into your bot folder and run it with `java -jar tsih-robo-ktx.jar`
 
-## Huge thanks
+## Huge thanks to
 
-This project wouldn't be possible without:
-
-- People that developed JDA, JDA-ktx, lavaplayer and gallery-dl
+- People that developed the libraries/programs JDA, JDA-ktx, lavaplayer, youtube-source, gallery-dl, yt-dlp, ffmpeg, Flyway, Hibernate and SQLite
 - JDA Discord server's brilliant minds for helping me deal with my stupidity
-- Asuran95 and rafaelrc7 for telling me the bot was based and that I should rewrite most of the scripts
+- Asuran95 and rafaelrc7 for telling me the bot was based and that I should rewrite most of the code
 - Ikuse for making incentivising Tsih art to keep the darkness away
 - Riiya for not rebranding Tsih into Tewi in his server
-- Lela for supporting this project
 - My teacher for presenting me Kotlin
 - People that use tsih-robo (and criticised her)
 - SaucyBot for being a worthy opponent
+- Lua language and Discordia library for jumpstarting my obsession for programming discord bots
 - Other people that I forgot to mention
