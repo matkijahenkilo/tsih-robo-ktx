@@ -116,8 +116,11 @@ class SauceSender(
                                     msg += ", sending alternative fix instead (phixiv)"
                                     sendPixivAltFix(link).also { wasFixed = true }
                                 } else {
-                                    msg += ", send direct links instead (gallery-dl -g)"
-                                    sendDirectCommonLinks(link).also { wasFixed = true }
+                                    wasFixed = sendDirectCommonLinks(link)
+                                    msg += if (wasFixed)
+                                        ", sending direct links instead (gallery-dl -g)"
+                                    else
+                                        ", tried sending direct links instead (gallery-dl -g) but it failed"
                                 }
                                 logger.warn(msg)
                                 return@launch
@@ -243,9 +246,9 @@ class SauceSender(
     }
 
     /*
-    better fit for websites like kemono
+    better fit for websites like kemono since images can go above 10mb
      */
-    private suspend fun sendDirectCommonLinks(link: String) {
+    private suspend fun sendDirectCommonLinks(link: String): Boolean {
         val child = spawnGallerydlProcess(makeCommonCommandForFetchingUrls(link))
         val exitedChild = readGallerydlProcess(child)
         val linksStdout = exitedChild.stdout
@@ -255,9 +258,16 @@ class SauceSender(
                 links.add(linkFromGL)
             }
         }
+
+        // `gallery-dl -g` might return nothing
+        if (links.isEmpty()) {
+            return false
+        }
+
         event.message.reply_(content = "<$link>\n${links.joinToString("\n")}")
             .mentionRepliedUser(false)
             .queue()
+        return true
     }
 
     data class AltTwitterFix(
