@@ -9,8 +9,6 @@ import org.matkijahenkilo.tsihRoboKtx.discordBot.commands.music.MusicInfoEmbed
 import org.matkijahenkilo.tsihRoboKtx.discordBot.commands.music.RequestedTrackInfo
 import org.matkijahenkilo.tsihRoboKtx.discordBot.commands.music.TrackListEventInterface
 import org.matkijahenkilo.tsihRoboKtx.sql.JPAUtil
-import java.util.concurrent.BlockingQueue
-import java.util.concurrent.LinkedBlockingQueue
 
 
 class TrackScheduler(
@@ -18,15 +16,13 @@ class TrackScheduler(
 ) : AudioEventAdapter(), TrackListEventInterface {
 
     // priority over currentQueue
-    val priorityQueue: BlockingQueue<RequestedTrackInfo> = LinkedBlockingQueue()
+    val priorityQueue: MutableList<RequestedTrackInfo> = mutableListOf()
 
-    // this is what plays on the bot, can be shuffled and unshuffled
-    private var currentQueue: BlockingQueue<RequestedTrackInfo> = LinkedBlockingQueue()
+    // this is what plays on the bot, is also used for the SHOW_QUEUE command, and it's content
+    // are saved on disk
+    var currentQueue: MutableList<RequestedTrackInfo> = mutableListOf()
 
-    // used to keep track of the entire track and to be saved to disk
-    val originalQueue: BlockingQueue<RequestedTrackInfo> = LinkedBlockingQueue()
-
-    // used to repeat the audio without deleting it from another queue with .poll()
+    // used to repeat the audio without deleting it from the list
     private var lastContent: RequestedTrackInfo? = null
 
     var isShuffled: Boolean = false
@@ -44,10 +40,9 @@ class TrackScheduler(
             if (entry.track != null) {
                 if (!player.startTrack(entry.track, true)) {
                     if (isPriority) {
-                        priorityQueue.offer(entry)
+                        priorityQueue.add(entry)
                     } else {
-                        currentQueue.offer(entry)
-                        originalQueue.offer(entry)
+                        currentQueue.add(entry)
                     }
                 } else {
                     lastContent = entry
@@ -62,7 +57,7 @@ class TrackScheduler(
     /**
      * Start the next track, stopping the current one if it is playing.
      *
-     * @param skip if scheduler should skip the current track for the next one in BlockingQueue
+     * @param skip if scheduler should skip the current track for the next one in the list
      */
     fun nextTrack(skip: Boolean) {
         if (isRepeating && !skip) {
@@ -70,35 +65,29 @@ class TrackScheduler(
                 RequestedTrackInfo(lastContent!!.track!!.makeClone(), lastContent!!.requester, lastContent!!.guild)
             player.startTrack(lastContent!!.track, true)
         } else {
-            val content = priorityQueue.poll() ?: currentQueue.poll()
+            var content: RequestedTrackInfo?
 
+            if (priorityQueue.isNotEmpty())
+                content = priorityQueue.removeFirstOrNull()
+            else {
+                if (isShuffled) {
+                    content = currentQueue.randomOrNull()
+                    currentQueue.remove(content)
+                } else
+                    content = currentQueue.removeFirstOrNull()
+            }
             if (content == null) { // if there's nothing left to play in track list
                 player.startTrack(null, false)
             } else {
                 lastContent = RequestedTrackInfo(content.track!!.makeClone(), content.requester, content.guild)
                 player.startTrack(content.track, false)
-                originalQueue.remove(content)
                 MusicInfoEmbed.postEmbed(content, channel, this, player)
             }
         }
     }
 
-    /**
-     * Shuffles the playlist and save it to the current queue.
-     * If undoing the shuffle, the original queue before shuffling will be the new playlist again with the removed tracks.
-     *
-     * @param toggleShuffle if the scheduler should enable/disable shuffling. Passing `true` will invert its current
-     * status while passing `false` won't change its status. Regardless of the param received,
-     * if `isShuffled` is currently `true`, the playlist will be shuffled
-     */
-    fun shuffle(toggleShuffle: Boolean) {
-        if (toggleShuffle) isShuffled = !this.isShuffled
-
-        currentQueue = if (isShuffled) {
-            LinkedBlockingQueue(currentQueue.shuffled())
-        } else {
-            originalQueue
-        }
+    fun toggleShuffle() {
+        isShuffled = !this.isShuffled
     }
 
     fun toggleRepeat() {

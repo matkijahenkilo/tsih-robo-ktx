@@ -185,7 +185,7 @@ fun musicInit(jda: JDA): SlashCommandData {
         }
 
         val guildAudioPlayer = getGuildAudioPlayer(event.guild!!, event.messageChannel)
-        guildAudioPlayer.scheduler.shuffle(true)
+        guildAudioPlayer.scheduler.toggleShuffle()
         event.editMessageEmbeds(listOf(MusicInfoEmbed.getUpdatedEmbed(event, guildAudioPlayer))).queue()
     }
 

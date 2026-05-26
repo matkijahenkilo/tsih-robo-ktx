@@ -117,7 +117,7 @@ class Music(
             }
 
             MUSIC_SHOW_QUEUE -> {
-                val queueContents = musicManager.scheduler.priorityQueue + musicManager.scheduler.originalQueue
+                val queueContents = musicManager.scheduler.priorityQueue + musicManager.scheduler.currentQueue
                 val pages = mutableSetOf<MessageEmbed>()
                 var content = mutableListOf<String>()
                 var index = 1
@@ -189,8 +189,6 @@ class Music(
             }
         })
 
-        if (musicManager.scheduler.isShuffled) musicManager.scheduler.shuffle(false)
-
         return trackList
     }
 
@@ -224,8 +222,6 @@ class Music(
                 }
             })
         }
-
-        if (musicManager.scheduler.isShuffled) musicManager.scheduler.shuffle(false)
 
         return trackList
     }
