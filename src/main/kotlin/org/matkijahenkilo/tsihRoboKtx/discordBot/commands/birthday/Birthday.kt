@@ -86,7 +86,22 @@ class Birthday(private val event: GenericCommandInteractionEvent) : SlashCommand
     }
 
     private fun removeUser() {
-        val user = event.getOption(BIRTHDAY_OPTION_USER)!!.asMember!!
+        val str = event.getOption(BIRTHDAY_OPTION_REMOVE_USER)!!.asString
+        if (str.isNotEmpty() && !str.all { it.isDigit() }) {
+            event.hook.editMessage(
+                content = "Only user ids are permitted nanora."
+            ).queue()
+            return
+        }
+        val user = event.jda.retrieveUserById(str).complete()
+        if (user == null) {
+            event.hook.editMessage(
+                content = "Couldn't fetch user id $str. It might not exist anymore, it may be an invalid id or I cannot retrieve information about the user. Deleting them anyway nora."
+            ).queue()
+            JPAUtil.deleteBirthdayUser(str.toLong(), event.guild!!.idLong)
+            log.info("Deleted null user $str from ${event.guild!!.name}")
+            return
+        }
         val userId = user.idLong
         val guildId = event.guild!!.idLong
         val savedSubscription =
@@ -102,10 +117,10 @@ class Birthday(private val event: GenericCommandInteractionEvent) : SlashCommand
         JPAUtil.deleteBirthdayUser(userId, guildId)
 
         event.hook.editMessage(
-            content = "Oki, I forgor ${user.nickname ?: user.user.name}'s birthday..."
+            content = "Oki, I forgor ${user.globalName ?: user.name}'s birthday..."
         ).queue()
 
-        log.info("Deleted user ${user.nickname ?: user.user.name} from ${event.guild!!.name}")
+        log.info("Deleted user ${user.globalName ?: user.name} from ${event.guild!!.name}")
     }
 
     private fun listUsersByGuild() {
@@ -118,21 +133,22 @@ class Birthday(private val event: GenericCommandInteractionEvent) : SlashCommand
             event.hook.editMessage(content = "No one in the list nanora!").queue()
             return
         }
-
         birthdays.forEach { birthdaySubscription ->
             /*
             TODO(make user retrieval faster)
-                event.jda.retrieveUserById().complete() takes a long while to load all users, maybe put them in a cache?
+                event.jda.retrieveUserById().complete() takes a long while to load all users
+                and event.jda.getUserById() doesn't get any users, or I am stupid
              */
             val user = event.jda.retrieveUserById(birthdaySubscription.birthdayUserId.userId).complete()
             if (user != null) {
                 val monthName = Months.entries[(birthdaySubscription.birthdayUserId.month - 1).toInt()].monthName
                 content.add(
                     String.format(
-                        "`%s/%s` - %s",
+                        "%s/%s - `%s` (%s)",
                         birthdaySubscription.birthdayUserId.day,
                         monthName,
-                        user.name
+                        user.name,
+                        user.id,
                     )
                 )
                 if (content.size == ENTRY_LIMIT) {
@@ -144,6 +160,7 @@ class Birthday(private val event: GenericCommandInteractionEvent) : SlashCommand
                 }
             }
         }
+
 
         if (content.isNotEmpty()) {
             pages.add(EmbedBuilder {
@@ -209,6 +226,7 @@ class Birthday(private val event: GenericCommandInteractionEvent) : SlashCommand
         const val BIRTHDAY_OPTION_DAY = "day"
         const val BIRTHDAY_OPTION_MONTH = "month"
         const val BIRTHDAY_OPTION_USER = "user"
+        const val BIRTHDAY_OPTION_REMOVE_USER = "user_id"
         const val BIRTHDAY_REMOVE = "remove"
         const val BIRTHDAY_SET = "set_chat"
         const val BIRTHDAY_LIST = "list_birthdays"
@@ -235,8 +253,8 @@ class Birthday(private val event: GenericCommandInteractionEvent) : SlashCommand
                             ),
                         OptionData(OptionType.USER, BIRTHDAY_OPTION_USER, "Da user~", true)
                     ),
-                Subcommand(BIRTHDAY_REMOVE, "I'll forget the birthday date nora.")
-                    .addOption(OptionType.USER, BIRTHDAY_OPTION_USER, "Da user~", true),
+                Subcommand(BIRTHDAY_REMOVE, "I'll forget a birthday date nora!")
+                    .addOption(OptionType.STRING, BIRTHDAY_OPTION_REMOVE_USER, "Input the user's ID that you want me to forget.", true),
                 Subcommand(
                     BIRTHDAY_SET,
                     "When used, I'll use this chat to send happy birthday messages nanora!"

@@ -257,16 +257,6 @@ object JPAUtil {
 
             if (birthdayChannelObjFromExistingGuild == null) {
                 session.persist(birthdayChannel)
-            } else {
-                println(
-                    session.merge(
-                        BirthdayChannel(
-                            birthdayChannelId = birthdayChannelObjFromExistingGuild.birthdayChannelId,
-                            channelId = birthdayChannel.channelId,
-                            guildId = birthdayChannelObjFromExistingGuild.guildId
-                        )
-                    )
-                )
             }
         }
     }
@@ -279,15 +269,12 @@ object JPAUtil {
                 BirthdayChannel::class.java
             ).singleResult
 
-            println(birthdayChannelFromDB)
             val managedUser = session.merge(birthdayUser)
-            println(managedUser)
 
             val sub = BirthdayUserChannelSubscription(
                 birthdayChannelId = birthdayChannelFromDB,
                 birthdayUserId = managedUser
             )
-            println(sub)
             session.persist(sub)
         }
     }
