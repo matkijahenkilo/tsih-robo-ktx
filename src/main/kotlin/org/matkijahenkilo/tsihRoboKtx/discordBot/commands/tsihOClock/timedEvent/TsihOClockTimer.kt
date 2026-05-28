@@ -11,6 +11,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.time.Instant
+import java.util.*
 
 class TsihOClockTimer(private val jda: JDA) : TimedEvent() {
 
@@ -25,14 +26,28 @@ class TsihOClockTimer(private val jda: JDA) : TimedEvent() {
             footerImagePath = mutableListOf(FileUpload.fromData(footerImage))
     }
 
+    private val counterFile = File("data/tsih-o-clock-counter.properties")
+
+    private fun getCurrentCount(): String {
+        if (!counterFile.exists()) return "1"
+        val props = Properties()
+        counterFile.inputStream().use { props.load(it) }
+        return props.getProperty("count", "1")
+    }
+
+    private fun incrementCounter(currentCount: Int) = Properties().apply {
+        setProperty("count", (currentCount + 1).toString())
+        counterFile.outputStream().use { store(it, "Total times that Tsih O'Clock was sent") }
+    }
+
     override val task: Runnable = Runnable {
         CoroutineScope(Dispatchers.IO).launch {
             val channelList = JPAUtil.getAllTsihOClockRooms()
 
             if (channelList.isNotEmpty()) {
-                // TODO: TOC counter
                 val files = File("data/images/tsihoclock").listFiles()!!
                 val jobList = mutableListOf<Job>()
+                val currentCount = getCurrentCount()
                 pog.info("Sending images to ${channelList.size} channels")
                 channelList.forEach { obj ->
                     jobList += async {
@@ -52,7 +67,7 @@ class TsihOClockTimer(private val jda: JDA) : TimedEvent() {
                                         color = 0xff80fd
                                         field {
                                             name = randomName()
-                                            value = randomValue()
+                                            value = randomValue() + "\nTsih O'Clock counter: $currentCount~"
                                         }
                                         image = "attachment://${file.name}"
                                         footer {
@@ -69,6 +84,7 @@ class TsihOClockTimer(private val jda: JDA) : TimedEvent() {
                     }
                 }
                 jobList.joinAll()
+                incrementCounter(currentCount.toInt())
             }
         }
     }
