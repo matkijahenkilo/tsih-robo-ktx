@@ -259,8 +259,19 @@ class Music(
             event.hook.editMessage(content = "Loaded the first song of result `$originalOption` nanora!")
                 .queue()
         } else {
-            event.hook.editMessage(content = "Loaded a [song or playlist](<${option}>) nanora!")
-                .queue()
+            val links = option.split(" ")
+            val msg = if (links.size > 1) {
+                buildString {
+                    append("Loaded the following links:")
+                    links.forEach {
+                        append("\n<$it>")
+                    }
+                }
+            } else {
+                "Loaded a [song or playlist](<${option}>) nanora!"
+            }
+
+            event.hook.editMessage(content = msg).queue()
         }
     }
 
