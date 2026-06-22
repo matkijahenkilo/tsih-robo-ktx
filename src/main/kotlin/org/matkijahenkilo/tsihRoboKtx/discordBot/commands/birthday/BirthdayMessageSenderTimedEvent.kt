@@ -49,7 +49,7 @@ class BirthdayMessageSenderTimedEvent(private val jda: JDA) : TimedEvent() {
 
             if (birthdayUsers.isNullOrEmpty()) {
                 markDayAsSent(todayString)
-                logger.info("List of birthday is empty or null, not running")
+                logger.info("No birthday marked for today. Fetched value is either empty or null, not running")
                 return@Runnable
             }
 
