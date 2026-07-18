@@ -11,6 +11,30 @@ object BotSettings {
 
     private enum class Settings(val propertyName: String, val defaultValue: String) {
         MARKOV_WORD_LIMIT("markovWordLimit", "10000"),
+        GALLERY_DL_WHITE_LIST(
+            "whiteList", listOf(
+                "https://x.com/",
+                "https://hitomi.la/",
+                "https://kemono.cr/",
+                "https://twitter.com/",
+                "https://sankaku.app/",
+                "https://exhentai.org/",
+                "https://e-hentai.org/",
+                "https://kemono.party/",
+                "https://inkbunny.net/",
+                "https://www.pixiv.net/",
+                "https://www.tsumino.com/",
+                "https://www.deviantart.com/",
+                "https://www.furaffinity.net/",
+                "https://chan.sankakucomplex.com/",
+                "https://e621.net/",
+                "https://booru.io/",
+                "https://nijie.info/",
+                "https://nhentai.net/",
+                "https://e-hentai.org/",
+                "https://hentai2read.com/"
+            ).joinToString(",")
+        )
     }
 
     init {
@@ -40,6 +64,10 @@ object BotSettings {
         if (hasChanged) propertiesFile.outputStream().use { p.store(it, null) }
     }
 
-    fun getMarkovWordLimit() =
+    fun getMarkovWordLimit(): Int =
         p.getProperty(Settings.MARKOV_WORD_LIMIT.propertyName, Settings.MARKOV_WORD_LIMIT.defaultValue).toInt()
+
+    fun getGalleryDlWhiteList(): List<String> =
+        p.getProperty(Settings.GALLERY_DL_WHITE_LIST.propertyName, Settings.GALLERY_DL_WHITE_LIST.defaultValue)
+            .split(",")
 }

@@ -65,6 +65,7 @@ Runs every time a message is sent to a text channel where the bot has permission
 
 - `sauceSender`
   - checks if it's a link that can have its embed "fixed", if it can (e.g. in case of Twitter or Pixiv), the bot will download its contents using gallery-dl and upload it on discord as if it's the original post. Upload is limited to 10 files
+    - In `data/settings.properties` you can edit which links will have it's media downloaded by the bot
 - `randomReact`
   - has a small chance to react to a message with a random custom emoji from a random server. It's guaranteed when saying "tsih" or "nora"
 
