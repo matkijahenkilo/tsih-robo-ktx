@@ -41,7 +41,7 @@ class Music(
         val option = originalOption?.let { linkOrSearch ->
             when {
                 searchPrefix != null -> "$searchPrefix$linkOrSearch"
-                !linkOrSearch.contains("https://") -> "${YTMSEARCH_PREFIX}$linkOrSearch"
+                !linkOrSearch.contains("://") -> "${YTMSEARCH_PREFIX}$linkOrSearch"
                 else -> linkOrSearch
             }
         }
