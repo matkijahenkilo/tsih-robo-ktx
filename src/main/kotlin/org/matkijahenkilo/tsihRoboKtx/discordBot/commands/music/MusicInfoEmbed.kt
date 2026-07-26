@@ -23,10 +23,6 @@ import java.time.Instant
 
 object MusicInfoEmbed {
 
-    private var pausedText = "Paused:"
-    private var shuffleText = "Shuffling:"
-    private var repeatText = "Repeating:"
-
     private val stop = danger(Music.STOP, emoji = Emoji.fromUnicode("🛑"))
     private val pauseOrStart = primary(Music.PLAY, emoji = Emoji.fromUnicode("⏯"))
     private val skip = primary(Music.SKIP, emoji = Emoji.fromUnicode("⏭"))
@@ -80,9 +76,14 @@ object MusicInfoEmbed {
         scheduler: TrackScheduler,
         isPaused: Boolean
     ): MessageEmbed {
+        val embedTitle = if (info.isStream)
+                info.title
+            else
+                String.format("%s\n(%s)", info.title, formatMillis(info.length))
+
         var embed = EmbedBuilder {
             thumbnail = info.artworkUrl
-            title = info.title + "\n(${formatMillis(info.length)})"
+            title = embedTitle
             url = info.uri
             color = getRandomColor()
             timestamp = Instant.now()
@@ -126,17 +127,17 @@ object MusicInfoEmbed {
 
     fun fillFields(embed: InlineEmbed, scheduler: TrackScheduler, isPaused: Boolean): InlineEmbed {
         embed.field {
-            name = pausedText
+            name = "Paused:"
             value = if (isPaused) "✅" else "❌"
             inline = true
         }
         embed.field {
-            name = repeatText
+            name = "Repeating:"
             value = if (scheduler.isRepeating) "✅" else "❌"
             inline = true
         }
         embed.field {
-            name = shuffleText
+            name = "Shuffling:"
             value = if (scheduler.isShuffled) "✅" else "❌"
             inline = true
         }
