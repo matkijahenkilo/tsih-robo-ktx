@@ -7,10 +7,13 @@ import java.util.*
 object BotSettings {
     private val logger = LoggerFactory.getLogger(BotSettings.javaClass.name)
     private val propertiesFile = File("data/settings.properties")
-    private val p = Properties()
 
-    private enum class Settings(val propertyName: String, val defaultValue: String) {
+    @PublishedApi
+    internal val p = Properties()
+
+    enum class Settings(val propertyName: String, val defaultValue: String) {
         MARKOV_WORD_LIMIT("markovWordLimit", "10000"),
+        DISCORD_UPLOAD_SIZE_LIMIT("discordUploadSizeLimit", "20"), // value in mb
         GALLERY_DL_WHITE_LIST(
             "whiteList", listOf(
                 "https://x.com/",
@@ -64,10 +67,13 @@ object BotSettings {
         if (hasChanged) propertiesFile.outputStream().use { p.store(it, null) }
     }
 
-    fun getMarkovWordLimit(): Int =
-        p.getProperty(Settings.MARKOV_WORD_LIMIT.propertyName, Settings.MARKOV_WORD_LIMIT.defaultValue).toInt()
-
-    fun getGalleryDlWhiteList(): List<String> =
-        p.getProperty(Settings.GALLERY_DL_WHITE_LIST.propertyName, Settings.GALLERY_DL_WHITE_LIST.defaultValue)
-            .split(",")
+    inline fun <reified T> get(setting: Settings): T {
+        val value = p.getProperty(setting.propertyName, setting.defaultValue)
+        return when (T::class) {
+            Int::class -> value.toInt() as T
+            List::class -> value.split(",") as T
+            String::class -> value as T
+            else -> throw IllegalArgumentException("Unsupported settings type: ${T::class.simpleName}")
+        }
+    }
 }

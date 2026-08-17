@@ -11,4 +11,4 @@ val blackList = listOf(
     Regex("<.+>"),
 )
 
-private val whiteList = BotSettings.getGalleryDlWhiteList()
+private val whiteList = BotSettings.get<List<String>>(BotSettings.Settings.GALLERY_DL_WHITE_LIST)

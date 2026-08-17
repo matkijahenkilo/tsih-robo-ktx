@@ -7,7 +7,7 @@ import java.util.*
 class CorpusSaverManager(guildId: Long?) {
     private val file: File = File("data/markov/${guildId}")
     val workingDir: File = File("data/markov")
-    private val maxTotalWords = BotSettings.getMarkovWordLimit()
+    private val maxTotalWords = BotSettings.get<Int>(BotSettings.Settings.MARKOV_WORD_LIMIT)
 
     init {
         if (!workingDir.exists()) workingDir.mkdirs()

@@ -2,9 +2,10 @@ package org.matkijahenkilo.tsihRoboKtx.discordBot.commands.sauceSender
 
 import kotlinx.coroutines.coroutineScope
 import net.dv8tion.jda.api.entities.MessageEmbed
+import org.matkijahenkilo.tsihRoboKtx.utils.BotSettings
 import java.io.File
 
-private const val defaultLimit = 10
+private val defaultLimit = BotSettings.get<Int>(BotSettings.Settings.DISCORD_UPLOAD_SIZE_LIMIT)
 
 fun spawnGallerydlProcess(command: List<String>): Process = ProcessBuilder(command)
     .directory(File("./data"))

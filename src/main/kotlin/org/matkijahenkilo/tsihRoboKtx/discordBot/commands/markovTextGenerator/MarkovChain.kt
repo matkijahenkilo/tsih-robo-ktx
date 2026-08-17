@@ -6,7 +6,7 @@ import kotlin.random.Random
 class MarkovChain(corpus: List<String>) {
 
     private val markovChain: MutableMap<String, ArrayDeque<String>> = linkedMapOf()
-    private val maxTotalWords = BotSettings.getMarkovWordLimit()
+    private val maxTotalWords = BotSettings.get<Int>(BotSettings.Settings.MARKOV_WORD_LIMIT)
     private var totalWordCount = 0
 
     init {
