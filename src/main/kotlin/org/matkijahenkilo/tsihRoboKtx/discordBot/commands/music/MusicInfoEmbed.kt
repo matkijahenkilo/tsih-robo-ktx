@@ -77,9 +77,9 @@ object MusicInfoEmbed {
         isPaused: Boolean
     ): MessageEmbed {
         val embedTitle = if (info.isStream)
-                info.title
-            else
-                String.format("%s\n(%s)", info.title, formatMillis(info.length))
+            info.title
+        else
+            String.format("%s\n(%s)", info.title, formatMillis(info.length))
 
         var embed = EmbedBuilder {
             thumbnail = info.artworkUrl

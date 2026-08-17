@@ -254,7 +254,12 @@ class Birthday(private val event: GenericCommandInteractionEvent) : SlashCommand
                         OptionData(OptionType.USER, BIRTHDAY_OPTION_USER, "Da user~", true)
                     ),
                 Subcommand(BIRTHDAY_REMOVE, "I'll forget a birthday date nora!")
-                    .addOption(OptionType.STRING, BIRTHDAY_OPTION_REMOVE_USER, "Input the user's ID that you want me to forget.", true),
+                    .addOption(
+                        OptionType.STRING,
+                        BIRTHDAY_OPTION_REMOVE_USER,
+                        "Input the user's ID that you want me to forget.",
+                        true
+                    ),
                 Subcommand(
                     BIRTHDAY_SET,
                     "When used, I'll use this chat to send happy birthday messages nanora!"

@@ -80,18 +80,10 @@ fun musicInit(jda: JDA): SlashCommandData {
     }
 
     fun isSameVC(event: GenericCommandInteractionEvent): Boolean =
-        if (event.guild!!.audioManager.connectedChannel != null) {
-            event.member!!.voiceState!!.channel!!.id == event.guild!!.audioManager.connectedChannel!!.id
-        } else {
-            false
-        }
+        event.guild!!.audioManager.connectedChannel != null && event.member!!.voiceState!!.channel!!.id == event.guild!!.audioManager.connectedChannel!!.id
 
     fun isSameVC(event: ButtonInteractionEvent): Boolean =
-        if (event.guild!!.audioManager.connectedChannel != null) {
-            event.member!!.voiceState!!.channel!!.id == event.guild!!.audioManager.connectedChannel!!.id
-        } else {
-            false
-        }
+        event.guild!!.audioManager.connectedChannel != null && event.member!!.voiceState!!.channel!!.id == event.guild!!.audioManager.connectedChannel!!.id
 
     fun stopAndCloseConnection(event: GenericGuildEvent) {
         val guildAudioPlayer = getGuildAudioPlayer(event.guild, null)

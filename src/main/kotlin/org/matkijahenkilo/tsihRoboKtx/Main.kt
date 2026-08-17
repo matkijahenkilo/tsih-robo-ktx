@@ -47,7 +47,7 @@ private fun getBotToken(): String? {
 
 private fun tsihOClockExists(): Boolean {
     val path = File("data/images/tsihoclock/")
-    return if (path.exists()) path.listFiles()!!.isNotEmpty() else false
+    return path.exists() && path.listFiles()!!.isNotEmpty()
 }
 
 val LOG: Logger = LoggerFactory.getLogger("Tsih")
