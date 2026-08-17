@@ -160,14 +160,14 @@
         <dependency>
             <groupId>net.dv8tion</groupId>
             <artifactId>JDA</artifactId>
-            <version>6.4.2</version>
+            <version>6.5.0</version>
         </dependency>
 
         <!-- https://github.com/MinnDevelopment/jda-ktx -->
         <dependency>
             <groupId>club.minnced</groupId>
             <artifactId>jda-ktx</artifactId>
-            <version>0.14.2</version>
+            <version>0.15.0</version>
         </dependency>
 
         <!--
@@ -184,7 +184,7 @@
         <dependency>
             <groupId>dev.lavalink.youtube</groupId>
             <artifactId>common</artifactId>
-            <version>1.18.1</version>
+            <version>1.18.2</version>
         </dependency>
 
         <!--
@@ -264,7 +264,7 @@
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>1.5.37</version>
+            <version>1.6.3</version>
         </dependency>
     </dependencies>
 

@@ -22,7 +22,7 @@ maven.buildMavenPackage {
   # Maven uses the internet for downloading deps, thus you need to manually
   # update the mvnHash when they change. You can set it to `lib.fakeHash` and
   # get the right one from the error message
-  mvnHash = "sha256-pr5UD7uyTpEdoM6Vaxr7ib67eESCbup2N9cmEXspJ2o=";
+  mvnHash = "sha256-fknJZrZfysCtGLDu4v1yKWl3dxT6bF4w2veCpk2JsDw=";
 
   nativeBuildInputs = [ makeWrapper ];
 
@@ -33,7 +33,7 @@ maven.buildMavenPackage {
     install -Dm644 target/${jar-file} $out/share/${project-name}
 
     makeWrapper ${jdk25}/bin/java $out/bin/${project-name} \
-      --add-flags "-Xms128m -Xmx512m -XX:+UseSerialGC -XX:+UseCompactObjectHeaders -XX:+ExitOnOutOfMemoryError -Xss256k --enable-native-access=ALL-UNNAMED -jar $out/share/${project-name}/${jar-file}" \
+      --add-flags "-Xms64m -Xmx192m -XX:+UseSerialGC -XX:+UseCompactObjectHeaders -XX:+ExitOnOutOfMemoryError -Xss256k --enable-native-access=ALL-UNNAMED -jar $out/share/${project-name}/${jar-file}" \
       --prefix PATH : ${
         lib.makeBinPath [
           ffmpeg
