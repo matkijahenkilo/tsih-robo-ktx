@@ -287,7 +287,7 @@ class Music(
                 )
             }
         else
-            loadAudioTracks(option.split(" ")).map {
+            loadAudioTracks(option.replace("\n", " ").split(" ")).map {
                 RequestedTrackInfo(
                     it,
                     event.member!!.user,
